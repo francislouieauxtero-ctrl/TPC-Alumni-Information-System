@@ -16,6 +16,13 @@ class AuthFlowTest extends TestCase
     {
         $department = Department::factory()->create(['name' => 'Engineering']);
 
+        \App\Models\Graduate::factory()->create([
+            'department_id' => $department->id,
+            'student_number' => 'STU20240001',
+            'name' => 'Jane Doe',
+            'batch_year' => '2026',
+        ]);
+
         $response = $this->postJson('/api/auth/register', [
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
@@ -46,6 +53,76 @@ class AuthFlowTest extends TestCase
             ->assertJson([
                 'status' => false,
                 'message' => 'Your account is pending department approval. Please wait.',
+            ]);
+    }
+
+    public function test_registration_rejects_unknown_student_id(): void
+    {
+        $department = Department::factory()->create(['name' => 'Engineering']);
+
+        $response = $this->postJson('/api/auth/register', [
+            'name' => 'Jane Doe',
+            'email' => 'jane@example.com',
+            'password' => 'secret123',
+            'password_confirmation' => 'secret123',
+            'department_id' => $department->id,
+            'school_id' => 'UNKNOWN-ID',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['school_id'])
+            ->assertJsonFragment([
+                'message' => 'This student ID is not found in the graduates student ID list.',
+            ]);
+    }
+
+    public function test_registration_accepts_numeric_student_id_that_matches_graduate_record(): void
+    {
+        $department = Department::factory()->create(['name' => 'Engineering']);
+
+        $graduate = \App\Models\Graduate::factory()->create([
+            'department_id' => $department->id,
+            'student_number' => '0001',
+            'name' => 'Jane Doe',
+            'batch_year' => '2026',
+        ]);
+
+        $response = $this->postJson('/api/auth/register', [
+            'name' => 'Jane Doe',
+            'email' => 'jane-match@example.com',
+            'password' => 'secret123',
+            'password_confirmation' => 'secret123',
+            'department_id' => $department->id,
+            'school_id' => '1',
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('data.schoolId', '1');
+    }
+
+    public function test_invalid_credentials_return_unauthorized_message(): void
+    {
+        $department = Department::factory()->create(['name' => 'Business']);
+
+        User::factory()->create([
+            'email' => 'student@example.com',
+            'password' => Hash::make('secret123'),
+            'role' => User::ROLE_USER,
+            'department_id' => $department->id,
+            'school_id' => 'STU20240002',
+            'is_verified' => true,
+            'status' => User::STATUS_ACTIVE,
+        ]);
+
+        $response = $this->postJson('/api/auth/login', [
+            'email' => 'student@example.com',
+            'password' => 'wrong-password',
+        ]);
+
+        $response->assertStatus(401)
+            ->assertJson([
+                'status' => false,
+                'message' => 'Invalid credentials',
             ]);
     }
 

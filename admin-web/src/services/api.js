@@ -28,8 +28,16 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.clear();
-      window.location.href = "/welcome";
+      const isAuthEndpoint =
+        error.config?.url?.includes("/auth/login") ||
+        error.config?.url?.includes("/auth/google-login") ||
+        error.config?.url?.includes("/auth/forgot-password") ||
+        error.config?.url?.includes("/auth/reset-password");
+
+      if (!isAuthEndpoint) {
+        localStorage.clear();
+        window.location.href = "/welcome";
+      }
     }
     return Promise.reject(error);
   },

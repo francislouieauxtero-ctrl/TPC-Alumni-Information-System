@@ -86,7 +86,11 @@ export default function StudentRegister() {
       });
       finishRegistration(form.email);
     } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
+      const backendMessage =
+        err.response?.data?.errors?.school_id?.[0] ||
+        err.response?.data?.message ||
+        "Registration failed";
+      setError(backendMessage);
     } finally {
       setLoading(false);
     }
@@ -122,7 +126,11 @@ export default function StudentRegister() {
 
         finishRegistration(form.email);
       } catch (err) {
-        setError(err.response?.data?.message || "Google registration failed");
+        const backendMessage =
+          err.response?.data?.errors?.school_id?.[0] ||
+          err.response?.data?.message ||
+          "Google registration failed";
+        setError(backendMessage);
       } finally {
         setLoading(false);
       }
