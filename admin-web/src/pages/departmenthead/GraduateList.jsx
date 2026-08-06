@@ -21,6 +21,9 @@ export default function GraduateList() {
   const fetchGraduates = async () => {
     try {
       setLoading(true);
+      // graduateService.getAdminGraduates() is already scoped server-side
+      // to the logged-in department head's own department, so no
+      // department_id filter is needed on the frontend here.
       const data = await graduateService.getAdminGraduates({
         ...filters,
         page: currentPage,
@@ -127,6 +130,9 @@ export default function GraduateList() {
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">
                   Block
                 </th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">
+                  Status
+                </th>
                 <th className="px-6 py-3 text-right text-sm font-semibold text-gray-600">
                   Actions
                 </th>
@@ -149,6 +155,19 @@ export default function GraduateList() {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-800">
                     {graduate.block || "-"}
+                  </td>
+                  <td className="px-6 py-4 text-sm">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        graduate.registration_status === "registered"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-amber-100 text-amber-700"
+                      }`}
+                    >
+                      {graduate.registration_status === "registered"
+                        ? "Registered"
+                        : "Not Registered"}
+                    </span>
                   </td>
                   <td className="px-6 py-4 text-right space-x-4">
                     <button
