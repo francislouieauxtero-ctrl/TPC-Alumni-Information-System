@@ -225,7 +225,7 @@ public function rejectDepartmentHead(Request $request, int $id): JsonResponse
         $admin = User::admins()->findOrFail($id);
 
         $admin->tokens()->delete();
-        $admin->delete();
+        $admin->forceDelete();
 
         return response()->json([
             'status' => true,
@@ -441,7 +441,7 @@ public function deactivateDepartmentHead(Request $request, int $id): JsonRespons
             }
 
             $student->tokens()->delete();
-            $student->delete();
+            $student->forceDelete();
 
             return response()->json([
                 'status' => true,

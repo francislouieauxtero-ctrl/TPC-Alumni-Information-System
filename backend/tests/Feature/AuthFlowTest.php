@@ -126,6 +126,80 @@ class AuthFlowTest extends TestCase
             ]);
     }
 
+    public function test_admin_can_reject_student_registration_and_remove_user_from_database(): void
+    {
+        $department = Department::factory()->create(['name' => 'Business']);
+
+        $admin = User::factory()->create([
+            'role' => User::ROLE_ADMIN,
+            'department_id' => $department->id,
+            'status' => User::STATUS_ACTIVE,
+            'is_verified' => true,
+        ]);
+
+        $student = User::factory()->create([
+            'role' => User::ROLE_USER,
+            'department_id' => $department->id,
+            'school_id' => 'STU20240005',
+            'is_verified' => false,
+            'status' => User::STATUS_ACTIVE,
+        ]);
+
+        $response = $this->actingAs($admin, 'sanctum')
+            ->withHeader('Accept', 'application/json')
+            ->postJson("/api/admin/students/{$student->id}/reject");
+
+        $response->assertOk();
+        $response->assertJsonPath('status', true);
+        $this->assertDatabaseMissing('users', ['id' => $student->id]);
+    }
+
+    public function test_student_can_register_with_same_school_id_after_rejection(): void
+    {
+        $department = Department::factory()->create(['name' => 'Business']);
+
+        $admin = User::factory()->create([
+            'role' => User::ROLE_ADMIN,
+            'department_id' => $department->id,
+            'status' => User::STATUS_ACTIVE,
+            'is_verified' => true,
+        ]);
+
+        $graduate = \App\Models\Graduate::factory()->create([
+            'department_id' => $department->id,
+            'student_number' => 'STU20240007',
+            'name' => 'Rejected Student',
+            'batch_year' => '2026',
+        ]);
+
+        $rejectedStudent = User::factory()->create([
+            'role' => User::ROLE_USER,
+            'department_id' => $department->id,
+            'school_id' => 'STU20240007',
+            'is_verified' => false,
+            'status' => User::STATUS_ACTIVE,
+        ]);
+
+        $rejectResponse = $this->actingAs($admin, 'sanctum')
+            ->withHeader('Accept', 'application/json')
+            ->postJson("/api/admin/students/{$rejectedStudent->id}/reject");
+
+        $rejectResponse->assertOk();
+        $this->assertDatabaseMissing('users', ['id' => $rejectedStudent->id]);
+
+        $registerResponse = $this->postJson('/api/auth/register', [
+            'name' => 'Jane Rejected',
+            'email' => 'jane.rejected@example.com',
+            'password' => 'secret123',
+            'password_confirmation' => 'secret123',
+            'department_id' => $department->id,
+            'school_id' => 'STU20240007',
+        ]);
+
+        $registerResponse->assertStatus(201)
+            ->assertJsonPath('data.schoolId', 'STU20240007');
+    }
+
     public function test_verified_student_can_login_and_access_profile(): void
     {
         $department = Department::factory()->create(['name' => 'Business']);

@@ -146,6 +146,6 @@ class DepartmentHeadStatusManagementTest extends TestCase
 
         $response->assertOk();
         $response->assertJsonPath('status', true);
-        $this->assertSoftDeleted('users', ['id' => $head->id]);
+        $this->assertDatabaseMissing('users', ['id' => $head->id]);
     }
 }

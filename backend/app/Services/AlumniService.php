@@ -90,12 +90,9 @@ class AlumniService
     public function rejectAlumni(User $alumni, User $actor, ?string $reason = null): void
     {
         DB::transaction(function () use ($alumni, $actor, $reason) {
-            // Mark as inactive
-            $alumni->update([
-                'status' => User::STATUS_INACTIVE,
-            ]);
+            $alumni->tokens()->delete();
 
-            // Log the action
+            // Log the action before permanently deleting the user.
             AccountActivityLog::create([
                 'actor_id'  => $actor->id,
                 'target_id' => $alumni->id,
@@ -106,6 +103,8 @@ class AlumniService
                     'alumni_name'  => $alumni->name,
                 ],
             ]);
+
+            $alumni->forceDelete();
         });
     }
 
