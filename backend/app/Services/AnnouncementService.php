@@ -9,6 +9,7 @@ use App\Mail\AnnouncementNotificationMail;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use App\Models\AccountActivityLog;
 
 class AnnouncementService
@@ -40,6 +41,10 @@ class AnnouncementService
                 $data['department_id'] = $creator->department_id;
             }
 
+            if (array_key_exists('images', $data)) {
+                $data['images'] = $this->storeImages($data['images'] ?? []);
+            }
+
             $announcement = $this->announcementRepository->create($data);
 
             AccountActivityLog::create([
@@ -64,6 +69,12 @@ class AnnouncementService
             if ($actor->isAdmin()) {
                 $data['scope'] = Announcement::SCOPE_DEPARTMENT_SPECIFIC;
                 $data['department_id'] = $actor->department_id;
+            }
+
+            if (array_key_exists('images', $data) && !empty($data['images'])) {
+                $data['images'] = $this->storeImages($data['images']);
+            } elseif (array_key_exists('images', $data)) {
+                unset($data['images']);
             }
 
             $announcement = $this->announcementRepository->update($announcement, $data);
@@ -99,6 +110,25 @@ class AnnouncementService
 
             return $deleted;
         });
+    }
+
+    protected function storeImages(array $images): array
+    {
+        $storedImages = [];
+
+        foreach ($images as $image) {
+            if ($image instanceof \Illuminate\Http\UploadedFile) {
+                $path = $image->store('announcements', 'public');
+                $storedImages[] = Storage::url($path);
+                continue;
+            }
+
+            if (is_string($image)) {
+                $storedImages[] = $image;
+            }
+        }
+
+        return $storedImages;
     }
 
     /**

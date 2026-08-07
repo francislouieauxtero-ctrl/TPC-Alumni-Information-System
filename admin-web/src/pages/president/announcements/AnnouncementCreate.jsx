@@ -15,6 +15,7 @@ export default function AnnouncementCreate({
     content: "",
     scope: "school_wide",
     department_id: null,
+    images: [],
   });
 
   useEffect(() => {
@@ -36,6 +37,11 @@ export default function AnnouncementCreate({
       ...formData,
       [name]: value,
     });
+  };
+
+  const handleFiles = (e) => {
+    const files = Array.from(e.target.files || []);
+    setFormData({ ...formData, images: files });
   };
 
   const handleScopeChange = (e) => {
@@ -71,9 +77,10 @@ export default function AnnouncementCreate({
     try {
       setLoading(true);
       const payload = {
-        title: formData.title.trim(),
-        content: formData.content.trim(),
+        title: formData.title.trim() || null,
+        content: formData.content.trim() || null,
         scope: formData.scope,
+        images: formData.images,
       };
 
       if (formData.scope === "department_specific") {
@@ -123,7 +130,7 @@ export default function AnnouncementCreate({
           {/* Content */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Content <span className="text-red-500">*</span>
+              Content
             </label>
             <textarea
               name="content"
@@ -132,6 +139,19 @@ export default function AnnouncementCreate({
               placeholder="Announcement content"
               rows="8"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-tpc-green"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Image upload (single or multiple)
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFiles}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2"
             />
           </div>
 

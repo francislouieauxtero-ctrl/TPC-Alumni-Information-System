@@ -20,12 +20,19 @@ class Announcement extends Model
         'title',
         'content',
         'scope',
+        'external_link',
+        'posted_at',
+        'posted_by',
+        'department_category',
+        'images',
     ];
 
     protected function casts(): array
     {
         return [
             'scope' => 'string',
+            'posted_at' => 'datetime',
+            'images' => 'array',
         ];
     }
 

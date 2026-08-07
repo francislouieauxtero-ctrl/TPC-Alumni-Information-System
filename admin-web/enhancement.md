@@ -4,8 +4,6 @@ the
 
 ---
 
-Department Head Account Activation and Deactivation not delete account only one account for dept head.
-
 - if account registration is rejected by dept head automatically delete the account in the database
 
 ---

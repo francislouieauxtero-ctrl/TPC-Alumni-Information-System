@@ -12,6 +12,7 @@ export default function AnnouncementList({
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [lightboxImage, setLightboxImage] = useState(null);
 
   useEffect(() => {
     fetchAnnouncements();
@@ -108,6 +109,71 @@ export default function AnnouncementList({
                   <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                     {announcement.content}
                   </p>
+
+                  {/* Images/Attachments */}
+                  {announcement.images && announcement.images.length > 0 && (
+                    <div className="mb-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {announcement.images.map((image, idx) => {
+                        const isImage = /\.(jpg|jpeg|png|webp|gif)$/i.test(
+                          image,
+                        );
+                        const isPdf = /\.pdf$/i.test(image);
+                        const isVideo = /\.(mp4|webm|mov|avi)$/i.test(image);
+                        const isDoc =
+                          /\.(doc|docx|txt|xls|xlsx|ppt|pptx)$/i.test(image);
+
+                        if (isImage) {
+                          return (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => setLightboxImage(image)}
+                              className="block"
+                            >
+                              <img
+                                src={image}
+                                alt={`Attachment ${idx + 1}`}
+                                className="w-full h-24 object-cover rounded-lg border border-gray-200 cursor-zoom-in"
+                              />
+                            </button>
+                          );
+                        }
+
+                        if (isVideo) {
+                          return (
+                            <video
+                              key={idx}
+                              src={image}
+                              controls
+                              preload="metadata"
+                              className="w-full h-24 rounded-lg object-cover border border-gray-200 bg-black"
+                            />
+                          );
+                        }
+
+                        return (
+                          <div
+                            key={idx}
+                            className="flex items-center justify-center h-24 bg-gray-100 rounded-lg border border-gray-200"
+                          >
+                            <a
+                              href={image}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-xs text-center text-tpc-green hover:underline px-2 break-all"
+                              title={image}
+                            >
+                              {isVideo && "▶ Video"}
+                              {isPdf && "📄 PDF"}
+                              {isDoc && "📋 Document"}
+                              {!isVideo && !isPdf && !isDoc && "📎 File"}
+                            </a>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-3 flex-wrap">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-semibold ${
@@ -183,6 +249,27 @@ export default function AnnouncementList({
           >
             Next
           </button>
+        </div>
+      )}
+      {lightboxImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setLightboxImage(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxImage(null)}
+            className="absolute top-4 right-4 text-white text-2xl leading-none rounded-full bg-white/10 hover:bg-white/20 w-10 h-10 flex items-center justify-center"
+            aria-label="Close"
+          >
+            ×
+          </button>
+          <img
+            src={lightboxImage}
+            alt="Full size attachment"
+            className="max-h-full max-w-full rounded-lg object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
         </div>
       )}
     </div>

@@ -14,10 +14,16 @@ class StoreAnnouncementRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['required', 'string', 'max:255'],
-            'content' => ['required', 'string'],
+            'title' => ['nullable', 'string', 'max:255'],
+            'content' => ['nullable', 'string'],
             'scope' => ['sometimes', 'in:school_wide,department_specific'],
             'department_id' => ['nullable', 'exists:departments,id'],
+            'external_link' => ['nullable', 'url'],
+            'posted_at' => ['nullable', 'date'],
+            'posted_by' => ['nullable', 'string', 'max:50'],
+            'department_category' => ['nullable', 'string', 'max:255'],
+            'images' => ['nullable', 'array'],
+            'images.*' => ['file', 'mimes:jpg,jpeg,png,webp,pdf,doc,docx,xls,xlsx,ppt,pptx,txt,mp4,mov,avi,webm,zip,rar', 'max:10240'],
         ];
     }
 }

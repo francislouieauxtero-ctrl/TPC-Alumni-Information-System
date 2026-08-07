@@ -49,10 +49,21 @@ function avatarPalette(name = "") {
   return AVATAR_PALETTES[code % AVATAR_PALETTES.length];
 }
 
-function Avatar({ name = "", size = "md" }) {
+function Avatar({ src, name = "", size = "md" }) {
   const initials = getInitials(name);
   const palette = avatarPalette(name);
   const sizeClass = size === "lg" ? "h-12 w-12 text-base" : "h-8 w-8 text-xs";
+
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt={name}
+        className={`flex-shrink-0 rounded-full object-cover border border-gray-200 ${sizeClass}`}
+      />
+    );
+  }
+
   return (
     <div
       className={`flex-shrink-0 flex items-center justify-center rounded-full font-medium ${sizeClass} ${palette}`}
@@ -174,31 +185,36 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
     >
       <div className="w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl">
         {/* Header */}
-        <div className="bg-tpc-greenDeep px-6 py-5">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <Avatar name={user.name} size="lg" />
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-white/50">
-                  Alumni detail
-                </p>
-                <h2 className="mt-0.5 text-xl font-semibold text-white">
-                  {user.name || "—"}
-                </h2>
-                {alumni.department?.name && (
-                  <p className="text-xs text-white/60 mt-0.5">
-                    {alumni.department.name}
-                  </p>
-                )}
-              </div>
-            </div>
-            <button
-              onClick={onClose}
-              className="mt-0.5 rounded-full border border-white/20 p-1.5 text-white/70 hover:bg-white/10 hover:text-white transition"
-              aria-label="Close"
-            >
-              <X className="h-4 w-4" />
-            </button>
+        <div className="relative bg-tpc-greenDeep px-6 pt-6 pb-10">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 rounded-full p-1.5 text-white/70 hover:bg-white/10 hover:text-white transition"
+            aria-label="Close"
+          >
+            <X className="h-4 w-4" />
+          </button>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/50">
+            Alumni detail
+          </p>
+          <h2 className="mt-0.5 text-xl font-semibold text-white">
+            {user.name || "—"}
+          </h2>
+          {alumni.department?.name && (
+            <p className="text-xs text-white/60 mt-0.5">
+              {alumni.department.name}
+            </p>
+          )}
+        </div>
+
+        {/* Avatar overlapping the header boundary */}
+        <div className="flex items-end gap-4 px-6 -mt-6 mb-4">
+          <Avatar
+            src={user.avatar || alumni.profile_photo_url}
+            name={user.name}
+            size="lg"
+          />
+          <div className="pb-1">
+            <StatusBadge status={employmentStatus} />
           </div>
         </div>
 
@@ -313,7 +329,7 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
                 </p>
               ) : (
                 <p className="text-xs text-gray-400 mt-1">
-                  No reason provided.
+                  Feedback not provided by the alumni.
                 </p>
               )}
             </div>
@@ -594,7 +610,10 @@ export default function AlumniList() {
                     {/* Name + email */}
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
-                        <Avatar name={user.name} />
+                        <Avatar
+                          src={user.avatar || item.profile_photo_url}
+                          name={user.name}
+                        />
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-gray-800 truncate">
                             {user.name || "—"}
