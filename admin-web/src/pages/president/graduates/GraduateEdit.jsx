@@ -206,7 +206,7 @@ export default function GraduateEdit() {
               name="block"
               value={formData.block}
               onChange={handleChange}
-              placeholder="e.g., Block A"
+              placeholder="e.g., Block 1"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-tpc-green"
             />
             {errors.block && (

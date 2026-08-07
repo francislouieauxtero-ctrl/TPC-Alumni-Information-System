@@ -2,10 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Mail\AccountRejectedMail;
 use App\Models\Department;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class AuthFlowTest extends TestCase
@@ -152,6 +154,41 @@ class AuthFlowTest extends TestCase
         $response->assertOk();
         $response->assertJsonPath('status', true);
         $this->assertDatabaseMissing('users', ['id' => $student->id]);
+    }
+
+    public function test_admin_rejection_sends_notification_email_to_the_student(): void
+    {
+        Mail::fake();
+
+        $department = Department::factory()->create(['name' => 'Business']);
+
+        $admin = User::factory()->create([
+            'role' => User::ROLE_ADMIN,
+            'department_id' => $department->id,
+            'status' => User::STATUS_ACTIVE,
+            'is_verified' => true,
+        ]);
+
+        $student = User::factory()->create([
+            'role' => User::ROLE_USER,
+            'department_id' => $department->id,
+            'school_id' => 'STU20240008',
+            'email' => 'rejected.student@example.com',
+            'is_verified' => false,
+            'status' => User::STATUS_ACTIVE,
+        ]);
+
+        $response = $this->actingAs($admin, 'sanctum')
+            ->withHeader('Accept', 'application/json')
+            ->postJson("/api/admin/students/{$student->id}/reject", [
+                'reason' => 'Your information did not match the records.',
+            ]);
+
+        $response->assertOk();
+
+        Mail::assertQueued(AccountRejectedMail::class, function (AccountRejectedMail $mail) use ($student): bool {
+            return $mail->hasTo($student->email);
+        });
     }
 
     public function test_student_can_register_with_same_school_id_after_rejection(): void

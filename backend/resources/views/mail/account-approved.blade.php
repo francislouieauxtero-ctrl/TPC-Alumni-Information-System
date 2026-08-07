@@ -17,5 +17,5 @@ Login to Your Account
 If you have any questions or issues, please don't hesitate to contact us.
 
 Thanks,<br>
-{{ config('mail.from.name') }}
+Mail from TPC Alumni Portal
 @endcomponent

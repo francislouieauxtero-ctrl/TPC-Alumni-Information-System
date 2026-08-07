@@ -22,5 +22,5 @@ View Event Details
 @endcomponent
 
 Thanks,<br>
-{{ config('mail.from.name') }}
+Mail from TPC Alumni Portal
 @endcomponent

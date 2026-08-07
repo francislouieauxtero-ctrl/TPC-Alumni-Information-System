@@ -7,6 +7,7 @@ use App\Models\AlumniProfile;
 use App\Models\AccountActivityLog;
 use App\Repositories\AlumniRepository;
 use App\Mail\AccountApprovedMail;
+use App\Mail\AccountRejectedMail;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -103,6 +104,8 @@ class AlumniService
                     'alumni_name'  => $alumni->name,
                 ],
             ]);
+
+            Mail::to($alumni->email)->queue(new AccountRejectedMail($alumni, $reason));
 
             $alumni->forceDelete();
         });

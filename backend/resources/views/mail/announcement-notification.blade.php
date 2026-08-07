@@ -18,5 +18,5 @@ View in Portal
 @endcomponent
 
 Thanks,<br>
-{{ config('mail.from.name') }}
+Mail from TPC Alumni Portal
 @endcomponent

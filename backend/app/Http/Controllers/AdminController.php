@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\UserResource;
+use App\Mail\AccountRejectedMail;
 use App\Models\AlumniProfile;
 use App\Models\Department;
 use App\Models\Graduate;
@@ -11,6 +12,7 @@ use App\Repositories\UserRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Mail;
 
 class AdminController extends Controller
 {
@@ -439,6 +441,8 @@ public function deactivateDepartmentHead(Request $request, int $id): JsonRespons
                     'data' => (object) [],
                 ], 403);
             }
+
+            Mail::to($student->email)->queue(new AccountRejectedMail($student, $request->input('reason')));
 
             $student->tokens()->delete();
             $student->forceDelete();

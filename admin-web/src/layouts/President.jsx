@@ -117,14 +117,14 @@ export default function PresidentLayout({ children }) {
               sidebarOpen={sidebarOpen}
             />
           )}
-          {userRole === "super_admin" && (
+          {/* {userRole === "super_admin" && (
             <NavLink
               to="/president/alumni"
               icon={<UserCheck className="w-5 h-5" />}
               label="Alumni Approval"
               sidebarOpen={sidebarOpen}
             />
-          )}
+          )} */}
           {userRole === "super_admin" && (
             <NavLink
               to="/president/events"
