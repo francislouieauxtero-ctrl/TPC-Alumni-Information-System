@@ -14,12 +14,13 @@ class UpdateJobHistoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'company' => ['sometimes', 'string', 'max:255'],
-            'position' => ['sometimes', 'string', 'max:255'],
+            'company' => ['nullable', 'string', 'max:255', 'required_if:employment_type,employed'],
+            'position' => ['nullable', 'string', 'max:255', 'required_if:employment_type,employed'],
             'industry' => ['nullable', 'string', 'max:255'],
-            'start_date' => ['sometimes', 'date'],
+            'start_date' => ['nullable', 'date', 'required_if:employment_type,employed'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'is_current' => ['sometimes', 'boolean'],
+            'employment_type' => ['sometimes', 'string', 'in:employed,unemployed,self_employed'],
         ];
     }
 }

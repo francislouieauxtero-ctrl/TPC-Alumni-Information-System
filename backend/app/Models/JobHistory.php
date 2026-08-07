@@ -19,6 +19,7 @@ class JobHistory extends Model
         'start_date',
         'end_date',
         'is_current',
+        'employment_type',
         'is_employer_updated',
     ];
 

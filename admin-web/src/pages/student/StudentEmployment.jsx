@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Briefcase, Plus, Pencil, Trash2, Lock } from "lucide-react";
+import { Plus, Pencil, Trash2, Lock } from "lucide-react";
 import employmentService from "../../services/employmentService";
+import alumniService from "../../services/alumniService";
 import { toast } from "react-toastify";
 
 const EMPTY_FORM = {
@@ -10,6 +11,9 @@ const EMPTY_FORM = {
   start_date: "",
   end_date: "",
   is_current: false,
+  employment_type: "employed",
+  is_work_aligned: null,
+  work_aligned_reason: "",
 };
 
 export default function StudentEmployment() {
@@ -20,6 +24,7 @@ export default function StudentEmployment() {
   const [editJob, setEditJob] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
+  const hasExistingJob = jobs.data.length > 0;
 
   useEffect(() => {
     fetchJobs();
@@ -57,6 +62,9 @@ export default function StudentEmployment() {
       start_date: job.start_date || "",
       end_date: job.end_date || "",
       is_current: job.is_current || false,
+      employment_type: job.employment_type || "employed",
+      is_work_aligned: job.is_work_aligned ?? null,
+      work_aligned_reason: job.work_aligned_reason || "",
     });
     setErrors({});
     setModalOpen(true);
@@ -76,18 +84,35 @@ export default function StudentEmployment() {
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: null }));
     }
+
+    if (
+      name === "employment_type" &&
+      value === "unemployed" &&
+      hasExistingJob
+    ) {
+      setForm((prev) => ({ ...prev, employment_type: "employed" }));
+    }
   };
 
   const validate = () => {
     const next = {};
-    if (!form.company.trim()) next.company = "Company is required.";
-    if (!form.position.trim()) next.position = "Position is required.";
-    if (!form.start_date) next.start_date = "Start date is required.";
-    if (!form.is_current && !form.end_date)
-      next.end_date = "End date or current role is required.";
-    if (form.end_date && form.start_date && form.end_date < form.start_date) {
-      next.end_date = "End date must be the same or after start date.";
+
+    if (!form.employment_type) {
+      next.employment_type = "Please select an employment status.";
     }
+
+    if (form.employment_type === "employed") {
+      if (!form.company.trim()) next.company = "Company is required.";
+      if (!form.position.trim()) next.position = "Position is required.";
+      if (!form.start_date) next.start_date = "Start date is required.";
+      if (!form.is_current && !form.end_date) {
+        next.end_date = "End date or current role is required.";
+      }
+      if (form.end_date && form.start_date && form.end_date < form.start_date) {
+        next.end_date = "End date must be the same or after start date.";
+      }
+    }
+
     return next;
   };
 
@@ -102,8 +127,21 @@ export default function StudentEmployment() {
     setSaving(true);
 
     try {
-      const payload = { ...form };
-      if (payload.is_current) payload.end_date = null;
+      // ── 1. Save the job entry ──────────────────────────────────────
+      const payload = {
+        company: form.employment_type === "employed" ? form.company : "",
+        position: form.employment_type === "employed" ? form.position : "",
+        industry: form.industry,
+        start_date:
+          form.employment_type === "employed" ? form.start_date : null,
+        end_date:
+          form.employment_type === "employed" && !form.is_current
+            ? form.end_date
+            : null,
+        is_current: form.is_current,
+        employment_type: form.employment_type,
+      };
+
       if (editJob) {
         await employmentService.update(editJob.id, payload);
         toast.success("Job updated successfully.");
@@ -111,6 +149,24 @@ export default function StudentEmployment() {
         await employmentService.create(payload);
         toast.success("Job added successfully.");
       }
+
+      // ── 2. Save alignment separately, only for the current job,
+      //      only if answered ─────────────────────────────────────────
+      if (form.is_current && form.is_work_aligned !== null) {
+        try {
+          await alumniService.updateAlignment(
+            form.is_work_aligned,
+            form.work_aligned_reason || null,
+          );
+        } catch (alignErr) {
+          toast.error(
+            alignErr?.message ||
+              alignErr?.errors?.is_work_aligned?.[0] ||
+              "Job saved, but alignment could not be updated.",
+          );
+        }
+      }
+
       closeModal();
       fetchJobs();
     } catch (err) {
@@ -130,8 +186,6 @@ export default function StudentEmployment() {
       toast.error(err.message || "Failed to delete job entry.");
     }
   };
-
-  const currentJob = jobs.data.find((job) => job.is_current);
 
   return (
     <div className="px-4 py-6 sm:p-8">
@@ -173,6 +227,21 @@ export default function StudentEmployment() {
                     </span>
                     <span className="text-sm text-gray-600">
                       @ {job.company}
+                    </span>
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                        job.employment_type === "self_employed"
+                          ? "bg-violet-100 text-violet-700"
+                          : job.employment_type === "unemployed"
+                            ? "bg-gray-100 text-gray-700"
+                            : "bg-emerald-100 text-emerald-700"
+                      }`}
+                    >
+                      {job.employment_type === "self_employed"
+                        ? "Self-employed"
+                        : job.employment_type === "unemployed"
+                          ? "Unemployed"
+                          : "Employed"}
                     </span>
                     {job.is_current && (
                       <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
@@ -279,45 +348,74 @@ export default function StudentEmployment() {
                 </label>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="space-y-2 text-sm text-gray-600">
-                  Industry
-                  <input
-                    name="industry"
-                    value={form.industry}
-                    onChange={handleChange}
-                    className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-tpc-green focus:ring-2 focus:ring-tpc-green/20"
-                  />
-                </label>
-                <label className="space-y-2 text-sm text-gray-600">
-                  Start Date
-                  <input
-                    type="date"
-                    name="start_date"
-                    value={form.start_date}
-                    onChange={handleChange}
-                    className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-tpc-green focus:ring-2 focus:ring-tpc-green/20"
-                  />
-                  {errors.start_date && (
-                    <p className="text-xs text-red-600">{errors.start_date}</p>
+              <label className="space-y-2 text-sm text-gray-600">
+                Employment Status
+                <select
+                  name="employment_type"
+                  value={form.employment_type}
+                  onChange={handleChange}
+                  className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-tpc-green focus:ring-2 focus:ring-tpc-green/20"
+                >
+                  <option value="employed">Employed</option>
+                  {!hasExistingJob && (
+                    <option value="unemployed">Unemployed</option>
                   )}
-                </label>
-              </div>
+                  <option value="self_employed">Self-employed</option>
+                </select>
+                {errors.employment_type && (
+                  <p className="text-xs text-red-600">
+                    {errors.employment_type}
+                  </p>
+                )}
+              </label>
 
-              {!form.is_current && (
-                <label className="space-y-2 text-sm text-gray-600">
-                  End Date
-                  <input
-                    type="date"
-                    name="end_date"
-                    value={form.end_date}
-                    onChange={handleChange}
-                    className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-tpc-green focus:ring-2 focus:ring-tpc-green/20"
-                  />
-                  {errors.end_date && (
-                    <p className="text-xs text-red-600">{errors.end_date}</p>
+              {form.employment_type === "employed" && (
+                <>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <label className="space-y-2 text-sm text-gray-600">
+                      Industry
+                      <input
+                        name="industry"
+                        value={form.industry}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-tpc-green focus:ring-2 focus:ring-tpc-green/20"
+                      />
+                    </label>
+                    <label className="space-y-2 text-sm text-gray-600">
+                      Start Date
+                      <input
+                        type="date"
+                        name="start_date"
+                        value={form.start_date}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-tpc-green focus:ring-2 focus:ring-tpc-green/20"
+                      />
+                      {errors.start_date && (
+                        <p className="text-xs text-red-600">
+                          {errors.start_date}
+                        </p>
+                      )}
+                    </label>
+                  </div>
+
+                  {!form.is_current && (
+                    <label className="space-y-2 text-sm text-gray-600">
+                      End Date
+                      <input
+                        type="date"
+                        name="end_date"
+                        value={form.end_date}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-tpc-green focus:ring-2 focus:ring-tpc-green/20"
+                      />
+                      {errors.end_date && (
+                        <p className="text-xs text-red-600">
+                          {errors.end_date}
+                        </p>
+                      )}
+                    </label>
                   )}
-                </label>
+                </>
               )}
 
               <label className="inline-flex items-center gap-3 text-sm text-gray-700">
@@ -330,6 +428,58 @@ export default function StudentEmployment() {
                 />
                 Currently working here
               </label>
+
+              {/* ── Alignment question — only shown while "Currently working here" is checked ── */}
+              {form.is_current && (
+                <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                  <p className="mb-2 text-sm font-medium text-gray-700">
+                    Is this job aligned with your course?
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setForm((p) => ({ ...p, is_work_aligned: true }))
+                      }
+                      className={`flex-1 rounded-xl border px-4 py-2.5 text-sm font-medium transition ${
+                        form.is_work_aligned === true
+                          ? "border-emerald-400 bg-emerald-50 text-emerald-700"
+                          : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
+                      }`}
+                    >
+                      Aligned
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setForm((p) => ({ ...p, is_work_aligned: false }))
+                      }
+                      className={`flex-1 rounded-xl border px-4 py-2.5 text-sm font-medium transition ${
+                        form.is_work_aligned === false
+                          ? "border-red-300 bg-red-50 text-red-600"
+                          : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
+                      }`}
+                    >
+                      Not Aligned
+                    </button>
+                  </div>
+
+                  <label className="mt-3 block space-y-2 text-sm text-gray-600">
+                    feedback (optional)
+                    <textarea
+                      value={form.work_aligned_reason}
+                      onChange={(e) =>
+                        setForm((p) => ({
+                          ...p,
+                          work_aligned_reason: e.target.value,
+                        }))
+                      }
+                      rows={2}
+                      className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-tpc-green focus:ring-2 focus:ring-tpc-green/20"
+                    />
+                  </label>
+                </div>
+              )}
 
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
                 <button

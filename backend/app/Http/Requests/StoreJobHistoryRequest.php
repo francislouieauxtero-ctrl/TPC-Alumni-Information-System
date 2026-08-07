@@ -14,12 +14,13 @@ class StoreJobHistoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'company' => ['required', 'string', 'max:255'],
-            'position' => ['required', 'string', 'max:255'],
+            'company' => ['nullable', 'string', 'max:255', 'required_if:employment_type,employed'],
+            'position' => ['nullable', 'string', 'max:255', 'required_if:employment_type,employed'],
             'industry' => ['nullable', 'string', 'max:255'],
-            'start_date' => ['required', 'date'],
+            'start_date' => ['nullable', 'date', 'required_if:employment_type,employed'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'is_current' => ['sometimes', 'boolean'],
+            'employment_type' => ['required', 'string', 'in:employed,unemployed,self_employed'],
         ];
     }
 }

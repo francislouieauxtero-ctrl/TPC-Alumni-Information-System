@@ -558,7 +558,7 @@ export default function StudentProfile() {
                     </div>
                   </div>
                 )}
-              </div>
+              </div> 
             )}
 
             <div className="border-t border-gray-100 px-4 py-3 sm:px-6">

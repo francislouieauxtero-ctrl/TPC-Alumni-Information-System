@@ -33,6 +33,8 @@ class JobHistoryService
         return DB::transaction(function () use ($user, $data) {
             $data['user_id'] = $user->id;
             $data['is_current'] = $data['is_current'] ?? false;
+            $data['employment_type'] = $data['employment_type'] ?? AlumniProfile::STATUS_UNEMPLOYED;
+            $data = $this->normalizePayload($data);
 
             if ($data['is_current']) {
                 JobHistory::where('user_id', $user->id)
@@ -41,7 +43,7 @@ class JobHistoryService
 
             $jobHistory = $this->jobHistoryRepository->create($data);
 
-            $this->syncAlumniEmploymentStatus($user); // <-- add
+            $this->syncAlumniEmploymentStatus($user, $data['employment_type']);
 
             return $jobHistory;
         });
@@ -50,6 +52,8 @@ class JobHistoryService
     public function update(JobHistory $jobHistory, User $user, array $data): JobHistory
     {
         return DB::transaction(function () use ($jobHistory, $user, $data) {
+            $data = $this->normalizePayload($data);
+
             if (array_key_exists('is_current', $data) && $data['is_current']) {
                 JobHistory::where('user_id', $user->id)
                     ->where('id', '!=', $jobHistory->id)
@@ -58,7 +62,7 @@ class JobHistoryService
 
             $updated = $this->jobHistoryRepository->update($jobHistory, $data);
 
-            $this->syncAlumniEmploymentStatus($user); // <-- add
+            $this->syncAlumniEmploymentStatus($user, $data['employment_type'] ?? $updated->employment_type);
 
             return $updated;
         });
@@ -71,7 +75,7 @@ class JobHistoryService
 
             $result = $this->jobHistoryRepository->delete($jobHistory);
 
-            $this->syncAlumniEmploymentStatus($user); // <-- add
+            $this->syncAlumniEmploymentStatus($user, $jobHistory->employment_type ?? null);
 
             return $result;
         });
@@ -79,7 +83,27 @@ class JobHistoryService
 
     // ------------------------------------------------------------------
 
-   private function syncAlumniEmploymentStatus(User $user): void
+    private function normalizePayload(array $data): array
+    {
+        $employmentType = $data['employment_type'] ?? null;
+
+        if ($employmentType === AlumniProfile::STATUS_EMPLOYED) {
+            $data['company'] = $data['company'] ?? '';
+            $data['position'] = $data['position'] ?? '';
+            $data['start_date'] = $data['start_date'] ?? null;
+            $data['end_date'] = $data['end_date'] ?? null;
+            return $data;
+        }
+
+        $data['company'] = $data['company'] ?? '';
+        $data['position'] = $data['position'] ?? '';
+        $data['start_date'] = $data['start_date'] ?? now()->toDateString();
+        $data['end_date'] = $data['end_date'] ?? null;
+
+        return $data;
+    }
+
+   private function syncAlumniEmploymentStatus(User $user, ?string $explicitType = null): void
 {
     $alumni = AlumniProfile::where('user_id', $user->id)->first();
 
@@ -87,38 +111,36 @@ class JobHistoryService
         return;
     }
 
-    $currentJob = JobHistory::where('user_id', $user->id)
-        ->where('is_current', true)
-        ->latest('start_date')
+    $latestEntry = JobHistory::where('user_id', $user->id)
+        ->latest('created_at')
         ->first();
 
-    $hasAnyHistory = JobHistory::where('user_id', $user->id)->exists();
+    $type = $explicitType ?? $latestEntry?->employment_type ?? AlumniProfile::STATUS_UNEMPLOYED;
 
-    if ($currentJob) {
-        // Has a current job → employed
+    if ($type === AlumniProfile::STATUS_EMPLOYED) {
+        $currentJob = JobHistory::where('user_id', $user->id)
+            ->where('is_current', true)
+            ->latest('start_date')
+            ->first();
+
         $alumni->update([
             'employment_status' => AlumniProfile::STATUS_EMPLOYED,
-            'current_job'       => $currentJob->position,
-            'company'           => $currentJob->company,
+            'current_job'       => $currentJob?->position,
+            'company'           => $currentJob?->company,
         ]);
-
-    } elseif ($hasAnyHistory) {
-        // Has past history but no current job → self employed
+    } elseif ($type === AlumniProfile::STATUS_SELF_EMPLOYED) {
         $alumni->update([
             'employment_status' => AlumniProfile::STATUS_SELF_EMPLOYED,
             'current_job'       => null,
             'company'           => null,
         ]);
-
     } else {
-        // No job history at all → unemployed
-        // Also clear alignment — the question no longer applies
         $alumni->update([
             'employment_status' => AlumniProfile::STATUS_UNEMPLOYED,
             'current_job'       => null,
             'company'           => null,
-            'is_work_aligned'   => null,   // ← reset: no job, no alignment answer
-            'work_aligned_reason' => null, // ← reset: clear the reason too
+            'is_work_aligned'   => null,
+            'work_aligned_reason' => null,
         ]);
     }
 }

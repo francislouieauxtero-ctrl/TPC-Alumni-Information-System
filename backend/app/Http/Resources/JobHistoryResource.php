@@ -17,6 +17,7 @@ class JobHistoryResource extends JsonResource
             'start_date' => $this->start_date?->toDateString(),
             'end_date' => $this->end_date?->toDateString(),
             'is_current' => $this->is_current,
+            'employment_type' => $this->employment_type,
             'is_employer_updated' => $this->is_employer_updated,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
