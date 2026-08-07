@@ -23,6 +23,32 @@ class StoreEventRequest extends FormRequest
         ];
     }
 
+    public function withValidator($validator)
+    {
+        $validator->after(function ($v) {
+            $user = auth()->user();
+            $scope = $this->input('scope');
+
+            // Admins cannot create school-wide events
+            if ($user->isAdmin() && $scope === 'school_wide') {
+                $v->errors()->add('scope', 'Only the president can create school-wide events.');
+            }
+
+            // If scope is department_specific, department_id is required
+            if ($scope === 'department_specific' && !$this->input('department_id')) {
+                $v->errors()->add('department_id', 'Department is required for department-specific events.');
+            }
+
+            // Admins must use their own department
+            if ($user->isAdmin()) {
+                $deptId = $this->input('department_id') ?: $user->department_id;
+                if ($deptId && $deptId != $user->department_id) {
+                    $v->errors()->add('department_id', 'You may only create events for your own department.');
+                }
+            }
+        });
+    }
+
     public function messages(): array
     {
         return [

@@ -144,11 +144,11 @@ export default function AnnouncementCreate({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Image upload (single or multiple)
+              Attachments (images, videos, documents)
             </label>
             <input
               type="file"
-              accept="image/*"
+              accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar"
               multiple
               onChange={handleFiles}
               className="w-full rounded-lg border border-gray-300 px-3 py-2"

@@ -40,12 +40,18 @@ class EventPolicy
 
     public function update(User $user, Event $event): bool
     {
-        // Only creator or super admin can update
+        // Super admin can update any event
         if ($user->isSuperAdmin()) {
             return true;
         }
 
+        // Creator can update their own event
         if ($user->id === $event->created_by) {
+            return true;
+        }
+
+        // Department admins can update events within their department
+        if ($user->isAdmin() && $event->department_id && $user->department_id === $event->department_id) {
             return true;
         }
 

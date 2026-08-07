@@ -10,6 +10,7 @@ use App\Mail\EventNotificationMail;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 class EventService
 {
@@ -57,6 +58,24 @@ class EventService
                 $data['department_id'] = $creator->department_id;
             }
 
+            // handle attachments if present (UploadedFile[])
+            $attachments = [];
+            if (!empty($data['attachments'])) {
+                foreach ($data['attachments'] as $file) {
+                    if (!$file) continue;
+                    $path = $file->store('events', 'public');
+                    $attachments[] = [
+                        'path' => $path,
+                        'url' => Storage::url($path),
+                        'name' => $file->getClientOriginalName(),
+                    ];
+                }
+            }
+
+            if (!empty($attachments)) {
+                $data['attachments'] = $attachments;
+            }
+
             $event = $this->eventRepository->create($data);
 
             // Log the action
@@ -85,6 +104,47 @@ class EventService
             if ($actor->isAdmin()) {
                 $data['scope'] = Event::SCOPE_DEPARTMENT_SPECIFIC;
                 $data['department_id'] = $actor->department_id;
+            }
+
+            // Load existing attachments
+            $existing = $event->attachments ?? [];
+
+            // Handle removed attachments (array of url or path)
+            if (!empty($data['removed_attachments'])) {
+                $toRemove = $data['removed_attachments'];
+                $remaining = [];
+                foreach ($existing as $att) {
+                    $keep = true;
+                    foreach ($toRemove as $r) {
+                        if (isset($att['url']) && $att['url'] === $r) {
+                            // delete file by path
+                            if (isset($att['path'])) Storage::disk('public')->delete($att['path']);
+                            $keep = false;
+                            break;
+                        }
+                    }
+                    if ($keep) $remaining[] = $att;
+                }
+                $existing = $remaining;
+            }
+
+            // Handle new uploaded attachments
+            if (!empty($data['attachments'])) {
+                foreach ($data['attachments'] as $file) {
+                    if (!$file) continue;
+                    $path = $file->store('events', 'public');
+                    $existing[] = [
+                        'path' => $path,
+                        'url' => Storage::url($path),
+                        'name' => $file->getClientOriginalName(),
+                    ];
+                }
+            }
+
+            if (!empty($existing)) {
+                $data['attachments'] = $existing;
+            } else {
+                $data['attachments'] = null;
             }
 
             $updated = $this->eventRepository->update($event, $data);

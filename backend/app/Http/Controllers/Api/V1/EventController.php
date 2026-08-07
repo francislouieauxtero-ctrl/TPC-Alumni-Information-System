@@ -46,9 +46,15 @@ class EventController extends Controller
         try {
             $this->authorize('create', Event::class);
 
+            $data = $request->validated();
+            // include uploaded files for processing in service
+            if ($request->hasFile('attachments')) {
+                $data['attachments'] = $request->file('attachments');
+            }
+
             $event = $this->eventService->create(
                 auth()->user(),
-                $request->validated()
+                $data
             );
 
             return $this->successResponse(
@@ -86,10 +92,18 @@ class EventController extends Controller
         try {
             $this->authorize('update', $event);
 
+            $data = $request->validated();
+            if ($request->hasFile('attachments')) {
+                $data['attachments'] = $request->file('attachments');
+            }
+            if ($request->has('removed_attachments')) {
+                $data['removed_attachments'] = $request->input('removed_attachments');
+            }
+
             $updated = $this->eventService->update(
                 $event,
                 auth()->user(),
-                $request->validated()
+                $data
             );
 
             return $this->successResponse(

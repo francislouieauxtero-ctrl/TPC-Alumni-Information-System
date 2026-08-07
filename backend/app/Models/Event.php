@@ -23,6 +23,7 @@ class Event extends Model
         'event_date',
         'location',
         'scope',
+        'attachments',
     ];
 
     protected function casts(): array
@@ -30,6 +31,7 @@ class Event extends Model
         return [
             'event_date' => 'datetime',
             'scope' => 'string',
+            'attachments' => 'array',
         ];
     }
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import eventService from "../../../services/eventService";
 import { toast } from "react-toastify";
+import { getAttachmentUrls } from "../../../utils/media";
 
 export default function EventView() {
   const { id } = useParams();
@@ -12,6 +13,7 @@ export default function EventView() {
       : "/president/events";
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [lightboxImage, setLightboxImage] = useState(null);
 
   useEffect(() => {
     fetchEvent();
@@ -50,6 +52,8 @@ export default function EventView() {
   }
 
   if (!event) return null;
+
+  const attachments = getAttachmentUrls(event);
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -158,6 +162,88 @@ export default function EventView() {
             <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
               {event.description}
             </p>
+          </div>
+        )}
+        {attachments.length > 0 && (
+          <div className="px-8 py-6">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+              Attachments
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {attachments.map((image, index) => {
+                const isImage = /\.(jpg|jpeg|png|webp|gif)$/i.test(image);
+                const isVideo = /\.(mp4|webm|mov|avi)$/i.test(image);
+
+                if (isImage) {
+                  return (
+                    <button
+                      key={`${index}`}
+                      type="button"
+                      onClick={() => setLightboxImage(image)}
+                      className="block"
+                    >
+                      <img
+                        src={image}
+                        alt={`Attachment ${index + 1}`}
+                        className="h-40 w-full rounded-xl object-cover border border-gray-200 hover:shadow-lg transition cursor-zoom-in"
+                      />
+                    </button>
+                  );
+                }
+
+                if (isVideo) {
+                  return (
+                    <video
+                      key={`${index}`}
+                      src={image}
+                      controls
+                      preload="metadata"
+                      className="h-40 w-full rounded-xl object-cover border border-gray-200 bg-black"
+                    />
+                  );
+                }
+
+                return (
+                  <a
+                    key={`${index}`}
+                    href={image}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center justify-center h-40 bg-gray-100 rounded-xl border border-gray-200 hover:bg-gray-200 transition"
+                    title={image}
+                  >
+                    <div className="text-center">
+                      <div className="text-2xl mb-2">📎</div>
+                      <div className="text-xs text-gray-600 px-2 break-all">
+                        {image.split("/").pop()}
+                      </div>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {lightboxImage && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+            onClick={() => setLightboxImage(null)}
+          >
+            <button
+              type="button"
+              onClick={() => setLightboxImage(null)}
+              className="absolute top-4 right-4 text-white text-2xl leading-none rounded-full bg-white/10 hover:bg-white/20 w-10 h-10 flex items-center justify-center"
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <img
+              src={lightboxImage}
+              alt="Full size attachment"
+              className="max-h-full max-w-full rounded-lg object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
           </div>
         )}
       </div>

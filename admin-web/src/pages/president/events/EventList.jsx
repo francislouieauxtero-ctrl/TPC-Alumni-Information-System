@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import eventService from "../../../services/eventService";
 import { toast } from "react-toastify";
+import { getAttachmentUrls } from "../../../utils/media";
 
 export default function EventList() {
   const navigate = useNavigate();
   const [events, setEvents] = useState({ data: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [lightboxImage, setLightboxImage] = useState(null);
   const [filters, setFilters] = useState({ search: "", include_past: false });
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -19,10 +21,18 @@ export default function EventList() {
     try {
       setLoading(true);
       setError(null);
-      const data = await eventService.getAll({
-        ...filters,
-        page: currentPage,
-      });
+      const reqFilters = { ...filters, page: currentPage };
+      const userRole = localStorage.getItem("userRole");
+      if (userRole === "admin") {
+        const deptId = localStorage.getItem("departmentId");
+        if (deptId) {
+          // Request department-specific events for this admin
+          reqFilters.department_id = deptId;
+          // Also request school-wide events so admins see public events
+          reqFilters.include_school_wide = true;
+        }
+      }
+      const data = await eventService.getAll(reqFilters);
       setEvents(data);
     } catch (err) {
       setError(err.message || "Failed to fetch events");
@@ -159,6 +169,60 @@ export default function EventList() {
                 )}
               </div>
 
+              {getAttachmentUrls(event).length > 0 && (
+                <div className="mt-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    {getAttachmentUrls(event).map((image, idx) => {
+                      const isImage = /\.(jpg|jpeg|png|webp|gif)$/i.test(image);
+                      const isVideo = /\.(mp4|webm|mov|avi)$/i.test(image);
+
+                      if (isImage) {
+                        return (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setLightboxImage(image)}
+                            className="block"
+                          >
+                            <img
+                              src={image}
+                              alt={`Event ${idx + 1}`}
+                              className="w-full h-24 object-cover rounded-lg border border-gray-200 cursor-zoom-in"
+                            />
+                          </button>
+                        );
+                      }
+
+                      if (isVideo) {
+                        return (
+                          <video
+                            key={idx}
+                            src={image}
+                            controls
+                            preload="metadata"
+                            className="w-full h-24 rounded-lg object-cover border border-gray-200 bg-black"
+                          />
+                        );
+                      }
+
+                      return (
+                        <a
+                          key={idx}
+                          href={image}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center justify-center h-24 bg-gray-100 rounded-lg border border-gray-200"
+                        >
+                          <div className="text-xs text-gray-600 px-2 break-all">
+                            File
+                          </div>
+                        </a>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Actions */}
               <div className="flex gap-2 pt-4 border-t border-gray-200">
                 <button
@@ -208,6 +272,27 @@ export default function EventList() {
               Next
             </button>
           )}
+        </div>
+      )}
+      {lightboxImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setLightboxImage(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxImage(null)}
+            className="absolute top-4 right-4 text-white text-2xl leading-none rounded-full bg-white/10 hover:bg-white/20 w-10 h-10 flex items-center justify-center"
+            aria-label="Close"
+          >
+            ×
+          </button>
+          <img
+            src={lightboxImage}
+            alt="Full size attachment"
+            className="max-h-full max-w-full rounded-lg object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
         </div>
       )}
     </div>

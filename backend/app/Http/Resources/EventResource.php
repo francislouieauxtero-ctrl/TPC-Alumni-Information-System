@@ -22,6 +22,7 @@ class EventResource extends JsonResource
             'scope' => $this->scope,
             'is_future' => $this->isFuture(),
             'is_past' => $this->isPast(),
+            'attachments' => $this->attachments ?? [],
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

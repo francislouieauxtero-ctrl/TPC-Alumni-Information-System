@@ -38,7 +38,12 @@ class AnnouncementController extends Controller
     {
         try {
             $this->authorize('create', Announcement::class);
-            $announcement = $this->announcementService->create(auth()->user(), $request->validated());
+            $data = $request->validated();
+            if ($request->hasFile('images')) {
+                $data['images'] = $request->file('images');
+            }
+
+            $announcement = $this->announcementService->create(auth()->user(), $data);
 
             return $this->successResponse(
                 new AnnouncementResource($announcement->load('creator', 'department')),
@@ -70,7 +75,15 @@ class AnnouncementController extends Controller
         try {
             $this->authorize('update', $announcement);
 
-            $updated = $this->announcementService->update($announcement, auth()->user(), $request->validated());
+            $data = $request->validated();
+            if ($request->hasFile('images')) {
+                $data['images'] = $request->file('images');
+            }
+            if ($request->has('removed_images')) {
+                $data['removed_images'] = $request->input('removed_images');
+            }
+
+            $updated = $this->announcementService->update($announcement, auth()->user(), $data);
 
             return $this->successResponse(
                 new AnnouncementResource($updated->load('creator', 'department')),
