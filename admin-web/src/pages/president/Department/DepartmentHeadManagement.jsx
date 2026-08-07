@@ -9,7 +9,6 @@ import {
   UserCog,
   Pencil,
   PlusCircle,
-  Trash2,
   X,
   Loader2,
 } from "lucide-react";
@@ -30,7 +29,6 @@ export default function DepartmentHeadManagement({ embedded = false }) {
   // Departments state
   const [departments, setDepartments] = useState([]);
   const [deptLoading, setDeptLoading] = useState(true);
-  const [deletingId, setDeletingId] = useState(null);
 
   // Edit modal state
   const [editTarget, setEditTarget] = useState(null); // the admin being edited
@@ -105,52 +103,70 @@ export default function DepartmentHeadManagement({ embedded = false }) {
   };
 
   const handleDeactivate = async (id, name) => {
-    if (!window.confirm(`Deactivate ${name}?`)) return;
+    if (
+      !window.confirm(
+        `Deactivate ${name}? They will no longer be able to sign in.`,
+      )
+    )
+      return;
     try {
       setActionLoading(id);
-      const response = await api.post(`/admin/staff/${id}/deactivate`);
+      const response = await api.post(
+        `/super-admin/department-admins/${id}/deactivate`,
+      );
       if (response.data.status) {
         toast.success(`${name} has been deactivated.`);
         fetchStaff();
       }
-    } catch {
-      toast.error("Failed to deactivate department head.");
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || "Failed to deactivate department head.",
+      );
     } finally {
       setActionLoading(null);
     }
   };
 
-  const [deletingAdminId, setDeletingAdminId] = useState(null);
-  const handleDeleteAdmin = async (id, name) => {
-    if (!window.confirm(`Delete ${name}? This cannot be undone.`)) return;
-    try {
-      setDeletingAdminId(id);
-      await api.delete(`/super-admin/department-admins/${id}`);
-      toast.success(
-        `${name} an Department Head account has been deleted successfully.`,
-      );
-      setDepartmentHeads((prev) => prev.filter((m) => m.id !== id));
-    } catch (err) {
-      toast.error(
-        err.response?.data?.message || "Failed to delete department head.",
-      );
-    } finally {
-      setDeletingAdminId(null);
-    }
-  };
   const handleActivate = async (id, name) => {
     try {
       setActionLoading(id);
-      const response = await api.post(`/admin/staff/${id}/activate`);
+      const response = await api.post(
+        `/super-admin/department-admins/${id}/activate`,
+      );
       if (response.data.status) {
         toast.success(`${name} has been activated.`);
         fetchStaff();
       }
-    } catch {
-      toast.error("Failed to activate department head.");
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || "Failed to activate department head.",
+      );
     } finally {
       setActionLoading(null);
     }
+  };
+
+  const hasActiveDepartmentHead = (departmentId, memberId = null) => {
+    if (!departmentId) {
+      return false;
+    }
+
+    return departmentHeads.some(
+      (member) =>
+        member.department?.id === departmentId &&
+        member.status === "active" &&
+        member.id !== memberId,
+    );
+  };
+
+  const getActivationButtonLabel = (member) => {
+    if (!member.department?.id) {
+      return "Activate";
+    }
+
+    return hasActiveDepartmentHead(member.department.id, member.id)
+      ? "Deactivated"
+      : "Activate";
   };
 
   // ── Edit modal ────────────────────────────────────────────────
@@ -244,7 +260,6 @@ export default function DepartmentHeadManagement({ embedded = false }) {
     if (!window.confirm(`Delete department "${name}"? This cannot be undone.`))
       return;
     try {
-      setDeletingId(id);
       await api.delete(`/super-admin/departments/${id}`);
       toast.success(`Department "${name}" deleted.`);
       setDepartments((prev) => prev.filter((d) => d.id !== id));
@@ -252,8 +267,6 @@ export default function DepartmentHeadManagement({ embedded = false }) {
       toast.error(
         err.response?.data?.message || "Failed to delete department.",
       );
-    } finally {
-      setDeletingId(null);
     }
   };
 
@@ -366,11 +379,10 @@ export default function DepartmentHeadManagement({ embedded = false }) {
                         onClick={() =>
                           handleDeleteDepartment(dept.id, dept.name)
                         }
-                        disabled={deletingId === dept.id}
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 disabled:opacity-40 transition"
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition"
                         title="Delete department"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <X className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   )}
@@ -396,6 +408,10 @@ export default function DepartmentHeadManagement({ embedded = false }) {
 
       {/* Filters */}
       <div className="bg-white border border-gray-200 rounded-xl p-5 mb-5 shadow-sm">
+        <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
+          Only one active department head is allowed per department. Deactivate
+          the current head first before activating a replacement.
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -511,16 +527,6 @@ export default function DepartmentHeadManagement({ embedded = false }) {
                               <Pencil className="w-3 h-3" />
                               Edit
                             </button>
-                            <button
-                              onClick={() =>
-                                handleDeleteAdmin(member.id, member.name)
-                              }
-                              disabled={deletingAdminId === member.id}
-                              className="inline-flex items-center gap-1 bg-red-100 hover:bg-red-200 disabled:opacity-50 text-red-600 px-3 py-1.5 rounded-lg text-xs font-medium transition"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                              Delete
-                            </button>
                           </>
                         )}
                         {!member.isVerified && (
@@ -561,10 +567,24 @@ export default function DepartmentHeadManagement({ embedded = false }) {
                               onClick={() =>
                                 handleActivate(member.id, member.name)
                               }
-                              disabled={actionLoading === member.id}
+                              disabled={
+                                actionLoading === member.id ||
+                                hasActiveDepartmentHead(
+                                  member.department?.id,
+                                  member.id,
+                                )
+                              }
+                              title={
+                                hasActiveDepartmentHead(
+                                  member.department?.id,
+                                  member.id,
+                                )
+                                  ? "Deactivate the current department head for this department before activating another one."
+                                  : "Activate this department head"
+                              }
                               className="bg-green-100 hover:bg-green-200 disabled:opacity-50 text-green-700 px-3 py-1.5 rounded-lg text-xs font-medium transition"
                             >
-                              Activate
+                              {getActivationButtonLabel(member)}
                             </button>
                           ))}
                       </div>

@@ -7,8 +7,9 @@ import {
   LogOut,
   Home,
   User,
-  Award,
-  Users,
+  GraduationCap,
+  UserCheck,
+  Clock,
   CalendarDays,
   BarChart3,
   Megaphone,
@@ -106,19 +107,19 @@ export default function DepartmentHeadLayout({ children }) {
           />
           <NavLink
             to="/department-head/graduates"
-            icon={<Users className="w-5 h-5" />}
+            icon={<GraduationCap className="w-5 h-5" />}
             label="Graduates"
             sidebarOpen={sidebarOpen}
           />
           <NavLink
             to="/department-head/alumni"
-            icon={<Award className="w-5 h-5" />}
+            icon={<UserCheck className="w-5 h-5" />}
             label="Registered Alumni"
             sidebarOpen={sidebarOpen}
           />
           <NavLink
             to="/department-head/alumni/pending"
-            icon={<Award className="w-5 h-5" />}
+            icon={<Clock className="w-5 h-5" />}
             label="Pending Alumni"
             sidebarOpen={sidebarOpen}
           />
@@ -140,7 +141,6 @@ export default function DepartmentHeadLayout({ children }) {
             label="Analytics"
             sidebarOpen={sidebarOpen}
           />
-
           <NavLink
             to="/department-head/profile"
             icon={<User className="w-5 h-5" />}

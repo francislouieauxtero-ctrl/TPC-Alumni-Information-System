@@ -6,9 +6,14 @@ import {
   X,
   LogOut,
   Users,
+  Building2,
+  GraduationCap,
+  UserCheck,
+  Calendar,
   BarChart3,
-  Settings,
+  LineChart,
   Megaphone,
+  UserCircle,
 } from "lucide-react";
 import api from "../services/api";
 import UserAvatar from "../components/shared/UserAvatar";
@@ -78,6 +83,7 @@ export default function PresidentLayout({ children }) {
         </div>
 
         {/* Navigation */}
+        {/* Navigation */}
         <nav className="flex-1 flex flex-col gap-1 py-5">
           {userRole === "super_admin" && (
             <NavLink
@@ -90,12 +96,11 @@ export default function PresidentLayout({ children }) {
           {userRole === "super_admin" && (
             <NavLink
               to="/president/DepartmentHeadManagement"
-              icon={<Users className="w-5 h-5" />}
+              icon={<Building2 className="w-5 h-5" />}
               label="Manage Departments"
               sidebarOpen={sidebarOpen}
             />
           )}
-
           {userRole === "super_admin" && (
             <NavLink
               to="/president/students"
@@ -107,7 +112,7 @@ export default function PresidentLayout({ children }) {
           {userRole === "super_admin" && (
             <NavLink
               to="/president/graduates"
-              icon={<Users className="w-5 h-5" />}
+              icon={<GraduationCap className="w-5 h-5" />}
               label="Manage Graduates"
               sidebarOpen={sidebarOpen}
             />
@@ -115,7 +120,7 @@ export default function PresidentLayout({ children }) {
           {userRole === "super_admin" && (
             <NavLink
               to="/president/alumni"
-              icon={<Users className="w-5 h-5" />}
+              icon={<UserCheck className="w-5 h-5" />}
               label="Alumni Approval"
               sidebarOpen={sidebarOpen}
             />
@@ -123,12 +128,11 @@ export default function PresidentLayout({ children }) {
           {userRole === "super_admin" && (
             <NavLink
               to="/president/events"
-              icon={<BarChart3 className="w-5 h-5" />}
+              icon={<Calendar className="w-5 h-5" />}
               label="Events"
               sidebarOpen={sidebarOpen}
             />
           )}
-
           {userRole === "super_admin" && (
             <NavLink
               to="/president/announcements"
@@ -137,11 +141,10 @@ export default function PresidentLayout({ children }) {
               sidebarOpen={sidebarOpen}
             />
           )}
-
           {userRole === "super_admin" && (
             <NavLink
               to="/president/analytics"
-              icon={<BarChart3 className="w-5 h-5" />}
+              icon={<LineChart className="w-5 h-5" />}
               label="Analytics"
               sidebarOpen={sidebarOpen}
             />
@@ -149,7 +152,7 @@ export default function PresidentLayout({ children }) {
           {userRole === "super_admin" && (
             <NavLink
               to="/president/profile"
-              icon={<Settings className="w-5 h-5" />}
+              icon={<UserCircle className="w-5 h-5" />}
               label="My Profile"
               sidebarOpen={sidebarOpen}
             />

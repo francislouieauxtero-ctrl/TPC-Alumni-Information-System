@@ -73,7 +73,7 @@ export default function EditProfileForm({
             </div>
           )}
 
-          {/* ── Photo upload ─────────────────────────────────────────────── */}
+          {/* ── Photo upload ───────────────────────────────────────────────
           <div>
             <p className="text-sm font-medium text-gray-700 mb-2 sm:mb-3">
               Profile photo
@@ -115,7 +115,7 @@ export default function EditProfileForm({
                 {validationErrors.avatar[0]}
               </p>
             )}
-          </div>
+          </div> */}
 
           {/* ── Main fields ──────────────────────────────────────────────── */}
           <form

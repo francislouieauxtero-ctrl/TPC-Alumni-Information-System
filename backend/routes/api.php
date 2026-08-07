@@ -35,6 +35,11 @@ Route::prefix('super-admin')->middleware('role:super_admin')->group(function () 
     Route::get('department-admins', [AdminController::class, 'listDepartmentAdmins']);
     Route::put('department-admins/{id}', [AdminController::class, 'updateDepartmentAdmin']);
     Route::delete('department-admins/{id}', [AdminController::class, 'deleteDepartmentAdmin']);
+    Route::post('department-admins/{id}/reject', [AdminController::class, 'rejectDepartmentHead']);
+    Route::post('department-admins/{id}/activate', [AdminController::class, 'activateDepartmentHead']);
+    Route::post('department-admins/{id}/deactivate', [AdminController::class, 'deactivateDepartmentHead']);
+    Route::patch('department-heads/{id}/activate', [AdminController::class, 'activateDepartmentHead']);
+    Route::patch('department-heads/{id}/deactivate', [AdminController::class, 'deactivateDepartmentHead']);
     Route::apiResource('departments', DepartmentController::class)->except(['index']);
     Route::apiResource('graduates', GraduateController::class);
 });

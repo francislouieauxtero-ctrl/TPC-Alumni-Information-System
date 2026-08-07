@@ -44,6 +44,35 @@ class UpdateDepartmentAdminRequest extends FormRequest
         ];
     }
 
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $status = $this->input('status');
+            $departmentId = $this->input('department_id');
+            $adminId = $this->route('id');
+
+            if ($status !== User::STATUS_ACTIVE) {
+                return;
+            }
+
+            $targetDepartmentId = $departmentId ?? $this->route('department_id');
+            if (! $targetDepartmentId) {
+                return;
+            }
+
+            $activeHeadExists = User::query()
+                ->where('role', User::ROLE_ADMIN)
+                ->where('department_id', $targetDepartmentId)
+                ->where('status', User::STATUS_ACTIVE)
+                ->where('id', '!=', $adminId)
+                ->exists();
+
+            if ($activeHeadExists) {
+                $validator->errors()->add('status', 'Deactivate the current department head for this department before activating another one.');
+            }
+        });
+    }
+
     public function messages(): array
     {
         return [

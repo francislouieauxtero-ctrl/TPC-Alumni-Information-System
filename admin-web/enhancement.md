@@ -4,16 +4,6 @@ the
 
 ---
 
-Page 2 – Detailed Feedback Report
-Alumni Name Employment Status Course Alignment Employment Feedback
-Juan Dela Cruz Employed Yes Working as a Software Developer at ABC Company.
-Maria Santos Self-employed Yes Managing my own IT service business.
-Kevin Ramos Employed No Working in Sales due to limited IT opportunities.
-Angela Cruz Unemployed — (No Feedback Submitted)
-Carlo Reyes Unemployed — (No Feedback Submitted)
-
----
-
 Department Head Account Activation and Deactivation not delete account only one account for dept head.
 
 - if account registration is rejected by dept head automatically delete the account in the database

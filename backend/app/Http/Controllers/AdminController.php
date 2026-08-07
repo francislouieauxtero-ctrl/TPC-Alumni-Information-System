@@ -133,42 +133,62 @@ class AdminController extends Controller
                 'data' => (object) [],
             ], 500);
         }
-    }public function updateDepartmentAdmin(
-    \App\Http\Requests\UpdateDepartmentAdminRequest $request,
-    int $id
-): JsonResponse {
-    try {
-        $admin = User::admins()->findOrFail($id);
-
-        $data = $request->only(['name', 'email', 'department_id', 'status']);
-
-        if ($request->filled('password')) {
-            $data['password'] = $request->password;
-        }
-
-        $admin->update($data);
-
-        return response()->json([
-            'status'  => true,
-            'message' => 'Department head updated successfully',
-            'data'    => new UserResource($admin->refresh()->load('department')),
-        ]);
-    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
-        return response()->json([
-            'status'  => false,
-            'message' => 'Department head not found',
-            'data'    => (object) [],
-        ], 404);
-    } catch (\Throwable $e) {
-        report($e);
-
-        return response()->json([
-            'status'  => false,
-            'message' => 'Failed to update department head',
-            'data'    => (object) [],
-        ], 500);
     }
-}
+
+    public function updateDepartmentAdmin(
+        \App\Http\Requests\UpdateDepartmentAdminRequest $request,
+        int $id
+    ): JsonResponse {
+        try {
+            $admin = User::admins()->findOrFail($id);
+
+            $data = $request->only(['name', 'email', 'department_id', 'status']);
+
+            if ($request->filled('password')) {
+                $data['password'] = $request->password;
+            }
+
+            if (($data['status'] ?? null) === User::STATUS_ACTIVE) {
+                $departmentId = $data['department_id'] ?? $admin->department_id;
+                $activeHeadExists = User::query()
+                    ->where('role', User::ROLE_ADMIN)
+                    ->where('department_id', $departmentId)
+                    ->where('status', User::STATUS_ACTIVE)
+                    ->where('id', '!=', $admin->id)
+                    ->exists();
+
+                if ($activeHeadExists) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Deactivate the current department head for this department before activating another one.',
+                        'data' => (object) [],
+                    ], 422);
+                }
+            }
+
+            $admin->update($data);
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Department head updated successfully',
+                'data'    => new UserResource($admin->refresh()->load('department')),
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Department head not found',
+                'data'    => (object) [],
+            ], 404);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json([
+                'status'  => false,
+                'message' => 'Failed to update department head',
+                'data'    => (object) [],
+            ], 500);
+        }
+    }
 public function deleteDepartmentAdmin(Request $request, int $id): JsonResponse
 {
     try {
@@ -195,6 +215,111 @@ public function deleteDepartmentAdmin(Request $request, int $id): JsonResponse
             'status'  => false,
             'message' => 'Failed to delete department head',
             'data'    => (object) [],
+        ], 500);
+    }
+}
+
+public function rejectDepartmentHead(Request $request, int $id): JsonResponse
+{
+    try {
+        $admin = User::admins()->findOrFail($id);
+
+        $admin->tokens()->delete();
+        $admin->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Department head rejected and account deleted successfully',
+            'data' => (object) [],
+        ]);
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Department head not found',
+            'data' => (object) [],
+        ], 404);
+    } catch (\Throwable $e) {
+        report($e);
+
+        return response()->json([
+            'status' => false,
+            'message' => 'Failed to reject department head',
+            'data' => (object) [],
+        ], 500);
+    }
+}
+
+public function activateDepartmentHead(Request $request, int $id): JsonResponse
+{
+    try {
+        $admin = User::admins()->findOrFail($id);
+
+        $activeHeadExists = User::query()
+            ->where('role', User::ROLE_ADMIN)
+            ->where('department_id', $admin->department_id)
+            ->where('status', User::STATUS_ACTIVE)
+            ->where('id', '!=', $admin->id)
+            ->exists();
+
+        if ($activeHeadExists) {
+            return response()->json([
+                'status' => false,
+                'message' => 'This department already has an active department head.',
+                'data' => (object) [],
+            ], 422);
+        }
+
+        $admin->update(['status' => User::STATUS_ACTIVE]);
+        $admin->tokens()->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Department head activated successfully',
+            'data' => new UserResource($admin->refresh()->load('department')),
+        ]);
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Department head not found',
+            'data' => (object) [],
+        ], 404);
+    } catch (\Throwable $e) {
+        report($e);
+
+        return response()->json([
+            'status' => false,
+            'message' => 'Failed to activate department head',
+            'data' => (object) [],
+        ], 500);
+    }
+}
+
+public function deactivateDepartmentHead(Request $request, int $id): JsonResponse
+{
+    try {
+        $admin = User::admins()->findOrFail($id);
+
+        $admin->update(['status' => User::STATUS_INACTIVE]);
+        $admin->tokens()->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Department head deactivated successfully',
+            'data' => new UserResource($admin->refresh()->load('department')),
+        ]);
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Department head not found',
+            'data' => (object) [],
+        ], 404);
+    } catch (\Throwable $e) {
+        report($e);
+
+        return response()->json([
+            'status' => false,
+            'message' => 'Failed to deactivate department head',
+            'data' => (object) [],
         ], 500);
     }
 }
@@ -265,10 +390,15 @@ public function deleteDepartmentAdmin(Request $request, int $id): JsonResponse
                 ], 403);
             }
 
-            $admins = User::admins()
+            $query = User::admins()
                 ->with('department')
-                ->latest()
-                ->paginate($request->integer('per_page', 15));
+                ->latest();
+
+            if ($request->filled('status')) {
+                $query->where('status', $request->string('status')->toString());
+            }
+
+            $admins = $query->paginate($request->integer('per_page', 15));
 
             return response()->json([
                 'status' => true,

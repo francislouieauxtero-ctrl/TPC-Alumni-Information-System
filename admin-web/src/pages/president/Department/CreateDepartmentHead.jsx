@@ -4,6 +4,8 @@ import { ArrowLeft, UserCog, Eye, EyeOff } from "lucide-react";
 import api from "../../../services/api";
 import { toast } from "react-toastify";
 
+const DEPARTMENT_HEAD_STATUS_ACTIVE = "active";
+
 export default function CreateDepartmentHead() {
   const navigate = useNavigate();
 
@@ -24,7 +26,25 @@ export default function CreateDepartmentHead() {
   const fetchDepartments = async () => {
     try {
       const response = await api.get("/departments");
-      setDepartments(response.data.data || []);
+      const allDepartments = response.data.data || [];
+      const departmentHeadResponse = await api.get(
+        "/super-admin/department-admins",
+        {
+          params: {
+            status: DEPARTMENT_HEAD_STATUS_ACTIVE,
+          },
+        },
+      );
+      const activeHeads = departmentHeadResponse.data.data || [];
+      const unavailableDepartmentIds = new Set(
+        activeHeads
+          .map((head) => head.department?.id ?? head.department_id)
+          .filter(Boolean),
+      );
+
+      setDepartments(
+        allDepartments.filter((dept) => !unavailableDepartmentIds.has(dept.id)),
+      );
     } catch {
       toast.error("Failed to load departments.");
     }
@@ -161,14 +181,8 @@ export default function CreateDepartmentHead() {
           </select>
           {departments.length === 0 && (
             <p className="mt-1.5 text-xs text-amber-600">
-              No departments found.{" "}
-              <button
-                type="button"
-                onClick={() => navigate("/president/departments/create")}
-                className="underline hover:text-amber-700 transition"
-              >
-                Create one first.
-              </button>
+              No departments are available for a new department head right now.
+              Each department can have only one active head at a time.
             </p>
           )}
         </div>
