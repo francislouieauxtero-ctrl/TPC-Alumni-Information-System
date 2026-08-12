@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Graduate;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -25,6 +26,35 @@ class StoreGraduateRequest extends FormRequest
             'batch_year' => ['required', 'string', 'regex:/^\d{4}(-\d{4})?$/'],
             'block' => ['nullable', 'string', 'max:255'],
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator): void {
+            $studentNumber = trim((string) $this->input('student_number'));
+
+            if ($studentNumber === '') {
+                return;
+            }
+
+            if ($this->hasDuplicateStudentNumber($studentNumber)) {
+                $validator->errors()->add('student_number', 'Student number already exists');
+            }
+        });
+    }
+
+    protected function hasDuplicateStudentNumber(string $studentNumber): bool
+    {
+        $query = Graduate::query()
+            ->where(function ($query) use ($studentNumber): void {
+                $query->where('student_number', $studentNumber);
+
+                if (is_numeric($studentNumber)) {
+                    $query->orWhereRaw('CAST(student_number AS UNSIGNED) = ?', [(int) $studentNumber]);
+                }
+            });
+
+        return $query->exists();
     }
 
     public function messages(): array

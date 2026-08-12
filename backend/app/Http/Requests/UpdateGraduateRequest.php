@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Graduate;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -30,6 +31,41 @@ class UpdateGraduateRequest extends FormRequest
             'batch_year' => ['sometimes', 'string', 'regex:/^\d{4}(-\d{4})?$/'],
             'block' => ['nullable', 'string', 'max:255'],
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator): void {
+            if (! $this->filled('student_number')) {
+                return;
+            }
+
+            $studentNumber = trim((string) $this->input('student_number'));
+            $graduateId = $this->route('graduate')?->id ?? $this->route('graduate');
+
+            if ($studentNumber === '' || $graduateId === null) {
+                return;
+            }
+
+            if ($this->hasDuplicateStudentNumber($studentNumber, $graduateId)) {
+                $validator->errors()->add('student_number', 'Student number already exists');
+            }
+        });
+    }
+
+    protected function hasDuplicateStudentNumber(string $studentNumber, int $ignoreId): bool
+    {
+        $query = Graduate::query()
+            ->where(function ($query) use ($studentNumber): void {
+                $query->where('student_number', $studentNumber);
+
+                if (is_numeric($studentNumber)) {
+                    $query->orWhereRaw('CAST(student_number AS UNSIGNED) = ?', [(int) $studentNumber]);
+                }
+            })
+            ->where('id', '!=', $ignoreId);
+
+        return $query->exists();
     }
 
     public function messages(): array

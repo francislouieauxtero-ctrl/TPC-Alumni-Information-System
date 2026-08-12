@@ -50,11 +50,24 @@ class GraduateRepository
     }
 
     /**
-     * Find graduate by student number
+     * Find graduate by student number (exact match or numeric-equivalent duplicate)
      */
-    public function findByStudentNumber(string $studentNumber): ?Graduate
+    public function findByStudentNumber(string $studentNumber, ?int $ignoreId = null): ?Graduate
     {
-        return Graduate::where('student_number', $studentNumber)->first();
+        $query = Graduate::query()
+            ->where(function ($query) use ($studentNumber): void {
+                $query->where('student_number', $studentNumber);
+
+                if (is_numeric($studentNumber)) {
+                    $query->orWhereRaw('CAST(student_number AS UNSIGNED) = ?', [(int) $studentNumber]);
+                }
+            });
+
+        if ($ignoreId !== null) {
+            $query->where('id', '!=', $ignoreId);
+        }
+
+        return $query->first();
     }
 
     /**
