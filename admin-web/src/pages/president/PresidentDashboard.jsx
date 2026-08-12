@@ -54,194 +54,188 @@ export default function PresidentDasboard() {
   }
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">
-          Department Head Dashboard
-        </h1>
-        <p className="text-gray-500">
-          Review and manage students in your department
-        </p>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-        <StatCard
-          title="Graduates"
-          value={stats?.total_graduates || 0}
-          icon={<GraduationCap className="w-6 h-6" />}
-          accent="bg-purple-500"
-        />
-        <StatCard
-          title="Total Alumni"
-          value={stats?.total_students || 0}
-          icon={<Users className="w-6 h-6" />}
-          color="bg-tpc-greenDeep"
-        />
-        <StatCard
-          title="Employed Alumni"
-          value={stats?.employed_alumni || 0}
-          icon={<Briefcase className="w-6 h-6" />}
-          color="bg-green-600"
-        />
-        <StatCard
-          title="Verified Alumni"
-          value={stats?.verified_students || 0}
-          icon={<CheckCircle className="w-6 h-6" />}
-          color="bg-green-500"
-        />
-        <StatCard
-          title="Pending Verification"
-          value={stats?.unverified_students || 0}
-          icon={<AlertCircle className="w-6 h-6" />}
-          color="bg-amber-500"
-        />
-        <StatCard
-          title="Active Alumni"
-          value={stats?.active_students || 0}
-          icon={<ToggleRight className="w-6 h-6" />}
-          color="bg-tpc-navy"
-        />
-        <StatCard
-          title="Inactive Alumni"
-          value={stats?.inactive_students || 0}
-          icon={<Users className="w-6 h-6" />}
-          color="bg-red-500"
-        />
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-          <h3 className="text-base font-semibold text-gray-800 mb-4">
-            Quick Actions
-          </h3>
-          <div className="space-y-3">
-            <a
-              href="/president/students"
-              className="block w-full bg-tpc-greenDeep hover:bg-tpc-green text-white font-semibold py-2 px-4 rounded-lg transition duration-200 text-center"
-            >
-              Review Student Applications
-            </a>
-            <button className="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-200">
-              View Reports
-            </button>
+    <div className="min-h-screen bg-slate-50 p-6 lg:p-8">
+      <div className="mx-auto max-w-7xl space-y-6">
+        <header className="rounded-2xl bg-gradient-to-r from-tpc-greenDeep via-tpc-green to-emerald-700 p-6 text-white shadow-lg shadow-emerald-900/10">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100">
+                President overview
+              </p>
+              <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
+                President Dashboard
+              </h1>
+            </div>
           </div>
-        </div>
+        </header>
 
-        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-          <h3 className="text-base font-semibold text-gray-800 mb-4">
-            Department Activity
-          </h3>
-          <div className="space-y-3 text-sm text-gray-500">
-            <p>• {stats?.unverified_students || 0} students pending review</p>
-            <p>• {stats?.verified_students || 0} students verified</p>
-            <p>• {stats?.active_students || 0} students active</p>
-            <p className="text-tpc-greenDeep hover:text-tpc-green cursor-pointer font-medium">
-              View all activity →
-            </p>
-          </div>
-        </div>
-      </div>
+        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <StatCard
+            title="Graduates"
+            value={stats?.total_graduates || 0}
+            icon={<GraduationCap className="h-5 w-5" />}
+            color="bg-violet-500"
+            detail="Academic completion"
+          />
+          <StatCard
+            title="Total Alumni"
+            value={stats?.total_students || 0}
+            icon={<Users className="h-5 w-5" />}
+            color="bg-tpc-greenDeep"
+            detail="All tracked alumni"
+          />
+          <StatCard
+            title="Employed"
+            value={stats?.employed_alumni || 0}
+            icon={<Briefcase className="h-5 w-5" />}
+            color="bg-emerald-600"
+            detail="Currently employed"
+          />
+          <StatCard
+            title="Verified"
+            value={stats?.verified_students || 0}
+            icon={<CheckCircle className="h-5 w-5" />}
+            color="bg-green-500"
+            detail="Approved records"
+          />
+          <StatCard
+            title="Pending"
+            value={stats?.unverified_students || 0}
+            icon={<AlertCircle className="h-5 w-5" />}
+            color="bg-amber-500"
+            detail="Awaiting review"
+          />
+          <StatCard
+            title="Active"
+            value={stats?.active_students || 0}
+            icon={<ToggleRight className="h-5 w-5" />}
+            color="bg-tpc-navy"
+            detail="Currently active"
+          />
+          <StatCard
+            title="Inactive"
+            value={stats?.inactive_students || 0}
+            icon={<Users className="h-5 w-5" />}
+            color="bg-red-500"
+            detail="Not currently active"
+          />
+        </section>
 
-      {/* Student Overview */}
-      <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-base font-semibold text-gray-800">
-            Student Overview
-          </h3>
-          <a
-            href="/president/students"
-            className="text-tpc-greenDeep hover:text-tpc-green font-semibold text-sm"
-          >
-            View All →
-          </a>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-gray-500 text-xs font-medium border-b border-gray-200 bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left">Status</th>
-                <th className="px-4 py-3 text-left">Count</th>
-                <th className="px-4 py-3 text-left">Percentage</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                <td className="px-4 py-3 text-gray-700">
-                  <span className="inline-block w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-                  Verified & Active
-                </td>
-                <td className="px-4 py-3 text-gray-800">
-                  {stats?.verified_students || 0}
-                </td>
-                <td className="px-4 py-3 text-gray-800">
-                  {stats?.total_students > 0
+        <section className="grid grid-cols-1 gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="mb-5 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-800">
+                Student overview
+              </h3>
+              <a
+                href="/president/students"
+                className="text-sm font-semibold text-tpc-greenDeep hover:text-tpc-green"
+              >
+                View all →
+              </a>
+            </div>
+
+            <div className="space-y-4">
+              <OverviewRow
+                label="Verified & active"
+                count={stats?.verified_students || 0}
+                percent={
+                  stats?.total_students > 0
                     ? Math.round(
                         ((stats?.verified_students || 0) /
                           stats.total_students) *
                           100,
                       )
-                    : 0}
-                  %
-                </td>
-              </tr>
-              <tr className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                <td className="px-4 py-3 text-gray-700">
-                  <span className="inline-block w-3 h-3 bg-amber-500 rounded-full mr-2"></span>
-                  Pending Verification
-                </td>
-                <td className="px-4 py-3 text-gray-800">
-                  {stats?.unverified_students || 0}
-                </td>
-                <td className="px-4 py-3 text-gray-800">
-                  {stats?.total_students > 0
+                    : 0
+                }
+                color="bg-green-500"
+              />
+              <OverviewRow
+                label="Pending verification"
+                count={stats?.unverified_students || 0}
+                percent={
+                  stats?.total_students > 0
                     ? Math.round(
                         ((stats?.unverified_students || 0) /
                           stats.total_students) *
                           100,
                       )
-                    : 0}
-                  %
-                </td>
-              </tr>
-              <tr className="hover:bg-gray-50 transition-colors">
-                <td className="px-4 py-3 text-gray-700">
-                  <span className="inline-block w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-                  Inactive
-                </td>
-                <td className="px-4 py-3 text-gray-800">
-                  {stats?.inactive_students || 0}
-                </td>
-                <td className="px-4 py-3 text-gray-800">
-                  {stats?.total_students > 0
+                    : 0
+                }
+                color="bg-amber-500"
+              />
+              <OverviewRow
+                label="Inactive"
+                count={stats?.inactive_students || 0}
+                percent={
+                  stats?.total_students > 0
                     ? Math.round(
                         ((stats?.inactive_students || 0) /
                           stats.total_students) *
                           100,
                       )
-                    : 0}
-                  %
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                    : 0
+                }
+                color="bg-red-500"
+              />
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-800">
+              Quick actions
+            </h3>
+            <div className="mt-5 space-y-3">
+              <a
+                href="/president/students"
+                className="block rounded-xl bg-tpc-greenDeep px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-tpc-green"
+              >
+                Review student applications
+              </a>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );
 }
 
-function StatCard({ title, value, icon, color }) {
+function StatCard({ title, value, icon, color, detail }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-between">
+    <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-gray-500 text-sm font-medium">{title}</p>
-          <p className="text-gray-900 text-2xl font-bold mt-2">{value}</p>
+          <p className="text-sm font-medium text-gray-500">{title}</p>
+          <p className="mt-3 text-3xl font-bold text-gray-900">{value}</p>
         </div>
-        <div className={`${color} text-white p-3 rounded-lg`}>{icon}</div>
+        <div
+          className={`${color} flex h-12 w-12 items-center justify-center rounded-xl text-white shadow-sm`}
+        >
+          {icon}
+        </div>
       </div>
+      <p className="mt-3 text-xs text-gray-400">{detail}</p>
+    </div>
+  );
+}
+
+function OverviewRow({ label, count, percent, color }) {
+  return (
+    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className={`h-3 w-3 rounded-full ${color}`} />
+          <span className="text-sm font-medium text-gray-700">{label}</span>
+        </div>
+        <span className="text-sm font-semibold text-gray-900">{count}</span>
+      </div>
+      <div className="h-2.5 rounded-full bg-gray-200">
+        <div
+          className={`${color} h-2.5 rounded-full`}
+          style={{ width: `${percent}%` }}
+        />
+      </div>
+      <div className="mt-2 text-right text-xs text-gray-500">{percent}%</div>
     </div>
   );
 }

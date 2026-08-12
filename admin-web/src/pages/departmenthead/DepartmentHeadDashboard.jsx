@@ -84,159 +84,188 @@ export default function DepartmentHeadDashboard() {
 
   const departmentName =
     stats?.department_name || stats?.department?.name || "Your Department";
+
+  const totalAlumni =
+    stats?.total_alumni ??
+    stats?.registered_alumni ??
+    stats?.total_students ??
+    0;
+  const employedCount = stats?.employed_alumni ?? stats?.total_employed ?? 0;
+  const selfEmployedCount = stats?.self_employed_alumni ?? 0;
+  const unemployedCount = stats?.unemployed_alumni ?? 0;
+  const totalEmployed = employedCount + selfEmployedCount;
   const employmentRate =
-    (stats?.employment_rate ?? stats?.total_alumni > 0)
-      ? Math.round((stats?.employed_alumni / stats?.total_alumni) * 100)
-      : 0;
+    typeof stats?.employment_rate === "number"
+      ? Math.round(stats.employment_rate)
+      : totalAlumni > 0
+        ? Math.round((totalEmployed / totalAlumni) * 100)
+        : 0;
 
   return (
-    <div className="p-8 space-y-8">
-      <div>
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-          <div>
-            <p className="text-sm uppercase tracking-[0.32em] text-gray-500 mb-2">
-              Department Dashboard
-            </p>
-            <h1 className="text-4xl font-bold text-gray-900">
-              {departmentName}
-            </h1>
+    <div className="min-h-screen bg-slate-50 p-6 lg:p-8">
+      <div className="mx-auto max-w-7xl space-y-6">
+        <header className="rounded-3xl bg-gradient-to-r from-tpc-greenDeep via-tpc-green to-emerald-700 p-6 text-white shadow-lg shadow-emerald-900/10">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-100">
+                Department dashboard
+              </p>
+              <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
+                {departmentName}
+              </h1>
+            </div>
+            <div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm">
+              <p className="text-xs uppercase tracking-[0.22em] text-emerald-100">
+                Employment rate
+              </p>
+              <p className="mt-1 text-2xl font-bold">{employmentRate}%</p>
+            </div>
           </div>
-          <div className="rounded-3xl bg-tpc-greenDeep/5 px-5 py-3 text-sm font-semibold text-tpc-greenDeep">
-            {stats?.department_code
-              ? `${stats.department_code} Department`
-              : "Department Overview"}
-          </div>
-        </div>
-        <p className="mt-3 text-gray-600 max-w-2xl">
-          Your department metrics, pending approvals, upcoming events, and
-          recent announcements are shown below.
-        </p>
-      </div>
+        </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-        <StatCard
-          title="Total Graduates"
-          value={stats?.total_graduates ?? stats?.total_graduate_count ?? 0}
-          icon={<Users className="w-6 h-6" />}
-          color="bg-tpc-greenDeep"
-        />
-        <StatCard
-          title="Registered Alumni"
-          value={stats?.total_alumni ?? stats?.registered_alumni ?? 0}
-          icon={<Sparkles className="w-6 h-6" />}
-          color="bg-tpc-gold"
-        />
-        <StatCard
-          title="Pending Approvals"
-          value={stats?.pending_approvals ?? stats?.pending_alumni ?? 0}
-          icon={<AlertCircle className="w-6 h-6" />}
-          color="bg-amber-500"
-        />
-        <StatCard
-          title="Employed Alumni"
-          value={stats?.employed_alumni ?? stats?.total_employed ?? 0}
-          icon={<Briefcase className="w-6 h-6" />}
-          color="bg-tpc-navy"
-        />
-      </div>
-
-      <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900">
-              Employment Rate
-            </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Percentage of approved alumni in your department who are employed.
-            </p>
-          </div>
-          <p className="text-3xl font-bold text-gray-900">{employmentRate}%</p>
-        </div>
-        <div className="h-3 overflow-hidden rounded-full bg-gray-200">
-          <div
-            className="h-full rounded-full bg-tpc-greenDeep"
-            style={{ width: `${Math.min(Math.max(employmentRate, 0), 100)}%` }}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard
+            title="Total Graduates"
+            value={stats?.total_graduates ?? stats?.total_graduate_count ?? 0}
+            icon={<Users className="w-5 h-5" />}
+            color="bg-tpc-greenDeep"
+            detail="All recorded graduates"
+          />
+          <StatCard
+            title="Registered Alumni"
+            value={totalAlumni}
+            icon={<Sparkles className="w-5 h-5" />}
+            color="bg-violet-500"
+            detail="Verified and active alumni"
+          />
+          <StatCard
+            title="Pending Approvals"
+            value={stats?.pending_approvals ?? stats?.pending_alumni ?? 0}
+            icon={<AlertCircle className="w-5 h-5" />}
+            color="bg-amber-500"
+            detail="Awaiting review"
+          />
+          <StatCard
+            title="Employed Alumni"
+            value={totalEmployed}
+            icon={<Briefcase className="w-5 h-5" />}
+            color="bg-tpc-navy"
+            detail="Employed + self-employed"
           />
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <section className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-5">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                Recent Activity
-              </h3>
-              <p className="text-sm text-gray-500">
-                Latest approvals and rejections in your department.
-              </p>
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+          <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Employment Rate
+                </h2>
+                <p className="mt-1 text-sm text-gray-500">
+                  Percentage of alumni in this department currently employed.
+                </p>
+              </div>
+              <div className="rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700">
+                {totalEmployed} / {totalAlumni} employed
+              </div>
             </div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-gray-600">
-              {activity.length} items
-            </span>
-          </div>
 
-          {activity.length > 0 ? (
+            <div className="mb-3 flex items-center justify-between text-sm text-gray-500">
+              <span>Progress</span>
+              <span className="font-semibold text-gray-700">
+                {employmentRate}%
+              </span>
+            </div>
+            <div className="h-3 overflow-hidden rounded-full bg-gray-200">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-tpc-greenDeep to-emerald-500"
+                style={{
+                  width: `${Math.min(Math.max(employmentRate, 0), 100)}%`,
+                }}
+              />
+            </div>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              <MiniStat label="Employed" value={employedCount} tone="emerald" />
+              <MiniStat
+                label="Self-employed"
+                value={selfEmployedCount}
+                tone="blue"
+              />
+              <MiniStat
+                label="Unemployed"
+                value={unemployedCount}
+                tone="amber"
+              />
+            </div>
+          </section>
+
+          <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="mb-5 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Quick insights
+                </h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Department snapshot
+                </p>
+              </div>
+              <BarChart3 className="h-5 w-5 text-gray-400" />
+            </div>
+
             <div className="space-y-4">
-              {activity.slice(0, 5).map((item) => (
-                <div
-                  key={
-                    item.id || `${item.type}-${item.timestamp}-${item.user_id}`
-                  }
-                  className="rounded-2xl border border-gray-100 bg-gray-50 p-4"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-sm text-gray-500 uppercase tracking-[0.24em]">
-                        {item.action || item.type || "Activity"}
-                      </p>
-                      <p className="text-gray-900 font-semibold mt-1">
-                        {item.name ||
-                          item.user_name ||
-                          item.alumni_name ||
-                          "Alumni action"}
-                      </p>
-                    </div>
-                    <span
-                      className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold ${
-                        item.action === "approved" || item.type === "approved"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {item.action || item.type || "Update"}
-                    </span>
-                  </div>
-                  <p className="mt-3 text-sm text-gray-500">
-                    {item.reason ||
-                      item.description ||
-                      "No additional details."}
-                  </p>
-                  <p className="mt-2 text-xs text-gray-400">
-                    {formatDateTime(item.timestamp || item.created_at)}
-                  </p>
-                </div>
-              ))}
+              <InsightRow
+                label="Verified alumni"
+                value={stats?.verified_students ?? 0}
+                color="bg-green-500"
+                percent={
+                  totalAlumni > 0
+                    ? Math.round(
+                        ((stats?.verified_students ?? 0) / totalAlumni) * 100,
+                      )
+                    : 0
+                }
+              />
+              <InsightRow
+                label="Active alumni"
+                value={stats?.active_students ?? 0}
+                color="bg-tpc-navy"
+                percent={
+                  totalAlumni > 0
+                    ? Math.round(
+                        ((stats?.active_students ?? 0) / totalAlumni) * 100,
+                      )
+                    : 0
+                }
+              />
+              <InsightRow
+                label="Inactive alumni"
+                value={stats?.inactive_students ?? 0}
+                color="bg-red-500"
+                percent={
+                  totalAlumni > 0
+                    ? Math.round(
+                        ((stats?.inactive_students ?? 0) / totalAlumni) * 100,
+                      )
+                    : 0
+                }
+              />
             </div>
-          ) : (
-            <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center text-gray-500">
-              No recent approvals or rejections yet.
-            </div>
-          )}
-        </section>
+          </section>
+        </div>
 
-        <div className="space-y-6">
-          <section className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-5">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+          <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="mb-5 flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">
                   Upcoming Events
                 </h3>
                 <p className="text-sm text-gray-500">
-                  School-wide and department events.
+                  Latest department activities
                 </p>
               </div>
-              <CalendarDays className="w-5 h-5 text-gray-400" />
+              <CalendarDays className="h-5 w-5 text-gray-400" />
             </div>
             {events.length > 0 ? (
               <div className="space-y-4">
@@ -249,14 +278,14 @@ export default function DepartmentHeadDashboard() {
                       <p className="font-semibold text-gray-900">
                         {event.title || event.name}
                       </p>
-                      <span className="text-xs uppercase tracking-[0.24em] text-gray-500">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-500">
                         {event.scope || event.event_type || "Event"}
                       </span>
                     </div>
                     <p className="mt-2 text-sm text-gray-600">
                       {event.location || event.venue || "No location provided"}
                     </p>
-                    <p className="mt-2 text-sm text-gray-500">
+                    <p className="mt-2 text-xs text-gray-500">
                       {formatDateTime(
                         event.date || event.event_date || event.starts_at,
                       )}
@@ -265,23 +294,21 @@ export default function DepartmentHeadDashboard() {
                 ))}
               </div>
             ) : (
-              <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center text-gray-500">
+              <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
                 No upcoming events found.
               </div>
             )}
           </section>
 
-          <section className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-5">
+          <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="mb-5 flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">
                   Recent Announcements
                 </h3>
-                <p className="text-sm text-gray-500">
-                  Department and school-wide news.
-                </p>
+                <p className="text-sm text-gray-500">Department updates</p>
               </div>
-              <Bell className="w-5 h-5 text-gray-400" />
+              <Bell className="h-5 w-5 text-gray-400" />
             </div>
             {announcements.length > 0 ? (
               <div className="space-y-4">
@@ -293,7 +320,7 @@ export default function DepartmentHeadDashboard() {
                     <p className="font-semibold text-gray-900">
                       {announcement.title}
                     </p>
-                    <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+                    <p className="mt-2 text-sm text-gray-600">
                       {announcement.body || announcement.content}
                     </p>
                     <p className="mt-3 text-xs text-gray-400">
@@ -305,7 +332,7 @@ export default function DepartmentHeadDashboard() {
                 ))}
               </div>
             ) : (
-              <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center text-gray-500">
+              <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
                 No announcements available.
               </div>
             )}
@@ -316,16 +343,61 @@ export default function DepartmentHeadDashboard() {
   );
 }
 
-function StatCard({ title, value, icon, color }) {
+function StatCard({ title, value, icon, color, detail }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow">
+    <div className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-sm text-gray-500">{title}</p>
           <p className="mt-3 text-3xl font-bold text-gray-900">{value ?? 0}</p>
         </div>
-        <div className={`${color} text-white p-3 rounded-2xl`}>{icon}</div>
+        <div
+          className={`${color} flex h-12 w-12 items-center justify-center rounded-2xl text-white`}
+        >
+          {icon}
+        </div>
       </div>
+      <p className="mt-3 text-xs text-gray-400">{detail}</p>
+    </div>
+  );
+}
+
+function MiniStat({ label, value, tone }) {
+  const tones = {
+    emerald: "bg-emerald-50 text-emerald-700",
+    blue: "bg-blue-50 text-blue-700",
+    amber: "bg-amber-50 text-amber-700",
+  };
+
+  return (
+    <div className="rounded-2xl border border-gray-200 bg-gray-50 p-3">
+      <div
+        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${tones[tone]}`}
+      >
+        {label}
+      </div>
+      <p className="mt-3 text-2xl font-bold text-gray-900">{value ?? 0}</p>
+    </div>
+  );
+}
+
+function InsightRow({ label, value, color, percent }) {
+  return (
+    <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className={`h-3 w-3 rounded-full ${color}`} />
+          <span className="text-sm font-medium text-gray-700">{label}</span>
+        </div>
+        <span className="text-sm font-semibold text-gray-900">{value}</span>
+      </div>
+      <div className="h-2.5 rounded-full bg-gray-200">
+        <div
+          className={`${color} h-2.5 rounded-full`}
+          style={{ width: `${Math.min(Math.max(percent, 0), 100)}%` }}
+        />
+      </div>
+      <div className="mt-2 text-right text-xs text-gray-500">{percent}%</div>
     </div>
   );
 }

@@ -131,6 +131,11 @@ function StatusBadge({ status }) {
 }
 
 function InfoRow({ icon, label, children }) {
+  const displayValue =
+    children === null || children === undefined || children === ""
+      ? "Data missing"
+      : children;
+
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center gap-1.5 text-gray-400">
@@ -139,7 +144,7 @@ function InfoRow({ icon, label, children }) {
           {label}
         </span>
       </div>
-      <div className="text-sm font-medium text-gray-800">{children ?? "—"}</div>
+      <div className="text-sm font-medium text-gray-700">{displayValue}</div>
     </div>
   );
 }
@@ -162,7 +167,16 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
     alumni.current_job ??
     alumni.alumniProfile?.current_job ??
     jobHistory?.find((j) => j.is_current)?.position ??
-    null;
+    "—";
+  const departmentName = alumni.department?.name ?? "Data missing";
+  const emailAddress = user.email ?? "Data missing";
+  const studentId = user.schoolId ?? user.school_id ?? "Data missing";
+  const contactNumber =
+    alumni.contact_number ??
+    alumni.alumniProfile?.contact_number ??
+    "Data missing";
+  const locationValue =
+    alumni.location ?? alumni.alumniProfile?.location ?? "Data missing";
 
   // ── Work alignment ────────────────────────────────────────────────────
   const isWorkAligned =
@@ -184,30 +198,23 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl">
-        {/* Header */}
-        <div className="relative bg-tpc-greenDeep px-6 pt-6 pb-10">
+        <div className="relative px-6 pt-6 pb-4">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 rounded-full p-1.5 text-white/70 hover:bg-white/10 hover:text-white transition"
+            className="absolute top-4 right-4 rounded-full p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
           </button>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/50">
-            Alumni detail
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-500">
+            Alumni Profile
           </p>
-          <h2 className="mt-0.5 text-xl font-semibold text-white">
-            {user.name || "—"}
+          <h2 className="mt-2 text-3xl font-bold text-gray-900">
+            {user.name || "No profile"}
           </h2>
-          {alumni.department?.name && (
-            <p className="text-xs text-white/60 mt-0.5">
-              {alumni.department.name}
-            </p>
-          )}
         </div>
 
-        {/* Avatar overlapping the header boundary */}
-        <div className="flex items-end gap-4 px-6 -mt-6 mb-4">
+        <div className="flex items-end gap-4 px-6 mb-4">
           <Avatar
             src={user.avatar || alumni.profile_photo_url}
             name={user.name}
@@ -224,33 +231,32 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
             {
               icon: <Mail className="h-3.5 w-3.5" />,
               label: "Email",
-              value: user.email,
+              value: emailAddress,
             },
             {
               icon: <GraduationCap className="h-3.5 w-3.5" />,
               label: "Student ID",
-              value: user.schoolId ?? user.school_id,
+              value: studentId,
             },
             {
               icon: <MapPin className="h-3.5 w-3.5" />,
               label: "Location",
-              value: alumni.location,
+              value: locationValue,
             },
             {
               icon: <Phone className="h-3.5 w-3.5" />,
               label: "Contact",
-              value: alumni.contact_number,
+              value: contactNumber,
             },
             {
               icon: <GraduationCap className="h-3.5 w-3.5" />,
-              label: "Batch",
-              value: batchYear,
+              label: "Batch Year",
+              value: batchYear || "Data missing",
             },
             {
-              icon: <Briefcase className="h-3.5 w-3.5" />,
-              label: "Status",
-              value: null,
-              custom: <StatusBadge status={employmentStatus} />,
+              icon: <Building2 className="h-3.5 w-3.5" />,
+              label: "Department",
+              value: departmentName,
             },
           ].map((item) => (
             <div key={item.label} className="px-5 py-4">
@@ -284,7 +290,7 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-sm font-semibold text-gray-800 truncate">
-                        {job.position}
+                        {job.position || "—"}
                       </p>
                       {job.is_current && (
                         <span className="flex-shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">
@@ -293,10 +299,10 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
                       )}
                     </div>
                     <p className="text-xs text-gray-600 mt-0.5">
-                      {job.company}
+                      {job.company || "—"}
                     </p>
                     <p className="text-xs text-gray-400 mt-0.5">
-                      {job.start_date}
+                      {job.start_date || "—"}
                       {job.end_date ? ` — ${job.end_date}` : ""}
                     </p>
                   </div>
@@ -304,9 +310,7 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-400">
-              No employment history recorded.
-            </p>
+            <p className="text-sm text-gray-400">No job history available</p>
           )}
 
           {/* ── Job–course alignment — only shown for employed alumni ──── */}
