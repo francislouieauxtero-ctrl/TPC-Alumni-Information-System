@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import eventService from "../../../services/eventService";
 import { toast } from "react-toastify";
-import { getAttachmentUrls } from "../../../utils/media";
+import { getAttachmentUrls, renderTextWithLinks } from "../../../utils/media";
 
 export default function EventList() {
   const navigate = useNavigate();
@@ -121,8 +121,8 @@ export default function EventList() {
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
                   {event.title}
                 </h3>
-                <p className="text-sm text-gray-600 line-clamp-2">
-                  {event.description}
+                <p className="text-sm text-gray-600 line-clamp-2 whitespace-pre-line">
+                  {renderTextWithLinks(event.description || "")}
                 </p>
               </div>
 

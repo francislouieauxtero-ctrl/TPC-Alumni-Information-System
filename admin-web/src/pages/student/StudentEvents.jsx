@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import eventService from "../../services/eventService";
-import { getAttachmentUrls } from "../../utils/media";
+import { getAttachmentUrls, renderTextWithLinks } from "../../utils/media";
 
 export default function StudentEvents() {
   const [events, setEvents] = useState({ data: [] });
@@ -98,8 +98,10 @@ export default function StudentEvents() {
                   <h2 className="text-lg font-semibold text-gray-900 mb-2 sm:text-xl">
                     {event.title}
                   </h2>
-                  <p className="text-sm text-gray-600 line-clamp-3">
-                    {event.description || "No description available."}
+                  <p className="text-sm text-gray-600 line-clamp-3 whitespace-pre-line">
+                    {renderTextWithLinks(
+                      event.description || "No description available.",
+                    )}
                   </p>
                 </div>
                 <span

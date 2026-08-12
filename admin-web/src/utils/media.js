@@ -1,3 +1,5 @@
+import React from "react";
+
 export function getAttachmentUrls(item) {
   if (!item) return [];
 
@@ -23,4 +25,37 @@ export function getAttachmentUrls(item) {
   return [];
 }
 
-export default { getAttachmentUrls };
+export function renderTextWithLinks(text, className = "") {
+  if (typeof text !== "string" || !text.trim()) {
+    return null;
+  }
+
+  const defaultLinkClass =
+    "text-tpc-green underline underline-offset-2 break-all hover:text-tpc-greenDeep";
+
+  const escapeHtml = (value) =>
+    value
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
+  const html = escapeHtml(text).replace(
+    /(https?:\/\/[^\s]+|www\.[^\s]+)/gi,
+    (match) => {
+      const href = /^www\./i.test(match) ? `https://${match}` : match;
+      const safeHref = href.replace(/"/g, "&quot;");
+      const linkClass = className || defaultLinkClass;
+
+      return `<a href="${safeHref}" target="_blank" rel="noreferrer noopener" class="${linkClass}">${match}</a>`;
+    },
+  );
+
+  return React.createElement("span", {
+    dangerouslySetInnerHTML: { __html: html },
+    className: "break-words",
+  });
+}
+
+export default { getAttachmentUrls, renderTextWithLinks };

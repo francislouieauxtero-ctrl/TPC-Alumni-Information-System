@@ -382,7 +382,7 @@ export default function EventEdit() {
             </div>
           </Field>
 
-          <Field label="External URL" error={errors.external_link}>
+          {/* <Field label="External URL" error={errors.external_link}>
             <input
               type="url"
               name="external_link"
@@ -391,7 +391,7 @@ export default function EventEdit() {
               placeholder="https://example.com/resource"
               className={inputClass(errors.external_link)}
             />
-          </Field>
+          </Field> */}
 
           {/* Actions */}
           <div className="flex items-center gap-3 pt-2">

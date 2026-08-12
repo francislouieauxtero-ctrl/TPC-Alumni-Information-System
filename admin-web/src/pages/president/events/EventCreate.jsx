@@ -23,7 +23,6 @@ export default function EventCreate() {
     scope: isAdmin ? "department_specific" : "school_wide",
     department_id: "",
     attachments: [],
-    external_link: "",
   });
   const fileInputRef = useRef(null);
 
@@ -238,25 +237,6 @@ export default function EventCreate() {
           </div>
 
           {/* Location */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Location
-            </label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              placeholder="e.g., Main Auditorium"
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-tpc-green ${
-                errors.location ? "border-red-500" : "border-gray-300"
-              }`}
-            />
-            {errors.location && (
-              <p className="text-red-500 text-sm mt-1">{errors.location}</p>
-            )}
-          </div>
-
           {/* Scope */}
           {!isAdmin ? (
             <div>
@@ -411,28 +391,6 @@ export default function EventCreate() {
             )}
             {errors.attachments && (
               <p className="text-red-500 text-sm mt-1">{errors.attachments}</p>
-            )}
-          </div>
-
-          {/* External link */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              External URL
-            </label>
-            <input
-              type="url"
-              name="external_link"
-              value={formData.external_link}
-              onChange={handleChange}
-              placeholder="https://example.com/resource"
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-tpc-green ${
-                errors.external_link ? "border-red-500" : "border-gray-300"
-              }`}
-            />
-            {errors.external_link && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.external_link}
-              </p>
             )}
           </div>
 

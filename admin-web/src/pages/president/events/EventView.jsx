@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import eventService from "../../../services/eventService";
 import { toast } from "react-toastify";
-import { getAttachmentUrls } from "../../../utils/media";
+import { getAttachmentUrls, renderTextWithLinks } from "../../../utils/media";
 
 export default function EventView() {
   const { id } = useParams();
@@ -159,9 +159,9 @@ export default function EventView() {
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
               Description
             </p>
-            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-              {event.description}
-            </p>
+            <div className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+              {renderTextWithLinks(event.description)}
+            </div>
           </div>
         )}
         {attachments.length > 0 && (

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import announcementService from "../../services/announcementService";
+import { renderTextWithLinks } from "../../utils/media";
 import { toast } from "react-toastify";
 
 export default function DepartmentHeadAnnouncementList({
@@ -111,8 +112,8 @@ export default function DepartmentHeadAnnouncementList({
                   <h3 className="text-lg font-semibold text-gray-800 mb-2">
                     {announcement.title}
                   </h3>
-                  <p className="text-sm text-gray-600 line-clamp-2">
-                    {announcement.content}
+                  <p className="text-sm text-gray-600 line-clamp-2 whitespace-pre-line">
+                    {renderTextWithLinks(announcement.content || "")}
                   </p>
                 </div>
 
