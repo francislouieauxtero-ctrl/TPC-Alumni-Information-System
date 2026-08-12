@@ -77,7 +77,7 @@ export default defineConfig({
     }),
   ],
   server: {
-    host: true,
+    host: "0.0.0.0",
     port: 5173,
     strictPort: true,
     allowedHosts: true,
@@ -86,8 +86,10 @@ export default defineConfig({
       interval: 1000,
     },
     hmr: {
-      protocol: "wss",
-      clientPort: 443,
+      host: "localhost",
+      clientPort: 3000,
+      port: 3000,
+      protocol: "ws",
     },
     proxy: {
       "/api": { target: "http://nginx", changeOrigin: true },
