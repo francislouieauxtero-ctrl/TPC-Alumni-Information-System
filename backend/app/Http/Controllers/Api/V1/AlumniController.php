@@ -39,6 +39,23 @@ class AlumniController extends Controller
     }
 
     /**
+     * Get rejected alumni registrations
+     */
+    public function rejected(): JsonResponse
+    {
+        try {
+            $rejected = $this->alumniService->getRejectedAlumni(auth()->user());
+
+            return $this->successResponse(
+                $rejected,
+                'Rejected alumni retrieved successfully'
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+    }
+
+    /**
      * Get all alumni
      */
     public function index(): JsonResponse

@@ -14,6 +14,7 @@ import {
   LineChart,
   Megaphone,
   UserCircle,
+  XCircle,
 } from "lucide-react";
 import api from "../services/api";
 import UserAvatar from "../components/shared/UserAvatar";

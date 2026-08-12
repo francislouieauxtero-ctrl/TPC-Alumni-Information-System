@@ -27,6 +27,7 @@ import Analytics from "./pages/president/Analytics";
 import GraduateList from "./pages/president/graduates/GraduateList";
 import GraduateCreate from "./pages/president/graduates/GraduateCreate";
 import AlumniApproval from "./pages/president/alumni/AlumniApproval";
+import RejectedAlumniList from "./pages/president/alumni/RejectedAlumniList";
 import EventList from "./pages/president/events/EventList";
 import GraduateEdit from "./pages/president/graduates/GraduateEdit";
 import DepartmentHeadGraduateList from "./pages/departmenthead/GraduateList";
@@ -51,6 +52,7 @@ import DepartmentHeadLayout from "./layouts/DepartmentHead";
 import StudentLayout from "./layouts/StudentLayout";
 import api from "./services/api";
 import { getDashboardPath } from "./utils/roleRedirect";
+import TermsAndPrivacy from "./pages/landingpage/Termsandprivacy";
 
 const queryClient = new QueryClient();
 
@@ -153,7 +155,7 @@ export default function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/pending-approval" element={<PendingApproval />} />
-            <Route path="/about" element={<About />} />
+            <Route path="/terms-privacy" element={<TermsAndPrivacy />} />
             {/* President Routes */}
             <Route
               path="/president/dashboard"
@@ -282,6 +284,16 @@ export default function App() {
                 <ProtectedRoute requiredRole={["super_admin"]}>
                   <PresidentLayout>
                     <AlumniApproval />
+                  </PresidentLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/president/alumni/rejected"
+              element={
+                <ProtectedRoute requiredRole={["super_admin"]}>
+                  <PresidentLayout>
+                    <RejectedAlumniList />
                   </PresidentLayout>
                 </ProtectedRoute>
               }
@@ -446,6 +458,16 @@ export default function App() {
                 <ProtectedRoute requiredRole="admin">
                   <DepartmentHeadLayout>
                     <DepartmentHeadAlumniApproval />
+                  </DepartmentHeadLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/department-head/alumni/rejected"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <DepartmentHeadLayout>
+                    <RejectedAlumniList />
                   </DepartmentHeadLayout>
                 </ProtectedRoute>
               }

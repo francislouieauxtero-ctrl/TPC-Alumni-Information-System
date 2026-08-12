@@ -60,6 +60,7 @@ Route::prefix('admin')->middleware('role:super_admin,admin')->group(function () 
     Route::controller(AlumniController::class)->group(function () {
         Route::get('alumni', 'index');
         Route::get('alumni/pending', 'pending');
+        Route::get('alumni/rejected', 'rejected');
         Route::patch('alumni/{alumni}/approve', 'approve');
         Route::patch('alumni/{alumni}/reject', 'reject');
         Route::get('alumni/alignment/summary',               'alignmentSummary');

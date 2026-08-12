@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\AccountActivityLog;
 use App\Models\AlumniProfile;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -18,6 +19,20 @@ class AlumniRepository
 
         if ($actor->isAdmin()) {
             $query->where('department_id', $actor->department_id);
+        }
+
+        return $query->paginate(15);
+    }
+
+    public function rejectedAlumni(User $actor): LengthAwarePaginator
+    {
+        $query = AccountActivityLog::query()
+            ->where('action', 'rejected_alumni')
+            ->with(['actor:id,name,email', 'target:id,name,email'])
+            ->orderByDesc('created_at');
+
+        if ($actor->isAdmin()) {
+            $query->where('actor_id', $actor->id);
         }
 
         return $query->paginate(15);

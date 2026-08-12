@@ -33,6 +33,14 @@ class AlumniService
     }
 
     /**
+     * Get rejected alumni registrations
+     */
+    public function getRejectedAlumni(User $actor): LengthAwarePaginator
+    {
+        return $this->alumniRepository->rejectedAlumni($actor);
+    }
+
+    /**
      * Get all alumni
      */
     public function getAll(User $actor, array $filters = []): LengthAwarePaginator

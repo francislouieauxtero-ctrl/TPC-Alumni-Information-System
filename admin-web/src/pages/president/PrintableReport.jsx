@@ -533,25 +533,49 @@ const reportPrintStyles = `
   .report-align-not { color: #b91c1c; font-weight: 600; }
 
   @media print {
-    /* The sidebar/header live in a parent layout component that wraps
-       PrintableReport — this component can't reach outward to hide them
-       directly. Instead: hide every element in the document by default
-       during print, then explicitly re-show only .report-page and its
-       descendants (excluding the .no-print controls, which stay hidden).
-       This guarantees print scope stays correct even if the parent
-       layout changes shape later, without editing that layout. */
-    body * { visibility: hidden; }
-    .report-page, .report-page *:not(.no-print):not(.no-print *) { visibility: visible; }
-    .no-print, .no-print * { visibility: hidden !important; display: none !important; }
-    .report-page {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background: #fff;
-      padding: 0;
+    /* Chrome/Edge still print the browser's default URL/date header/footer
+       unless the page is isolated and the print margins are adjusted. We keep
+       the report as the only visible content and set a long bond-paper page. */
+    html, body {
+      margin: 0 !important;
+      background: #fff !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
-    .report-sheet { box-shadow: none; margin: 0; max-width: none; padding: 0; }
-    @page { size: A4; margin: 18mm 16mm; }
+
+    body * { visibility: hidden !important; }
+    .report-page, .report-page *:not(.no-print):not(.no-print *) {
+      visibility: visible !important;
+    }
+    .no-print, .no-print * {
+      visibility: hidden !important;
+      display: none !important;
+    }
+
+    .report-page {
+      position: static !important;
+      top: auto !important;
+      left: auto !important;
+      width: 100% !important;
+      background: #fff !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      overflow: visible !important;
+    }
+
+    .report-sheet {
+      box-shadow: none !important;
+      margin: 0 !important;
+      max-width: none !important;
+      width: 100% !important;
+      padding: 0.25in 0.35in !important;
+      border: none !important;
+      border-radius: 0 !important;
+    }
+
+    @page {
+      size: legal portrait;
+      margin: 10mm 12mm;
+    }
   }
 `;

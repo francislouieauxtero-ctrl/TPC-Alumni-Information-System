@@ -14,6 +14,24 @@ const alumniService = {
   },
 
   /**
+   * Get rejected alumni registrations
+   */
+  getRejected: async () => {
+    try {
+      const response = await api.get("/admin/alumni/rejected");
+      const payload = response.data?.data ?? [];
+
+      if (Array.isArray(payload)) {
+        return payload;
+      }
+
+      return payload.data ?? [];
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
    * Get all alumni (returns paginated collection)
    */
   getAll: async (filters = {}) => {

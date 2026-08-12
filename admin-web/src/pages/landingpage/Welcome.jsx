@@ -16,7 +16,7 @@ export default function Welcome() {
 
       <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col px-5 py-6 sm:px-6 sm:py-10 md:px-10">
         {/* Top nav */}
-        <div className="flex animate-fadeUp items-center justify-between opacity-0">
+        <div className="flex animate-fadeUp items-center opacity-0">
           <div className="flex items-center gap-3 sm:gap-4">
             {/* Circular seal logo */}
             <img
@@ -68,9 +68,15 @@ export default function Welcome() {
               </Link>
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 border-t border-white/20 pt-6 text-[13px] text-white/70 sm:mt-10 sm:gap-x-8">
+            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-white/20 pt-6 text-[13px] text-white/70 sm:mt-10">
               <span>Alumni directory</span>
               <span>Reunions & events</span>
+              <Link
+                to="/terms-privacy"
+                className="underline-offset-4 hover:text-white hover:underline"
+              >
+                Terms &amp; Privacy
+              </Link>
             </div>
           </div>
 
