@@ -77,20 +77,33 @@ export default function StudentEmployment() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+
+    setForm((prev) => {
+      const next = {
+        ...prev,
+        [name]: type === "checkbox" ? checked : value,
+      };
+
+      if (name === "employment_type") {
+        if (value === "unemployed") {
+          next.is_current = true;
+          next.company = "";
+          next.position = "";
+          next.end_date = "";
+          next.is_work_aligned = null;
+          next.work_aligned_reason = "";
+        }
+
+        if (value === "self_employed") {
+          next.is_current = true;
+        }
+      }
+
+      return next;
+    });
+
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: null }));
-    }
-
-    if (
-      name === "employment_type" &&
-      value === "unemployed" &&
-      hasExistingJob
-    ) {
-      setForm((prev) => ({ ...prev, employment_type: "employed" }));
     }
   };
 
@@ -110,6 +123,13 @@ export default function StudentEmployment() {
       }
       if (form.end_date && form.start_date && form.end_date < form.start_date) {
         next.end_date = "End date must be the same or after start date.";
+      }
+    }
+
+    if (form.employment_type === "unemployed") {
+      if (!form.industry || !form.industry.trim()) {
+        next.industry =
+          "Please provide feedback about your current unemployment status.";
       }
     }
 
@@ -321,32 +341,34 @@ export default function StudentEmployment() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="space-y-2 text-sm text-gray-600">
-                  Company
-                  <input
-                    name="company"
-                    value={form.company}
-                    onChange={handleChange}
-                    className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-tpc-green focus:ring-2 focus:ring-tpc-green/20"
-                  />
-                  {errors.company && (
-                    <p className="text-xs text-red-600">{errors.company}</p>
-                  )}
-                </label>
-                <label className="space-y-2 text-sm text-gray-600">
-                  Position
-                  <input
-                    name="position"
-                    value={form.position}
-                    onChange={handleChange}
-                    className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-tpc-green focus:ring-2 focus:ring-tpc-green/20"
-                  />
-                  {errors.position && (
-                    <p className="text-xs text-red-600">{errors.position}</p>
-                  )}
-                </label>
-              </div>
+              {form.employment_type !== "unemployed" && (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="space-y-2 text-sm text-gray-600">
+                    Company
+                    <input
+                      name="company"
+                      value={form.company}
+                      onChange={handleChange}
+                      className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-tpc-green focus:ring-2 focus:ring-tpc-green/20"
+                    />
+                    {errors.company && (
+                      <p className="text-xs text-red-600">{errors.company}</p>
+                    )}
+                  </label>
+                  <label className="space-y-2 text-sm text-gray-600">
+                    Position
+                    <input
+                      name="position"
+                      value={form.position}
+                      onChange={handleChange}
+                      className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-tpc-green focus:ring-2 focus:ring-tpc-green/20"
+                    />
+                    {errors.position && (
+                      <p className="text-xs text-red-600">{errors.position}</p>
+                    )}
+                  </label>
+                </div>
+              )}
 
               <label className="space-y-2 text-sm text-gray-600">
                 Employment Status
@@ -418,19 +440,45 @@ export default function StudentEmployment() {
                 </>
               )}
 
-              <label className="inline-flex items-center gap-3 text-sm text-gray-700">
-                <input
-                  type="checkbox"
-                  name="is_current"
-                  checked={form.is_current}
-                  onChange={handleChange}
-                  className="h-4 w-4 rounded border-gray-300 text-tpc-green focus:ring-tpc-green"
-                />
-                Currently working here
-              </label>
+              {form.employment_type === "unemployed" && (
+                <label className="space-y-2 text-sm text-gray-600">
+                  Current status feedback
+                  <textarea
+                    name="industry"
+                    value={form.industry}
+                    onChange={handleChange}
+                    rows={3}
+                    placeholder="Please tell us why you are currently unemployed and what you are doing right now."
+                    className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-tpc-green focus:ring-2 focus:ring-tpc-green/20"
+                  />
+                  {errors.industry && (
+                    <p className="text-xs text-red-600">{errors.industry}</p>
+                  )}
+                </label>
+              )}
 
-              {/* ── Alignment question — only shown while "Currently working here" is checked ── */}
-              {form.is_current && (
+              {form.employment_type !== "unemployed" && (
+                <label className="inline-flex items-center gap-3 text-sm text-gray-700">
+                  <input
+                    type="checkbox"
+                    name="is_current"
+                    checked={form.is_current}
+                    onChange={handleChange}
+                    className="h-4 w-4 rounded border-gray-300 text-tpc-green focus:ring-tpc-green"
+                  />
+                  Currently working here
+                </label>
+              )}
+
+              {form.employment_type === "unemployed" && (
+                <div className="rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-sm text-amber-700">
+                  This is marked as your current status, so the feedback below
+                  is required.
+                </div>
+              )}
+
+              {/* ── Alignment question — only shown for active working statuses ── */}
+              {form.is_current && form.employment_type !== "unemployed" && (
                 <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
                   <p className="mb-2 text-sm font-medium text-gray-700">
                     Is this job aligned with your course?
