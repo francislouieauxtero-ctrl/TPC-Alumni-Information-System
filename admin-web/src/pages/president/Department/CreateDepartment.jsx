@@ -149,14 +149,14 @@ export default function CreateDepartment() {
                   >
                     <Pencil className="w-4 h-4" />
                   </button>
-                  <button
+                  {/* <button
                     onClick={() => handleDelete(dept.id, dept.name)}
                     disabled={deletingId === dept.id}
                     className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 disabled:opacity-40 transition"
                     title="Delete department"
                   >
                     <Trash2 className="w-4 h-4" />
-                  </button>
+                  </button> */}
                 </div>
               </li>
             ))}

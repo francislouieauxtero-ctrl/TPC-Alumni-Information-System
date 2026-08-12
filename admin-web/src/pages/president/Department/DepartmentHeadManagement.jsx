@@ -375,7 +375,7 @@ export default function DepartmentHeadManagement({ embedded = false }) {
                       >
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
-                      <button
+                      {/* <button
                         onClick={() =>
                           handleDeleteDepartment(dept.id, dept.name)
                         }
@@ -383,7 +383,7 @@ export default function DepartmentHeadManagement({ embedded = false }) {
                         title="Delete department"
                       >
                         <X className="w-3.5 h-3.5" />
-                      </button>
+                      </button> */}
                     </div>
                   )}
                 </li>

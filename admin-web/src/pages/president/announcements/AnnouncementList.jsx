@@ -63,18 +63,16 @@ export default function AnnouncementList({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-gray-800">Announcements</h1>
         <button
           onClick={() => navigate(`${basePath}/create`)}
-          className="px-6 py-2 bg-tpc-gold hover:bg-tpc-goldDeep text-black font-semibold rounded-full transition"
+          className="px-6 py-2 bg-tpc-greenDeep hover:bg-tpc-green text-white rounded-full transition"
         >
           + Create Announcement
         </button>
       </div>
 
-      {/* Search */}
       <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
         <input
           type="text"
@@ -85,98 +83,53 @@ export default function AnnouncementList({
         />
       </div>
 
-      {/* Error */}
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
           {error}
         </div>
       )}
 
-      {/* Announcements List */}
       {announcements.data && announcements.data.length > 0 ? (
-        <div className="space-y-4">
-          {announcements.data.map((announcement) => (
-            <div
-              key={announcement.id}
-              className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition"
-            >
-              <div className="flex justify-between items-start gap-4">
-                {/* Content */}
-                <div className="flex-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {announcements.data.map((announcement) => {
+            const images = Array.isArray(announcement.images)
+              ? announcement.images
+              : [];
+            const previewImage = images.find((image) =>
+              /\.(jpg|jpeg|png|webp|gif)$/i.test(image),
+            );
+
+            return (
+              <div
+                key={announcement.id}
+                className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-4"
+              >
+                <div>
                   <h3 className="text-lg font-semibold text-gray-800 mb-2">
                     {announcement.title}
                   </h3>
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                  <p className="text-sm text-gray-600 line-clamp-2">
                     {announcement.content}
                   </p>
+                </div>
 
-                  {/* Images/Attachments */}
-                  {announcement.images && announcement.images.length > 0 && (
-                    <div className="mb-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {announcement.images.map((image, idx) => {
-                        const isImage = /\.(jpg|jpeg|png|webp|gif)$/i.test(
-                          image,
-                        );
-                        const isPdf = /\.pdf$/i.test(image);
-                        const isVideo = /\.(mp4|webm|mov|avi)$/i.test(image);
-                        const isDoc =
-                          /\.(doc|docx|txt|xls|xlsx|ppt|pptx)$/i.test(image);
-
-                        if (isImage) {
-                          return (
-                            <button
-                              key={idx}
-                              type="button"
-                              onClick={() => setLightboxImage(image)}
-                              className="block"
-                            >
-                              <img
-                                src={image}
-                                alt={`Attachment ${idx + 1}`}
-                                className="w-full h-24 object-cover rounded-lg border border-gray-200 cursor-zoom-in"
-                              />
-                            </button>
-                          );
-                        }
-
-                        if (isVideo) {
-                          return (
-                            <video
-                              key={idx}
-                              src={image}
-                              controls
-                              preload="metadata"
-                              className="w-full h-24 rounded-lg object-cover border border-gray-200 bg-black"
-                            />
-                          );
-                        }
-
-                        return (
-                          <div
-                            key={idx}
-                            className="flex items-center justify-center h-24 bg-gray-100 rounded-lg border border-gray-200"
-                          >
-                            <a
-                              href={image}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-xs text-center text-tpc-green hover:underline px-2 break-all"
-                              title={image}
-                            >
-                              {isVideo && "▶ Video"}
-                              {isPdf && "📄 PDF"}
-                              {isDoc && "📋 Document"}
-                              {!isVideo && !isPdf && !isDoc && "📎 File"}
-                            </a>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  <div className="flex items-center gap-3 flex-wrap">
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Posted:</span>
+                    <span className="font-medium text-gray-800">
+                      {new Date(announcement.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">By:</span>
+                    <span className="font-medium text-gray-800">
+                      {announcement.creator?.name || "System"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Scope:</span>
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      className={`px-2 py-1 rounded text-xs font-semibold ${
                         announcement.scope === "school_wide"
                           ? "bg-blue-100 text-blue-700"
                           : "bg-purple-100 text-purple-700"
@@ -186,42 +139,61 @@ export default function AnnouncementList({
                         ? "School-wide"
                         : announcement.department?.name || "Department"}
                     </span>
-                    <span className="text-xs text-gray-500">
-                      {new Date(announcement.created_at).toLocaleDateString(
-                        undefined,
-                        {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        },
-                      )}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      by {announcement.creator?.name}
-                    </span>
                   </div>
                 </div>
 
-                {/* Actions */}
-                <div className="flex gap-2">
+                {previewImage ? (
                   <button
+                    type="button"
+                    onClick={() => setLightboxImage(previewImage)}
+                    className="block w-full"
+                  >
+                    <img
+                      src={previewImage}
+                      alt={announcement.title}
+                      className="w-full h-32 object-cover rounded-lg border border-gray-200 cursor-zoom-in"
+                    />
+                  </button>
+                ) : (
+                  <div className="flex items-center justify-center h-32 bg-gray-100 rounded-lg border border-gray-200 text-gray-500 text-sm">
+                    No image
+                  </div>
+                )}
+
+                <div className="flex gap-2 pt-4 border-t border-gray-200">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (previewImage) {
+                        setLightboxImage(previewImage);
+                        return;
+                      }
+                      toast.info("No preview available for this announcement");
+                    }}
+                    className="flex-1 px-4 py-2 text-tpc-green border border-tpc-green rounded-lg hover:bg-tpc-green hover:text-white transition"
+                  >
+                    View
+                  </button>
+                  <button
+                    type="button"
                     onClick={() =>
                       navigate(`${basePath}/${announcement.id}/edit`)
                     }
-                    className="px-4 py-2 text-tpc-green border border-tpc-green rounded-lg hover:bg-tpc-green hover:text-white transition text-sm font-medium"
+                    className="flex-1 px-4 py-2 text-tpc-green border border-tpc-green rounded-lg hover:bg-tpc-green hover:text-white transition"
                   >
                     Edit
                   </button>
                   <button
+                    type="button"
                     onClick={() => handleDelete(announcement.id)}
-                    className="px-4 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-600 hover:text-white transition text-sm font-medium"
+                    className="flex-1 px-4 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-600 hover:text-white transition"
                   >
                     Delete
                   </button>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="bg-white p-12 rounded-lg shadow-sm border border-gray-200 text-center">
@@ -229,7 +201,6 @@ export default function AnnouncementList({
         </div>
       )}
 
-      {/* Pagination */}
       {announcements.meta?.last_page > 1 && (
         <div className="flex justify-center gap-3">
           <button
@@ -251,6 +222,7 @@ export default function AnnouncementList({
           </button>
         </div>
       )}
+
       {lightboxImage && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
