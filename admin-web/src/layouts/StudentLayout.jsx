@@ -51,7 +51,7 @@ export default function StudentLayout({ children }) {
     <div className="flex h-screen bg-white text-gray-900 font-sans">
       {/* ── Desktop sidebar ── */}
       <aside
-        className={`hidden md:flex flex-col bg-tpc-greenDeep border-r border-white/10 px-3 py-6 transition-all duration-300 ${
+        className={`hidden min-[850px]:flex flex-col bg-tpc-greenDeep border-r border-white/10 px-3 py-6 transition-all duration-300 ${
           sidebarOpen ? "w-56" : "w-20"
         }`}
       >
@@ -136,14 +136,14 @@ export default function StudentLayout({ children }) {
       {/* ── Mobile drawer overlay ── */}
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+          className="fixed inset-0 z-40 bg-black/40 min-[850px]:hidden"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
 
       {/* ── Mobile drawer ── */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[80vw] max-w-48 flex-col bg-tpc-greenDeep px-4 py-6 transition-transform duration-300 md:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-[80vw] max-w-48 flex-col bg-tpc-greenDeep px-4 py-6 transition-transform duration-300 min-[850px]:hidden ${
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -215,14 +215,14 @@ export default function StudentLayout({ children }) {
           {/* Hamburger — mobile only */}
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors md:hidden shrink-0"
+            className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors min-[850px]:hidden shrink-0"
             aria-label="Open menu"
           >
             <Menu className="w-5 h-5" />
           </button>
 
           {/* Mobile logo (center) */}
-          <div className="flex items-center gap-2 md:hidden min-w-0">
+          <div className="flex items-center gap-2 min-[850px]:hidden min-w-0">
             <img
               src={logo}
               alt="Talibon Polytechnic College seal"
@@ -251,7 +251,7 @@ export default function StudentLayout({ children }) {
         <main className="flex-1 overflow-auto bg-white">{children}</main>
 
         {/* ── Mobile bottom nav ── */}
-        <nav className="flex border-t border-gray-200 bg-white md:hidden">
+        <nav className="flex border-t border-gray-200 bg-white min-[850px]:hidden">
           {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
             <MobileNavItem key={to} to={to} icon={Icon} label={label} />
           ))}

@@ -158,7 +158,7 @@ export default function StudentDashboard() {
         </div>
 
         {/* Announcements + Events — side by side on lg, stacked on mobile */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
+        <div className="grid grid-cols-1 min-[850px]:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
           {/* Latest Announcements */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6 flex flex-col">
             <div className="flex items-center justify-between mb-4">
