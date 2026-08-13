@@ -1,6 +1,6 @@
 import { Printer, ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
-import logo from "../../assets/tpcL.jpg";
+import headerImage from "../../assets/tpc header.jpg";
 import api from "../../services/api";
 
 // ── Theme tokens (kept local so this file has no dependency on Analytics.jsx) ──
@@ -93,7 +93,18 @@ export default function PrintableReport({
   return (
     <div className="report-page">
       {/* Screen-only controls, hidden on print via .no-print */}
-      <div className="no-print flex items-center justify-between max-w-3xl mx-auto px-6 pt-6">
+      <div className="no-print fixed top-20 right-4 z-50 flex gap-2">
+        <button
+          onClick={() => window.print()}
+          className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg text-white shadow-lg hover:shadow-xl transition"
+          style={{ background: GREEN_DEEP }}
+        >
+          <Printer size={16} />
+          Print / Save as PDF
+        </button>
+      </div>
+
+      <div className="no-print px-6 pt-6 pb-2">
         <button
           onClick={onClose}
           className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800"
@@ -101,23 +112,15 @@ export default function PrintableReport({
           <ArrowLeft size={14} />
           Back to Analytics
         </button>
-        <button
-          onClick={() => window.print()}
-          className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg text-white"
-          style={{ background: GREEN_DEEP }}
-        >
-          <Printer size={14} />
-          Print / Save as PDF
-        </button>
       </div>
 
       <div className="report-sheet">
         <header className="report-section report-header">
-          <div className="report-logo-wrapper">
+          <div className="report-header-image-wrapper">
             <img
-              src={logo}
+              src={headerImage}
               alt="Talibon Polytechnic College"
-              className="report-logo"
+              className="report-header-image"
               onError={(e) => {
                 e.currentTarget.style.display = "none";
               }}
@@ -470,8 +473,20 @@ const reportPrintStyles = `
   .report-header {
     text-align: center;
     border-bottom: 2px solid #02451C;
-    padding: 12px 0 8px;
+    padding: 0 0 10px;
     margin-bottom: 12px;
+  }
+  .report-header-image-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+    width: 100%;
+  }
+  .report-header-image {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    object-fit: cover;
   }
   .report-header h1 { font-size: 16px; font-weight: 700; color: #02451C; margin: 0 0 2px; }
   .report-subtitle { font-size: 11px; color: #6b7280; margin: 0; }
@@ -480,16 +495,6 @@ const reportPrintStyles = `
     font-size: 11px; font-weight: 700; text-transform: uppercase;
     letter-spacing: 0.03em; color: #02451C;
     border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; margin: 0 0 8px;
-  }
-  .report-logo-wrapper {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 6px;
-  }
-  .report-logo {
-    width: 60px;
-    height: 60px;
-    object-fit: contain;
   }
   .report-kv {
     display: flex; justify-content: space-between; font-size: 11px;
