@@ -248,7 +248,7 @@ function ProfileModal({ alumni, onClose, jobHistory, jobHistoryLoading }) {
                 Loading…
               </div>
             ) : jobHistory && jobHistory.length > 0 ? (
-              <div className="space-y-3">
+              <div className="max-h-96 overflow-y-auto space-y-3 pr-2">
                 {jobHistory.map((j) => (
                   <div
                     key={j.id}
