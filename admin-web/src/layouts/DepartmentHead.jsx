@@ -34,7 +34,6 @@ export default function DepartmentHeadLayout({ children }) {
   );
   const departmentScope =
     localStorage.getItem("userDepartmentName") || "This Department";
-
   useEffect(() => {
     const syncUser = async () => {
       try {
@@ -114,6 +113,7 @@ export default function DepartmentHeadLayout({ children }) {
             label={`${departmentScope} Graduates`}
             sidebarOpen={sidebarOpen}
           />
+
           <NavLink
             to="/department-head/alumni"
             icon={<UserCheck className="w-5 h-5" />}

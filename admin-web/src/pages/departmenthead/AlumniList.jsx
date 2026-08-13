@@ -14,6 +14,8 @@ import {
   CheckCircle2,
   XCircle,
   HelpCircle,
+  Check,
+  AlertCircle,
 } from "lucide-react";
 import alumniService from "../../services/alumniService";
 import api from "../../services/api";
@@ -52,23 +54,25 @@ function avatarPalette(name = "") {
 function Avatar({ src, name = "", size = "md" }) {
   const initials = getInitials(name);
   const palette = avatarPalette(name);
-  const sizeClass = size === "lg" ? "h-12 w-12 text-base" : "h-8 w-8 text-xs";
+  const sizeClass = size === "lg" ? "h-20 w-20 text-lg" : "h-8 w-8 text-xs";
+  const shadowClass =
+    size === "lg" ? "shadow-lg ring-4 ring-white" : "shadow-sm";
 
   if (src) {
     return (
       <img
         src={src}
         alt={name}
-        className={`flex-shrink-0 rounded-full object-cover border border-gray-200 ${sizeClass}`}
+        className={`flex-shrink-0 rounded-full object-cover border-2 border-tpc-greenDeep ${sizeClass} ${shadowClass}`}
       />
     );
   }
 
   return (
     <div
-      className={`flex-shrink-0 flex items-center justify-center rounded-full font-medium ${sizeClass} ${palette}`}
+      className={`flex-shrink-0 flex items-center justify-center rounded-full font-bold ${sizeClass} ${palette} ${shadowClass} border-2 border-opacity-20`}
     >
-      {initials || <User className="h-4 w-4" />}
+      {initials || <User className="h-5 w-5" />}
     </div>
   );
 }
@@ -78,19 +82,25 @@ const BADGE_MAP = {
     dot: "bg-green-500",
     text: "text-green-800",
     bg: "bg-green-100",
+    icon: Check,
     label: "Employed",
+    borderColor: "border-green-300",
   },
   unemployed: {
     dot: "bg-red-500",
     text: "text-red-800",
     bg: "bg-red-100",
+    icon: AlertCircle,
     label: "Unemployed",
+    borderColor: "border-red-300",
   },
   self_employed: {
     dot: "bg-blue-500",
     text: "text-blue-800",
     bg: "bg-blue-100",
+    icon: Briefcase,
     label: "Self-employed",
+    borderColor: "border-blue-300",
   },
 };
 
@@ -118,15 +128,18 @@ function StatusBadge({ status }) {
     dot: "bg-gray-400",
     text: "text-gray-700",
     bg: "bg-gray-100",
+    icon: AlertCircle,
+    borderColor: "border-gray-300",
     label: status ?? "Unknown",
   };
+  const IconComponent = s.icon;
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${s.bg} ${s.text}`}
+    <div
+      className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold border-2 ${s.bg} ${s.text} ${s.borderColor}`}
     >
-      <span className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${s.dot}`} />
+      <IconComponent className="h-4 w-4" />
       {s.label}
-    </span>
+    </div>
   );
 }
 
@@ -197,142 +210,179 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="relative px-6 pt-6 pb-4">
+      <div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+        {/* Header with green background */}
+        <div className="relative bg-tpc-greenDeep px-6 pt-6 pb-6">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 rounded-full p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition"
+            className="absolute top-4 right-4 rounded-full p-1.5 text-white/70 hover:text-white hover:bg-white/10 transition"
             aria-label="Close"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </button>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-500">
-            Alumni Profile
-          </p>
-          <h2 className="mt-2 text-3xl font-bold text-gray-900">
-            {user.name || "No profile"}
-          </h2>
+          <div>
+            <p className="text-white/60 text-xs font-medium uppercase tracking-widest mb-1">
+              Alumni Profile
+            </p>
+            <h2 className="text-white text-2xl font-bold">
+              {user.name || "—"}
+            </h2>
+          </div>
         </div>
 
-        <div className="flex items-end gap-4 px-6 mb-4">
+        {/* Avatar below header */}
+        <div className="flex items-end gap-4 px-6 mb-6 pt-6">
           <Avatar
             src={user.avatar || alumni.profile_photo_url}
             name={user.name}
             size="lg"
           />
-          <div className="pb-1">
+          <div className="pb-2">
             <StatusBadge status={employmentStatus} />
           </div>
         </div>
 
-        {/* Info grid */}
-        <div className="grid grid-cols-2 divide-x divide-y divide-gray-100 border-b border-gray-100">
-          {[
-            {
-              icon: <Mail className="h-3.5 w-3.5" />,
-              label: "Email",
-              value: emailAddress,
-            },
-            {
-              icon: <GraduationCap className="h-3.5 w-3.5" />,
-              label: "Student ID",
-              value: studentId,
-            },
-            {
-              icon: <MapPin className="h-3.5 w-3.5" />,
-              label: "Location",
-              value: locationValue,
-            },
-            {
-              icon: <Phone className="h-3.5 w-3.5" />,
-              label: "Contact",
-              value: contactNumber,
-            },
-            {
-              icon: <GraduationCap className="h-3.5 w-3.5" />,
-              label: "Batch Year",
-              value: batchYear || "Data missing",
-            },
-            {
-              icon: <Building2 className="h-3.5 w-3.5" />,
-              label: "Department",
-              value: departmentName,
-            },
-          ].map((item) => (
-            <div key={item.label} className="px-5 py-4">
-              <InfoRow icon={item.icon} label={item.label}>
-                {item.custom ?? item.value}
-              </InfoRow>
-            </div>
-          ))}
-        </div>
+        {/* Main content */}
+        <div className="px-6 pb-6 space-y-5">
+          {/* Info Cards Grid */}
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+            {[
+              {
+                icon: <Mail className="h-4 w-4" />,
+                label: "Email",
+                value: emailAddress,
+              },
+              {
+                icon: <GraduationCap className="h-4 w-4" />,
+                label: "Student ID",
+                value: studentId,
+              },
+              {
+                icon: <Building2 className="h-4 w-4" />,
+                label: "Department",
+                value: departmentName,
+              },
+              {
+                icon: <Phone className="h-4 w-4" />,
+                label: "Contact",
+                value: contactNumber,
+              },
+              {
+                icon: <MapPin className="h-4 w-4" />,
+                label: "Location",
+                value: locationValue,
+              },
+              {
+                icon: <Badge className="h-4 w-4" />,
+                label: "Batch Year",
+                value: batchYear || "Data missing",
+              },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="rounded-xl border border-gray-100 bg-gray-50 p-3"
+              >
+                <div className="flex items-center gap-1.5 text-gray-400 mb-1.5">
+                  {item.icon}
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">
+                    {item.label}
+                  </span>
+                </div>
+                <div className="text-sm font-medium text-gray-700 truncate">
+                  {item.value === null ||
+                  item.value === undefined ||
+                  item.value === ""
+                    ? "Data missing"
+                    : item.value}
+                </div>
+              </div>
+            ))}
+          </div>
 
-        {/* Employment history */}
-        <div className="px-6 py-5">
-          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
-            Employment history
-          </p>
-          {loading ? (
-            <div className="flex items-center gap-2 text-gray-400 text-sm py-2">
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-tpc-greenDeep" />
-              Loading…
+          {/* Current Job Card */}
+          {currentJob && currentJob !== "—" && (
+            <div className="rounded-xl border border-tpc-gold/20 bg-tpc-gold/5 p-4">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Briefcase className="h-4 w-4 text-tpc-goldDeep" />
+                <p className="text-xs font-semibold uppercase tracking-widest text-tpc-goldDeep">
+                  Current Job
+                </p>
+              </div>
+              <p className="text-sm font-medium text-gray-800">{currentJob}</p>
             </div>
-          ) : jobHistory && jobHistory.length > 0 ? (
-            <div className="space-y-2">
-              {jobHistory.map((job) => (
-                <div
-                  key={job.id}
-                  className="flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50 p-3.5"
-                >
-                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-tpc-greenDeep/10">
-                    <Building2 className="h-4 w-4 text-tpc-greenDeep" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-semibold text-gray-800 truncate">
-                        {job.position || "—"}
-                      </p>
+          )}
+
+          {/* Employment history */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-gray-600 mb-3">
+              Employment History
+            </p>
+            {loading ? (
+              <div className="flex items-center gap-2 text-gray-400 text-sm py-3">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-tpc-greenDeep" />
+                Loading…
+              </div>
+            ) : jobHistory && jobHistory.length > 0 ? (
+              <div className="space-y-3">
+                {jobHistory.map((job) => (
+                  <div
+                    key={job.id}
+                    className="rounded-xl border border-gray-100 bg-gray-50 p-4 hover:bg-gray-100 transition"
+                  >
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-tpc-greenDeep/10">
+                          <Briefcase className="h-4 w-4 text-tpc-greenDeep" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-800">
+                            {job.position || "—"}
+                          </p>
+                          <p className="text-xs text-gray-600 mt-0.5">
+                            {job.company || "—"}
+                          </p>
+                        </div>
+                      </div>
                       {job.is_current && (
-                        <span className="flex-shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">
+                        <span className="flex-shrink-0 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">
                           Current
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-600 mt-0.5">
-                      {job.company || "—"}
-                    </p>
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <p className="text-xs text-gray-500">
                       {job.start_date || "—"}
                       {job.end_date ? ` — ${job.end_date}` : ""}
                     </p>
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-gray-400">No job history available</p>
-          )}
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 bg-gray-50 rounded-lg p-3">
+                No job history available
+              </p>
+            )}
+          </div>
 
           {/* ── Job–course alignment — only shown for employed alumni ──── */}
           {isEmployed && (
-            <div className="mt-4 rounded-xl border border-gray-100 bg-gray-50 p-3.5">
-              <div className="flex items-center justify-between gap-2 mb-1.5">
-                <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">
                   Job–Course Alignment
                 </p>
                 <span
-                  className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${alignmentBadge.cls}`}
+                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium ${alignmentBadge.cls}`}
                 >
                   <AlignIcon className="h-3 w-3" />
                   {alignmentBadge.label}
                 </span>
               </div>
               {workAlignedReason ? (
-                <p className="text-xs text-gray-500 leading-relaxed mt-1">
+                <p className="text-xs text-emerald-700 leading-relaxed">
                   "{workAlignedReason}"
                 </p>
               ) : (
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-emerald-600">
                   Feedback not provided by the alumni.
                 </p>
               )}

@@ -9,6 +9,8 @@ import {
   GraduationCap,
   Building2,
   User,
+  Check,
+  AlertCircle,
 } from "lucide-react";
 import alumniService from "../../services/alumniService";
 import departmentService from "../../services/departmentService";
@@ -29,26 +31,51 @@ const formatBatchYear = (value) => {
 
 const statusBadge = (status) => {
   const map = {
-    employed: "bg-green-100 text-green-700",
-    unemployed: "bg-red-100 text-red-600",
-    self_employed: "bg-blue-100 text-blue-700",
+    employed: {
+      bg: "bg-green-100",
+      text: "text-green-800",
+      border: "border-green-300",
+      icon: Check,
+    },
+    unemployed: {
+      bg: "bg-red-100",
+      text: "text-red-800",
+      border: "border-red-300",
+      icon: AlertCircle,
+    },
+    self_employed: {
+      bg: "bg-blue-100",
+      text: "text-blue-800",
+      border: "border-blue-300",
+      icon: Briefcase,
+    },
   };
   const label = {
     employed: "Employed",
     unemployed: "Unemployed",
     self_employed: "Self-Employed",
   };
+  const config = map[status] ?? {
+    bg: "bg-gray-100",
+    text: "text-gray-700",
+    border: "border-gray-300",
+    icon: AlertCircle,
+  };
+  const IconComponent = config.icon;
   return (
-    <span
-      className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${map[status] ?? "bg-gray-100 text-gray-600"}`}
+    <div
+      className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold border-2 ${config.bg} ${config.text} ${config.border}`}
     >
+      <IconComponent className="h-4 w-4" />
       {label[status] ?? status}
-    </span>
+    </div>
   );
 };
 
 function Avatar({ src, name, size = "md" }) {
-  const dim = size === "lg" ? "h-16 w-16 text-xl" : "h-10 w-10 text-sm";
+  const dim = size === "lg" ? "h-20 w-20 text-lg" : "h-10 w-10 text-sm";
+  const shadowClass =
+    size === "lg" ? "shadow-lg ring-4 ring-white" : "shadow-sm";
   const initials = name
     ? name
         .split(" ")
@@ -63,13 +90,13 @@ function Avatar({ src, name, size = "md" }) {
       <img
         src={src}
         alt={name}
-        className={`${dim} rounded-full object-cover flex-shrink-0 border border-gray-200`}
+        className={`${dim} rounded-full object-cover flex-shrink-0 border-2 border-tpc-greenDeep ${shadowClass}`}
       />
     );
   }
   return (
     <div
-      className={`${dim} rounded-full bg-tpc-greenDeep/10 text-tpc-greenDeep font-semibold flex items-center justify-center flex-shrink-0`}
+      className={`${dim} rounded-full bg-tpc-greenDeep/15 text-tpc-greenDeep font-bold flex items-center justify-center flex-shrink-0 border-2 border-tpc-greenDeep/30 ${shadowClass}`}
     >
       {initials}
     </div>
@@ -132,111 +159,152 @@ function ProfileModal({ alumni, onClose, jobHistory, jobHistoryLoading }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="relative w-full max-w-lg rounded-2xl bg-white shadow-xl overflow-hidden">
-        <div className="bg-tpc-greenDeep px-6 pt-6 pb-10">
+      <div className="relative w-full max-w-2xl rounded-2xl bg-white shadow-xl overflow-hidden">
+        <div className="bg-tpc-greenDeep px-6 pt-6 pb-6">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 rounded-full p-1.5 text-white/70 hover:text-white hover:bg-white/10 transition"
           >
             <X className="h-5 w-5" />
           </button>
-          <p className="text-white/60 text-xs font-medium uppercase tracking-widest mb-1">
-            Alumni Profile
-          </p>
-          <h2 className="text-white text-2xl font-bold">{user.name ?? "—"}</h2>
+          <div>
+            <p className="text-white/60 text-xs font-medium uppercase tracking-widest mb-1">
+              Alumni Profile
+            </p>
+            <h2 className="text-white text-2xl font-bold">
+              {user.name ?? "—"}
+            </h2>
+          </div>
         </div>
 
-        <div className="flex items-end gap-4 px-6 -mt-6 mb-4">
+        <div className="flex items-end gap-4 px-6 mb-6 pt-6">
           <Avatar
             src={user.avatar || alumni.profile_photo_url}
             name={user.name}
             size="lg"
           />
-          <div className="pb-1">{statusBadge(inferredEmploymentStatus)}</div>
+          <div className="pb-2">{statusBadge(inferredEmploymentStatus)}</div>
         </div>
 
-        <div className="px-6 pb-6 space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <InfoItem
+        <div className="px-6 pb-6 space-y-5">
+          {/* Info Cards Grid */}
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+            <InfoCard
               icon={<User className="h-4 w-4" />}
               label="Email"
               value={user.email}
             />
-            <InfoItem
+            <InfoCard
               icon={<GraduationCap className="h-4 w-4" />}
               label="Student ID"
               value={user.schoolId || user.school_id}
             />
-            <InfoItem
+            <InfoCard
               icon={<Building2 className="h-4 w-4" />}
               label="Department"
               value={alumni.department?.name}
             />
-            <InfoItem
+            <InfoCard
               icon={<Phone className="h-4 w-4" />}
               label="Contact"
               value={alumni.contact_number}
             />
-            <InfoItem
+            <InfoCard
               icon={<MapPin className="h-4 w-4" />}
               label="Location"
               value={alumni.location}
             />
-            <InfoItem
-              icon={<Briefcase className="h-4 w-4" />}
-              label="Current Job"
-              value={currentJob}
-            />
-            <InfoItem
+            <InfoCard
               icon={<GraduationCap className="h-4 w-4" />}
               label="Batch Year"
               value={batchYear}
             />
           </div>
 
-          {company && (
-            <div className="rounded-lg border border-gray-100 bg-gray-50 px-4 py-3">
-              <p className="text-xs text-gray-400 mb-0.5">Company</p>
-              <p className="text-sm font-medium text-gray-800">{company}</p>
+          {/* Current Job Card */}
+          {currentJob && (
+            <div className="rounded-xl border border-tpc-gold/20 bg-tpc-gold/5 p-4">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Briefcase className="h-4 w-4 text-tpc-goldDeep" />
+                <p className="text-xs font-semibold uppercase tracking-widest text-tpc-goldDeep">
+                  Current Job
+                </p>
+              </div>
+              <p className="text-sm font-medium text-gray-800">{currentJob}</p>
+              {company && (
+                <p className="text-xs text-gray-600 mt-1">{company}</p>
+              )}
             </div>
           )}
 
-          <div className="pt-2">
-            <p className="text-xs text-gray-400 mb-2">Employment History</p>
+          {/* Employment history */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-gray-600 mb-3">
+              Employment History
+            </p>
             {jobHistoryLoading ? (
-              <div className="text-sm text-gray-500">Loading...</div>
+              <div className="flex items-center gap-2 text-gray-400 text-sm py-3">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-tpc-greenDeep" />
+                Loading…
+              </div>
             ) : jobHistory && jobHistory.length > 0 ? (
-              <ul className="space-y-2">
+              <div className="space-y-3">
                 {jobHistory.map((j) => (
-                  <li
+                  <div
                     key={j.id}
-                    className="rounded-md border border-gray-100 px-3 py-2"
+                    className="rounded-xl border border-gray-100 bg-gray-50 p-4 hover:bg-gray-100 transition"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm font-medium text-gray-800">
-                        {j.position} {j.company ? `· ${j.company}` : ""}
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-tpc-greenDeep/10">
+                          <Briefcase className="h-4 w-4 text-tpc-greenDeep" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-800">
+                            {j.position || "—"}
+                          </p>
+                          <p className="text-xs text-gray-600 mt-0.5">
+                            {j.company || "—"}
+                          </p>
+                        </div>
                       </div>
                       {j.is_current && (
-                        <span className="ml-2 inline-block rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700">
+                        <span className="flex-shrink-0 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">
                           Current
                         </span>
                       )}
                     </div>
-                    <div className="text-xs text-gray-500">
-                      {j.start_date}
+                    <p className="text-xs text-gray-500">
+                      {j.start_date || "—"}
                       {j.end_date ? ` — ${j.end_date}` : ""}
-                    </div>
-                  </li>
+                    </p>
+                  </div>
                 ))}
-              </ul>
-            ) : (
-              <div className="text-sm text-gray-500">
-                No job history available
               </div>
+            ) : (
+              <p className="text-sm text-gray-500 bg-gray-50 rounded-lg p-3">
+                No job history available
+              </p>
             )}
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function InfoCard({ icon, label, value }) {
+  return (
+    <div className="rounded-xl border border-gray-100 bg-gray-50 p-3">
+      <div className="flex items-center gap-1.5 text-gray-400 mb-1.5">
+        {icon}
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">
+          {label}
+        </p>
+      </div>
+      <p className="text-sm font-medium text-gray-700 truncate">
+        {value ?? <span className="text-gray-400 font-normal">—</span>}
+      </p>
     </div>
   );
 }
