@@ -73,7 +73,7 @@ export default defineConfig({
           },
         ],
       },
-      devOptions: { enabled: true, type: "module" },
+      devOptions: { enabled: false },
     }),
   ],
   server: {

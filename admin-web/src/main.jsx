@@ -19,6 +19,29 @@ import { registerSW } from "virtual:pwa-register";
 import "./index.css";
 import App from "./App.jsx";
 
+function clearDevelopmentServiceWorker() {
+  if (!import.meta.env.DEV || !("serviceWorker" in navigator)) {
+    return;
+  }
+
+  void navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((registration) => registration.unregister());
+  });
+
+  if ("caches" in window) {
+    void caches.keys().then((cacheNames) => {
+      cacheNames
+        .filter(
+          (cacheName) =>
+            cacheName.startsWith("tpc-") || cacheName.startsWith("workbox-"),
+        )
+        .forEach((cacheName) => caches.delete(cacheName));
+    });
+  }
+}
+
+clearDevelopmentServiceWorker();
+
 // ── PWA Update Toast (no extra library needed) ───────────────────────────────
 function UpdateToast({ onUpdate, onDismiss }) {
   return (
@@ -79,17 +102,19 @@ function UpdateToast({ onUpdate, onDismiss }) {
 function Root() {
   const [showUpdateToast, setShowUpdateToast] = useState(false);
 
-  const updateSW = registerSW({
-    onNeedRefresh() {
-      setShowUpdateToast(true);
-    },
-    onOfflineReady() {
-      console.log("TPC AMS is ready to work offline.");
-    },
-    onRegisterError(error) {
-      console.error("Service Worker registration failed:", error);
-    },
-  });
+  const updateSW = import.meta.env.PROD
+    ? registerSW({
+        onNeedRefresh() {
+          setShowUpdateToast(true);
+        },
+        onOfflineReady() {
+          console.log("TPC AMS is ready to work offline.");
+        },
+        onRegisterError(error) {
+          console.error("Service Worker registration failed:", error);
+        },
+      })
+    : () => {};
 
   return (
     <>
