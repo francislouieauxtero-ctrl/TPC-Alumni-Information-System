@@ -77,7 +77,7 @@ export default function DepartmentHeadLayout({ children }) {
       {/* Sidebar */}
       <div
         className={`${
-          sidebarOpen ? "w-70" : "w-20"
+          sidebarOpen ? "w-[280px]" : "w-20"
         } flex flex-col bg-tpc-greenDeep border-r border-white/10 px-3 py-6 transition-all duration-300`}
       >
         {/* Logo */}
