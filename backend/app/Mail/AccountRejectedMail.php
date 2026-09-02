@@ -2,7 +2,6 @@
 
 namespace App\Mail;
 
-use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -14,7 +13,11 @@ class AccountRejectedMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public function __construct(protected User $user, protected ?string $reason = null)
+    public function __construct(
+        protected string $name,
+        protected string $email,
+        protected ?string $reason = null,
+    )
     {
     }
 
@@ -30,8 +33,8 @@ class AccountRejectedMail extends Mailable implements ShouldQueue
         return new Content(
             markdown: 'mail.account-rejected',
             with: [
-                'name' => $this->user->name,
-                'email' => $this->user->email,
+                'name' => $this->name,
+                'email' => $this->email,
                 'reason' => $this->reason,
             ],
         );

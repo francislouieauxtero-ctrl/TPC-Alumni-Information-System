@@ -442,7 +442,11 @@ public function deactivateDepartmentHead(Request $request, int $id): JsonRespons
                 ], 403);
             }
 
-            Mail::to($student->email)->queue(new AccountRejectedMail($student, $request->input('reason')));
+            Mail::to($student->email)->queue(new AccountRejectedMail(
+                $student->name,
+                $student->email,
+                $request->input('reason'),
+            ));
 
             $student->tokens()->delete();
             $student->forceDelete();

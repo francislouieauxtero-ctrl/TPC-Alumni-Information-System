@@ -113,7 +113,11 @@ class AlumniService
                 ],
             ]);
 
-            Mail::to($alumni->email)->queue(new AccountRejectedMail($alumni, $reason));
+            Mail::to($alumni->email)->queue(new AccountRejectedMail(
+                $alumni->name,
+                $alumni->email,
+                $reason,
+            ));
 
             $alumni->forceDelete();
         });
