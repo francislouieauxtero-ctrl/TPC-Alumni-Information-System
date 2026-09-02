@@ -9,6 +9,7 @@ use App\Http\Requests\RejectAlumniRequest;
 use App\Http\Requests\UpdateWorkAlignmentRequest;
 use App\Http\Resources\AlumniProfileResource;
 use App\Http\Resources\UserResource;
+use App\Models\AccountActivityLog;
 use App\Models\User;
 use App\Services\AlumniService;
 use Illuminate\Http\JsonResponse;
@@ -50,6 +51,28 @@ class AlumniController extends Controller
                 $rejected,
                 'Rejected alumni retrieved successfully'
             );
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+    }
+
+    public function deleteRejected(AccountActivityLog $rejection): JsonResponse
+    {
+        try {
+            if ($rejection->action !== 'rejected_alumni') {
+                return $this->errorResponse('Rejected alumni record not found', 404);
+            }
+
+            $deleted = $this->alumniService->deleteRejectedAlumni(
+                $rejection->id,
+                auth()->user(),
+            );
+
+            if (!$deleted) {
+                return $this->errorResponse('Rejected alumni record not found', 404);
+            }
+
+            return $this->successResponse(null, 'Rejected alumni record deleted successfully');
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 500);
         }

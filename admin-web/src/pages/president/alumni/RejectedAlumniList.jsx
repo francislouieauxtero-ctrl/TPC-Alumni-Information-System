@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { XCircle, Search, Mail, Calendar, User } from "lucide-react";
+import { XCircle, Search, Mail, Calendar, User, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 import alumniService from "../../../services/alumniService";
 
@@ -7,6 +7,7 @@ export default function RejectedAlumniList() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [deletingId, setDeletingId] = useState(null);
 
   const fetchRejected = async () => {
     try {
@@ -23,6 +24,25 @@ export default function RejectedAlumniList() {
   useEffect(() => {
     fetchRejected();
   }, []);
+
+  const handleDelete = async (rejectionId) => {
+    if (!window.confirm("Delete this rejected account record?")) {
+      return;
+    }
+
+    try {
+      setDeletingId(rejectionId);
+      await alumniService.deleteRejected(rejectionId);
+      setItems((currentItems) =>
+        currentItems.filter((item) => item.id !== rejectionId),
+      );
+      toast.success("Rejected account record deleted");
+    } catch (err) {
+      toast.error(err.message || "Failed to delete rejected account record");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const filteredItems = items.filter((item) => {
     const target = item.target || item.user || {};
@@ -128,6 +148,18 @@ export default function RejectedAlumniList() {
                     {reason}
                   </p>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleDelete(item.id)}
+                  disabled={deletingId === item.id}
+                  title="Delete rejected account record"
+                  aria-label={`Delete rejected account record for ${displayName}`}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-red-200 px-3 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {deletingId === item.id ? "Deleting..." : "Delete record"}
+                </button>
               </div>
             );
           })}

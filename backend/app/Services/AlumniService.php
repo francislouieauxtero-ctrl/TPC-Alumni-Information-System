@@ -40,6 +40,11 @@ class AlumniService
         return $this->alumniRepository->rejectedAlumni($actor);
     }
 
+    public function deleteRejectedAlumni(int $rejectionId, User $actor): bool
+    {
+        return $this->alumniRepository->deleteRejected($rejectionId, $actor);
+    }
+
     /**
      * Get all alumni
      */

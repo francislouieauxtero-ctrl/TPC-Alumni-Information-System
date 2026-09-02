@@ -38,6 +38,19 @@ class AlumniRepository
         return $query->paginate(15);
     }
 
+    public function deleteRejected(int $rejectionId, User $actor): bool
+    {
+        $query = AccountActivityLog::query()
+            ->whereKey($rejectionId)
+            ->where('action', 'rejected_alumni');
+
+        if ($actor->isAdmin()) {
+            $query->where('actor_id', $actor->id);
+        }
+
+        return (bool) $query->delete();
+    }
+
     public function all(User $actor, array $filters = []): LengthAwarePaginator
     {
         $query = AlumniProfile::with('user', 'department')

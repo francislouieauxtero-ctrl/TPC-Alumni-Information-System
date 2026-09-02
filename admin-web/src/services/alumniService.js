@@ -31,6 +31,17 @@ const alumniService = {
     }
   },
 
+  deleteRejected: async (rejectionId) => {
+    try {
+      const response = await api.delete(
+        `/admin/alumni/rejected/${rejectionId}`,
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
   /**
    * Get all alumni (returns paginated collection)
    */
