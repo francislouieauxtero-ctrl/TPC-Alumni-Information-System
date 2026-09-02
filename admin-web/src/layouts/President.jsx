@@ -114,7 +114,7 @@ export default function PresidentLayout({ children }) {
             <NavLink
               to="/president/graduates"
               icon={<GraduationCap className="w-5 h-5" />}
-              label="Manage Graduates"
+              label="View Graduates"
               sidebarOpen={sidebarOpen}
             />
           )}
