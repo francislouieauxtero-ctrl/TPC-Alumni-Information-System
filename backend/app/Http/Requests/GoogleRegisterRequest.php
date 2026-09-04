@@ -16,7 +16,7 @@ class GoogleRegisterRequest extends FormRequest
     {
         return [
             'access_token' => 'required|string',
-            'department_id' => 'required|exists:departments,id',
+            'department_id' => 'nullable|exists:departments,id',
             'school_id' => [
                 'required',
                 'string',
@@ -24,6 +24,29 @@ class GoogleRegisterRequest extends FormRequest
                 'unique:users,school_id',
             ],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $schoolId = trim((string) $this->input('school_id'));
+
+        if ($schoolId === '') {
+            return;
+        }
+
+        $graduate = Graduate::query()
+            ->where(function ($query) use ($schoolId): void {
+                $query->where('student_number', $schoolId);
+
+                if (is_numeric($schoolId)) {
+                    $query->orWhereRaw('CAST(student_number AS UNSIGNED) = ?', [(int) $schoolId]);
+                }
+            })
+            ->first();
+
+        if ($graduate) {
+            $this->merge(['department_id' => $graduate->department_id]);
+        }
     }
 
     public function withValidator($validator): void

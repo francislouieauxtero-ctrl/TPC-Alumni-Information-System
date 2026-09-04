@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 import logo from "../../assets/tpcL.jpg";
 import bg from "../../assets/tpc.png";
@@ -11,37 +11,21 @@ export default function StudentRegister() {
   const [form, setForm] = useState({
     name: "",
     email: "",
-    department_id: "",
     school_id: "",
     password: "",
     password_confirmation: "",
   });
-  const [departments, setDepartments] = useState([]);
   const [errors, setErrors] = useState({});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  useEffect(() => {
-    const fetchDepartments = async () => {
-      try {
-        const response = await api.get("/departments");
-        setDepartments(response.data.data || []);
-      } catch (err) {
-        setError("Unable to load departments. Please try again later.");
-      }
-    };
-
-    fetchDepartments();
-  }, []);
-
   const validate = () => {
     const newErrors = {};
 
     if (!form.name) newErrors.name = "Full name is required";
     if (!form.email) newErrors.email = "Email is required";
-    if (!form.department_id) newErrors.department_id = "Department is required";
     if (!form.school_id) newErrors.school_id = "School ID is required";
     if (!form.password) newErrors.password = "Password is required";
     if (form.password && form.password.length < 8) {
@@ -63,7 +47,6 @@ export default function StudentRegister() {
     setForm({
       name: "",
       email: "",
-      department_id: "",
       school_id: "",
       password: "",
       password_confirmation: "",
@@ -98,14 +81,6 @@ export default function StudentRegister() {
 
   const handleGoogleRegister = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
-      if (!form.department_id) {
-        setErrors({ department_id: "Department is required" });
-        setError(
-          "Please select a department before using Google registration.",
-        );
-        return;
-      }
-
       if (!form.school_id) {
         setErrors({ school_id: "School ID is required" });
         setError(
@@ -120,7 +95,6 @@ export default function StudentRegister() {
       try {
         await api.post("/auth/google-register", {
           access_token: tokenResponse.access_token,
-          department_id: form.department_id,
           school_id: form.school_id,
         });
 
@@ -212,32 +186,6 @@ export default function StudentRegister() {
 
                 <div>
                   <label className="relative block">
-                    <span className="sr-only">Department</span>
-                    <select
-                      value={form.department_id}
-                      onChange={(e) =>
-                        updateForm("department_id", e.target.value)
-                      }
-                      required
-                      className={`${inputClass(errors.department_id)} appearance-none pl-4`}
-                    >
-                      <option value="">Select department</option>
-                      {departments.map((department) => (
-                        <option key={department.id} value={department.id}>
-                          {department.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  {errors.department_id && (
-                    <p className="mt-1 pl-4 text-xs text-text-danger">
-                      {errors.department_id}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="relative block">
                     <span className="sr-only">School ID</span>
                     <input
                       type="text"
@@ -245,7 +193,7 @@ export default function StudentRegister() {
                       onChange={(e) => updateForm("school_id", e.target.value)}
                       required
                       className={`${inputClass(errors.school_id)} pl-4`}
-                      placeholder="School ID"
+                      placeholder="Student number"
                     />
                   </label>
                   {errors.school_id && (
