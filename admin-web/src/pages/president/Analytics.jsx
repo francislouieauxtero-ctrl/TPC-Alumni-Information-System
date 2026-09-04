@@ -1168,7 +1168,7 @@ function AlignmentSummaryWidget({ onDrillDown, filters, onRowsLoaded }) {
                   className="flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-gray-800">
+                    <p className="break-words text-sm font-semibold text-gray-800">
                       {row.department?.name ||
                         `Department ${row.department_id}`}
                     </p>

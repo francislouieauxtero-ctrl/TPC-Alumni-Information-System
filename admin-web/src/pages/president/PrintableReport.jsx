@@ -361,10 +361,16 @@ function ReportBarChart({ rows }) {
     return <p className="report-empty">No alignment data available.</p>;
   }
 
-  const barHeight = 22,
-    gap = 10,
-    chartWidth = 480,
-    labelWidth = 110;
+  const barHeight = 24,
+    gap = 12,
+    chartWidth = 700;
+  const longestDepartmentName = Math.max(
+    ...rows.map((row) => row.department?.length || 0),
+  );
+  const labelWidth = Math.min(
+    300,
+    Math.max(140, longestDepartmentName * 7 + 12),
+  );
   const maxBarWidth = chartWidth - labelWidth - 50;
   const height = rows.length * (barHeight + gap);
 
@@ -380,7 +386,7 @@ function ReportBarChart({ rows }) {
         const width = (rate / 100) * maxBarWidth;
         return (
           <g key={row.department}>
-            <text x={0} y={y + barHeight / 2 + 4} fontSize="11" fill="#374151">
+            <text x={0} y={y + barHeight / 2 + 4} fontSize="12" fill="#374151">
               {row.department}
             </text>
             <rect
@@ -402,7 +408,7 @@ function ReportBarChart({ rows }) {
             <text
               x={labelWidth + maxBarWidth + 8}
               y={y + barHeight / 2 + 4}
-              fontSize="11"
+              fontSize="12"
               fill="#374151"
             >
               {rate}%
@@ -489,39 +495,39 @@ const reportPrintStyles = `
     object-fit: cover;
   }
   .report-header h1 { font-size: 16px; font-weight: 700; color: #02451C; margin: 0 0 2px; }
-  .report-subtitle { font-size: 11px; color: #6b7280; margin: 0; }
+  .report-subtitle { font-size: 12px; color: #6b7280; margin: 0; }
   .report-batch-subtitle { font-size: 12px; font-weight: 700; color: #02451C; margin: 3px 0 0; }
   .report-section-title {
-    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
     letter-spacing: 0.03em; color: #02451C;
     border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; margin: 0 0 8px;
   }
   .report-kv {
-    display: flex; justify-content: space-between; font-size: 11px;
+    display: flex; justify-content: space-between; font-size: 12px;
     padding: 2px 0; border-bottom: 1px dotted #e5e7eb;
   }
   .report-kv span:first-child { color: #6b7280; }
   .report-kv span:last-child { font-weight: 600; }
   .report-overview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .report-stat { display: flex; flex-direction: column; gap: 1px; }
-  .report-stat-label { font-size: 10px; color: #6b7280; }
+  .report-stat-label { font-size: 12px; color: #6b7280; }
   .report-stat-value { font-size: 15px; font-weight: 700; color: #111827; }
   .report-chart-row { display: flex; align-items: center; gap: 16px; }
-  .report-legend { list-style: none; margin: 0; padding: 0; font-size: 10px; color: #374151; }
+  .report-legend { list-style: none; margin: 0; padding: 0; font-size: 12px; color: #374151; }
   .report-legend li { display: flex; align-items: center; gap: 4px; margin-bottom: 3px; }
   .report-legend-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-  .report-empty { font-size: 11px; color: #9ca3af; }
-  .report-footer { margin-top: 16px; padding-top: 8px; border-top: 1px solid #e5e7eb; font-size: 11px; }
+  .report-empty { font-size: 12px; color: #9ca3af; }
+  .report-footer { margin-top: 16px; padding-top: 8px; border-top: 1px solid #e5e7eb; font-size: 12px; }
   .report-prepared-by { margin-top: 12px; font-weight: 600; }
   .report-avoid-break { break-inside: avoid; page-break-inside: avoid; }
   .report-align-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 10px;
+    font-size: 12px;
   }
   .report-align-table th {
     text-align: left;
-    font-size: 9px;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.02em;
