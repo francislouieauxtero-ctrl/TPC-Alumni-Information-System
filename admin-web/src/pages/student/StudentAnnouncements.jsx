@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CalendarClock, UserCircle2 } from "lucide-react";
+import { CalendarDays, Megaphone, Users } from "lucide-react";
 import announcementService from "../../services/announcementService";
 import { renderTextWithLinks } from "../../utils/media";
 
@@ -77,45 +77,63 @@ export default function StudentAnnouncements() {
             return (
               <div
                 key={announcement.id}
-                className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-4"
+                className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
               >
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                    {announcement.title || "Announcement"}
-                  </h3>
-                  <p className="text-sm text-gray-600 whitespace-pre-line break-words">
-                    {renderTextWithLinks(announcement.content || "")}
-                  </p>
-                </div>
+                <div className="space-y-4 p-5 sm:p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tpc-navy text-sm font-bold text-white">
+                      {(announcement.creator?.name || "System")
+                        .trim()
+                        .charAt(0)
+                        .toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-gray-900">
+                        {announcement.creator?.name || "System"}
+                      </p>
+                      <p className="text-sm text-gray-500">Announcement</p>
+                    </div>
+                  </div>
 
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Posted:</span>
-                    <span className="font-medium text-gray-800">
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-y border-gray-200 py-3">
+                    <span className="inline-flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-blue-700">
+                      <Megaphone className="h-4 w-4" />
+                      Announcement
+                    </span>
+                    <span className="inline-flex items-center gap-2 text-sm text-gray-600">
+                      <CalendarDays className="h-4 w-4" />
                       {new Date(
                         announcement.created_at || announcement.posted_at,
-                      ).toLocaleDateString()}
+                      ).toLocaleDateString(undefined, {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">By:</span>
-                    <span className="font-medium text-gray-800">
-                      {announcement.creator?.name || "System"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Scope:</span>
+
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className="min-w-0 text-xl font-bold text-tpc-navy break-words">
+                      {announcement.title || "Announcement"}
+                    </h3>
                     <span
-                      className={`px-2 py-1 rounded text-xs font-semibold ${
+                      className={`shrink-0 rounded-lg px-2 py-1 text-xs font-semibold ${
                         announcement.scope === "school_wide"
                           ? "bg-blue-100 text-blue-700"
                           : "bg-purple-100 text-purple-700"
                       }`}
                     >
+                      <Users className="mr-1 inline h-3.5 w-3.5" />
                       {announcement.scope === "school_wide"
                         ? "School-wide"
                         : announcement.department?.name || "Department"}
                     </span>
+                  </div>
+
+                  <div className="border-t border-gray-200 pt-4">
+                    <p className="text-sm leading-7 text-gray-700 whitespace-pre-line break-words">
+                      {renderTextWithLinks(announcement.content || "")}
+                    </p>
                   </div>
                 </div>
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { CalendarDays, CalendarPlus, MapPin, Users } from "lucide-react";
 import eventService from "../../services/eventService";
 import { getAttachmentUrls, renderTextWithLinks } from "../../utils/media";
 
@@ -91,73 +92,92 @@ export default function StudentEvents() {
           {events.data.map((event) => (
             <div
               key={event.id}
-              className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:rounded-3xl sm:p-6"
+              className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm sm:rounded-3xl"
             >
-              <div className="flex flex-wrap items-start justify-between gap-3 sm:gap-4">
-                <div className="min-w-0 flex-1">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-2 sm:text-xl">
-                    {event.title}
+              <div className="space-y-4 p-5 sm:p-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tpc-navy text-sm font-bold text-white">
+                    {(event.creator?.name || "System")
+                      .trim()
+                      .charAt(0)
+                      .toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold text-gray-900">
+                      {event.creator?.name || "System"}
+                    </p>
+                    <p className="text-sm text-gray-500">Event organizer</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3 border-y border-gray-200 py-3">
+                  <span className="inline-flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-blue-700">
+                    <CalendarPlus className="h-4 w-4" />
+                    Event
+                  </span>
+                  <span className="inline-flex items-center gap-2 text-sm text-gray-600">
+                    <CalendarDays className="h-4 w-4" />
+                    Posted {new Date(event.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+
+                <div className="flex items-start justify-between gap-3">
+                  <h2 className="min-w-0 text-xl font-bold text-tpc-navy break-words">
+                    {event.title || "Event"}
                   </h2>
-                  <p className="text-sm text-gray-600 whitespace-pre-line break-words">
+                  <span
+                    className={`shrink-0 rounded-lg px-2 py-1 text-xs font-semibold ${
+                      event.scope === "school_wide"
+                        ? "bg-blue-100 text-blue-700"
+                        : "bg-purple-100 text-purple-700"
+                    }`}
+                  >
+                    {event.scope === "school_wide"
+                      ? "School-wide"
+                      : event.department?.name || "Department"}
+                  </span>
+                </div>
+
+                <div className="grid gap-2 border-t border-gray-200 pt-4 text-sm text-gray-600 sm:grid-cols-2">
+                  <div className="flex items-center gap-2">
+                    <CalendarDays className="h-4 w-4 shrink-0 text-tpc-green" />
+                    <span className="font-medium text-gray-900">
+                      {new Date(event.event_date).toLocaleDateString(
+                        undefined,
+                        {
+                          weekday: "short",
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        },
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <MapPin className="h-4 w-4 shrink-0 text-tpc-green" />
+                    <span className="truncate font-medium text-gray-900">
+                      {event.location || "TBA"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 shrink-0 text-tpc-green" />
+                    <span className="font-medium text-gray-900">
+                      {event.is_future ? "Upcoming" : "Past"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-200 pt-4">
+                  <p className="text-sm leading-7 text-gray-700 whitespace-pre-line break-words">
                     {renderTextWithLinks(
                       event.description || "No description available.",
                     )}
                   </p>
                 </div>
-                <span
-                  className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${
-                    event.scope === "school_wide"
-                      ? "bg-blue-100 text-blue-700"
-                      : "bg-purple-100 text-purple-700"
-                  }`}
-                >
-                  {event.scope === "school_wide"
-                    ? "School-wide"
-                    : event.department?.name || "Department"}
-                </span>
               </div>
 
-              <div className="mt-5 grid gap-3 text-sm text-gray-600 sm:mt-6">
-                <div className="flex items-center justify-between gap-3">
-                  <span>Date</span>
-                  <span className="font-medium text-gray-900 text-right">
-                    {new Date(event.event_date).toLocaleDateString(undefined, {
-                      weekday: "short",
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span>Posted</span>
-                  <span className="font-medium text-gray-900 text-right">
-                    {new Date(event.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span>By</span>
-                  <span className="font-medium text-gray-900 text-right truncate">
-                    {event.creator?.name || "System"}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span>Location</span>
-                  <span className="font-medium text-gray-900 text-right truncate">
-                    {event.location || "TBA"}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span>Status</span>
-                  <span
-                    className={`rounded-full px-2 py-1 text-xs font-semibold ${event.is_future ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-700"}`}
-                  >
-                    {event.is_future ? "Upcoming" : "Past"}
-                  </span>
-                </div>
-              </div>
               {getAttachmentUrls(event).length > 0 && (
-                <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-3 px-5 pb-5 sm:grid-cols-2 sm:px-6 sm:pb-6 lg:grid-cols-3">
                   {getAttachmentUrls(event).map((image, index) => {
                     const isImage = /\.(jpg|jpeg|png|webp|gif)$/i.test(image);
                     const isVideo = /\.(mp4|webm|mov|avi)$/i.test(image);
