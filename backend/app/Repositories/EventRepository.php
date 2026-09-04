@@ -57,7 +57,7 @@ class EventRepository
             });
         }
 
-        return $query->orderBy('event_date', 'asc')->paginate(15);
+        return $query->orderBy('created_at', 'desc')->paginate(15);
     }
 
     /**

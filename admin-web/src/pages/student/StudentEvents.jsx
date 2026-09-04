@@ -98,7 +98,7 @@ export default function StudentEvents() {
                   <h2 className="text-lg font-semibold text-gray-900 mb-2 sm:text-xl">
                     {event.title}
                   </h2>
-                  <p className="text-sm text-gray-600 line-clamp-3 whitespace-pre-line">
+                  <p className="text-sm text-gray-600 whitespace-pre-line break-words">
                     {renderTextWithLinks(
                       event.description || "No description available.",
                     )}
