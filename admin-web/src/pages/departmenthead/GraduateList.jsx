@@ -176,12 +176,12 @@ export default function GraduateList() {
                     >
                       Edit
                     </button>
-                    <button
+                    {/* <button
                       onClick={() => handleDelete(graduate.id)}
                       className="text-red-600 hover:text-red-800 text-sm font-medium"
                     >
                       Delete
-                    </button>
+                    </button> */}
                   </td>
                 </tr>
               ))}

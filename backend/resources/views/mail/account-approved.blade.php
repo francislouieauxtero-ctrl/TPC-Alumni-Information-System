@@ -10,9 +10,6 @@ You can now log in to the alumni portal and start exploring:
 - Update your employment information
 - Connect with other alumni
 
-@component('mail::button', ['url' => config('app.url') . '/login'])
-Login to Your Account
-@endcomponent
 
 If you have any questions or issues, please don't hesitate to contact us.
 
