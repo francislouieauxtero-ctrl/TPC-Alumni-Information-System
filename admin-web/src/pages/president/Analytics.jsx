@@ -41,8 +41,9 @@ const GREEN_RING = "#86c99a"; // focus ring
 const STATUS_COLORS = [GREEN_DEEP, "#d97706", "#ef4444", "#8b5cf6"];
 const EMPLOY_COLORS = [GREEN_DEEP, "#ef4444", "#2563eb"];
 const EMPLOY_LABEL_COLORS = ["#16a34a", "#ef4444", "#3b82f6"];
-const ALIGNMENT_LINE_COLOR = "#4ade80";
+const ALIGNMENT_LINE_COLOR = "#3b9b6d";
 const ALIGNMENT_LINE2_COLOR = "#60a5fa";
+const ALIGNMENT_CHART_BACKGROUND = "#ffffff";
 
 // ── FilterBar ─────────────────────────────────────────────────────────────
 function FilterBar({
@@ -485,14 +486,14 @@ function AlignmentLineChart({ rows }) {
   return (
     <div
       style={{
-        background: GREEN_DEEP, // was #0f172a
+        background: ALIGNMENT_CHART_BACKGROUND,
         borderRadius: "12px",
         padding: "20px 20px 8px",
       }}
     >
       <p
         style={{
-          color: "#94a3b8",
+          color: "#1f2937",
           fontSize: "11px",
           fontWeight: 600,
           letterSpacing: "0.05em",
@@ -520,7 +521,7 @@ function AlignmentLineChart({ rows }) {
               borderRadius: 2,
             }}
           />
-          <span style={{ fontSize: "11px", color: "#94a3b8" }}>
+          <span style={{ fontSize: "11px", color: "#4b5563" }}>
             Alignment %
           </span>
         </span>
@@ -535,7 +536,7 @@ function AlignmentLineChart({ rows }) {
               borderTop: "2px dashed " + ALIGNMENT_LINE2_COLOR,
             }}
           />
-          <span style={{ fontSize: "11px", color: "#94a3b8" }}>
+          <span style={{ fontSize: "11px", color: "#4b5563" }}>
             Employed count
           </span>
         </span>
@@ -545,10 +546,7 @@ function AlignmentLineChart({ rows }) {
           data={chartData}
           margin={{ top: 4, right: 12, left: -20, bottom: 0 }}
         >
-          <CartesianGrid
-            strokeDasharray="4 4"
-            stroke="rgba(255,255,255,0.08)"
-          />
+          <CartesianGrid strokeDasharray="4 4" stroke="#e5e7eb" />
           <XAxis
             dataKey="name"
             tick={{ fontSize: 10, fill: "#64748b" }}
@@ -572,14 +570,14 @@ function AlignmentLineChart({ rows }) {
           />
           <Tooltip
             contentStyle={{
-              background: GREEN_MID, // was #1e293b
+              background: "#ffffff",
               border: `1px solid ${GREEN_RING}33`,
               borderRadius: "8px",
               fontSize: "11px",
-              color: "#e2e8f0",
-              boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+              color: "#1f2937",
+              boxShadow: "0 4px 16px rgba(15,23,42,0.12)",
             }}
-            labelStyle={{ color: "#94a3b8", marginBottom: "4px" }}
+            labelStyle={{ color: "#4b5563", marginBottom: "4px" }}
             formatter={(value, name) =>
               name === "rate"
                 ? [`${value}%`, "Alignment rate"]
