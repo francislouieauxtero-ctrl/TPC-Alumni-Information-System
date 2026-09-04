@@ -21,6 +21,7 @@ import UserAvatar from "../components/shared/UserAvatar";
 export default function DepartmentHeadLayout({ children }) {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
 
   const [departmentHeadName, setDepartmentHeadName] = useState(
@@ -72,13 +73,24 @@ export default function DepartmentHeadLayout({ children }) {
     }
   };
 
+  const handleSidebarToggle = () => {
+    if (window.innerWidth < 850) {
+      setMobileMenuOpen(false);
+      return;
+    }
+
+    setSidebarOpen(!sidebarOpen);
+  };
+
   return (
     <div className="flex h-screen bg-white text-gray-900 font-sans">
       {/* Sidebar */}
-      <div
+      <aside
         className={`${
-          sidebarOpen ? "w-[280px]" : "w-20"
-        } flex flex-col bg-tpc-greenDeep border-r border-white/10 px-3 py-6 transition-all duration-300`}
+          sidebarOpen ? "min-[850px]:w-[280px]" : "min-[850px]:w-20"
+        } fixed inset-y-0 left-0 z-50 flex w-[280px] ${
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        } flex-col bg-tpc-greenDeep border-r border-white/10 px-3 py-6 transition-all duration-300 min-[850px]:static min-[850px]:translate-x-0`}
       >
         {/* Logo */}
         <div className="px-3 pb-5 border-b border-white/20">
@@ -199,24 +211,32 @@ export default function DepartmentHeadLayout({ children }) {
 
         {/* Toggle Sidebar */}
         <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="hidden md:flex items-center justify-center h-12 mt-4 border-t border-white/20 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+          onClick={handleSidebarToggle}
+          className="flex min-[850px]:flex items-center justify-center h-12 mt-4 border-t border-white/20 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
         >
-          {sidebarOpen ? (
+          {sidebarOpen || mobileMenuOpen ? (
             <X className="w-5 h-5" />
           ) : (
             <Menu className="w-5 h-5" />
           )}
         </button>
-      </div>
+      </aside>
+
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 min-[850px]:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
         {/* Top Bar */}
         <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            onClick={() => setMobileMenuOpen(true)}
+            className="min-[850px]:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            aria-label="Open menu"
           >
             <Menu className="w-6 h-6" />
           </button>
