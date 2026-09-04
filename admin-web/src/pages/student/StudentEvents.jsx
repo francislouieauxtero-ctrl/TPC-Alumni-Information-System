@@ -130,6 +130,18 @@ export default function StudentEvents() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-3">
+                  <span>Posted</span>
+                  <span className="font-medium text-gray-900 text-right">
+                    {new Date(event.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span>By</span>
+                  <span className="font-medium text-gray-900 text-right truncate">
+                    {event.creator?.name || "System"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
                   <span>Location</span>
                   <span className="font-medium text-gray-900 text-right truncate">
                     {event.location || "TBA"}

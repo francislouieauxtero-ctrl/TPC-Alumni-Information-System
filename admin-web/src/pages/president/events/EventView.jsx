@@ -90,13 +90,20 @@ export default function EventView() {
               <h1 className="text-2xl font-bold text-gray-800 mb-1">
                 {event.title}
               </h1>
-              <p className="text-sm text-gray-500">
-                Created by{" "}
-                <span className="font-medium text-gray-700">
-                  {event.creator?.name ?? "—"}
-                </span>{" "}
-                · {new Date(event.created_at).toLocaleDateString()}
-              </p>
+              <div className="mt-2 space-y-1 text-sm text-gray-500">
+                <p>
+                  Posted:{" "}
+                  <span className="font-medium text-gray-700">
+                    {new Date(event.created_at).toLocaleDateString()}
+                  </span>
+                </p>
+                <p>
+                  By:{" "}
+                  <span className="font-medium text-gray-700">
+                    {event.creator?.name || "System"}
+                  </span>
+                </p>
+              </div>
             </div>
 
             {/* Status badge */}

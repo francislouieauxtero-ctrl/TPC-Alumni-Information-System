@@ -135,6 +135,18 @@ export default function EventList() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Posted:</span>
+                  <span className="font-medium text-gray-800">
+                    {new Date(event.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">By:</span>
+                  <span className="font-medium text-gray-800">
+                    {event.creator?.name || "System"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
                   <span className="text-gray-600">Location:</span>
                   <span className="font-medium text-gray-800">
                     {event.location || "-"}
