@@ -11,9 +11,6 @@ import {
   User,
   Check,
   AlertCircle,
-  CheckCircle2,
-  XCircle,
-  HelpCircle,
 } from "lucide-react";
 import alumniService from "../../services/alumniService";
 import departmentService from "../../services/departmentService";
@@ -131,9 +128,9 @@ function ProfileModal({ alumni, onClose, jobHistory, jobHistoryLoading }) {
     (jobHistory && jobHistory.find && jobHistory.find((j) => j.is_current)) ??
     null;
 
-  const currentJob =
-    profileCurrentJob ??
-    (currentJobFromHistory ? currentJobFromHistory.position : null);
+  const currentJob = jobHistoryLoading
+    ? profileCurrentJob
+    : (currentJobFromHistory?.position ?? profileCurrentJob);
 
   let inferredEmploymentStatus = employmentStatus ?? null;
 
@@ -152,51 +149,42 @@ function ProfileModal({ alumni, onClose, jobHistory, jobHistoryLoading }) {
       else inferredEmploymentStatus = "unemployed";
     }
   }
-  const company =
-    alumni.company ??
-    alumni.alumniProfile?.company ??
-    alumni.user?.alumniProfile?.company ??
-    (jobHistory && jobHistory.find
-      ? (jobHistory.find((j) => j.is_current)?.company ?? null)
-      : null);
-  const workAligned =
-    alumni.is_work_aligned ?? alumni.alumniProfile?.is_work_aligned ?? null;
+  const company = jobHistoryLoading
+    ? (alumni.company ??
+      alumni.alumniProfile?.company ??
+      alumni.user?.alumniProfile?.company)
+    : (currentJobFromHistory?.company ??
+      alumni.company ??
+      alumni.alumniProfile?.company ??
+      alumni.user?.alumniProfile?.company);
   const workAlignedReason =
     alumni.work_aligned_reason ??
     alumni.alumniProfile?.work_aligned_reason ??
+    alumni.user?.alumniProfile?.work_aligned_reason ??
     null;
-  const unemployedFeedback =
-    jobHistory?.find((job) => job.employment_type === "unemployed")?.industry ??
-    null;
-  const employmentFeedback =
+  const jobFeedback =
     inferredEmploymentStatus === "unemployed"
-      ? unemployedFeedback
+      ? (jobHistory?.find((job) => job.employment_type === "unemployed")
+          ?.industry ?? null)
       : workAlignedReason;
-  const FeedbackIcon =
-    inferredEmploymentStatus === "unemployed"
-      ? AlertCircle
-      : workAligned === true
-        ? CheckCircle2
-        : workAligned === false
-          ? XCircle
-          : HelpCircle;
-  const feedbackTitle =
-    inferredEmploymentStatus === "unemployed"
-      ? "Current Status Feedback"
-      : "Employment Feedback";
-  const feedbackStyle =
-    inferredEmploymentStatus === "unemployed"
-      ? "border-amber-200 bg-amber-50 text-amber-700"
-      : workAligned === true
-        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-        : workAligned === false
-          ? "border-red-200 bg-red-50 text-red-700"
-          : "border-gray-200 bg-gray-50 text-gray-600";
+  const sortedJobHistory = [...(jobHistory ?? [])].sort((first, second) => {
+    if (first.is_current !== second.is_current) {
+      return Number(second.is_current) - Number(first.is_current);
+    }
+
+    const firstDate = new Date(first.start_date || first.created_at).getTime();
+    const secondDate = new Date(
+      second.start_date || second.created_at,
+    ).getTime();
+
+    return secondDate - firstDate;
+  });
+  const feedbackStyle = "border-tpc-gold/20 bg-tpc-gold/5 text-gray-700";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="relative w-full max-w-2xl rounded-2xl bg-white shadow-xl overflow-hidden">
-        <div className="bg-tpc-greenDeep px-6 pt-6 pb-6">
+      <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-xl">
+        <div className="sticky top-0 z-10 bg-tpc-greenDeep px-6 pt-6 pb-6">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 rounded-full p-1.5 text-white/70 hover:text-white hover:bg-white/10 transition"
@@ -289,13 +277,13 @@ function ProfileModal({ alumni, onClose, jobHistory, jobHistoryLoading }) {
 
           <div className={`rounded-xl border p-4 ${feedbackStyle}`}>
             <div className="flex items-center gap-2 mb-2">
-              <FeedbackIcon className="h-4 w-4" />
+              <Briefcase className="h-4 w-4" />
               <p className="text-xs font-semibold uppercase tracking-widest">
-                {feedbackTitle}
+                Job Feedback
               </p>
             </div>
             <p className="text-sm leading-relaxed">
-              {employmentFeedback || "Feedback not provided by the alumni."}
+              {jobFeedback || "Feedback not provided by the alumni."}
             </p>
           </div>
 
@@ -311,7 +299,7 @@ function ProfileModal({ alumni, onClose, jobHistory, jobHistoryLoading }) {
               </div>
             ) : jobHistory && jobHistory.length > 0 ? (
               <div className="max-h-96 overflow-y-auto space-y-3 pr-2">
-                {jobHistory.map((j) => (
+                {sortedJobHistory.map((j) => (
                   <div
                     key={j.id}
                     className="rounded-xl border border-gray-100 bg-gray-50 p-4 hover:bg-gray-100 transition"
@@ -322,10 +310,12 @@ function ProfileModal({ alumni, onClose, jobHistory, jobHistoryLoading }) {
                           <Briefcase className="h-4 w-4 text-tpc-greenDeep" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-gray-800">
+                          <p className="text-sm text-gray-800">
+                            <span className="font-semibold">Position:</span>{" "}
                             {j.position || "—"}
                           </p>
                           <p className="text-xs text-gray-600 mt-0.5">
+                            <span className="font-semibold">Company:</span>{" "}
                             {j.company || "—"}
                           </p>
                           {j.employment_type === "unemployed" && j.industry && (

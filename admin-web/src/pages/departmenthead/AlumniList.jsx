@@ -176,16 +176,18 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
     alumni.employment_status ??
     alumni.alumniProfile?.employment_status ??
     "unemployed";
-  const currentJob =
-    alumni.current_job ??
-    alumni.alumniProfile?.current_job ??
-    jobHistory?.find((j) => j.is_current)?.position ??
-    "—";
-  const company =
-    alumni.company ??
-    alumni.alumniProfile?.company ??
-    jobHistory?.find((j) => j.is_current)?.company ??
-    null;
+  const currentJob = loading
+    ? (alumni.current_job ?? alumni.alumniProfile?.current_job ?? "—")
+    : (jobHistory?.find((j) => j.is_current)?.position ??
+      alumni.current_job ??
+      alumni.alumniProfile?.current_job ??
+      "—");
+  const company = loading
+    ? (alumni.company ?? alumni.alumniProfile?.company ?? null)
+    : (jobHistory?.find((j) => j.is_current)?.company ??
+      alumni.company ??
+      alumni.alumniProfile?.company ??
+      null);
   const departmentName = alumni.department?.name ?? "Data missing";
   const emailAddress = user.email ?? "Data missing";
   const studentId = user.schoolId ?? user.school_id ?? "Data missing";
@@ -199,50 +201,44 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
   // ── Work alignment ────────────────────────────────────────────────────
   const isWorkAligned =
     alumni.is_work_aligned ?? alumni.alumniProfile?.is_work_aligned ?? null;
-  const workAlignedReason =
-    alumni.work_aligned_reason ??
-    alumni.alumniProfile?.work_aligned_reason ??
-    null;
   const isEmployed =
     employmentStatus === "employed" || employmentStatus === "self_employed";
   const alignmentKey = String(isWorkAligned ?? null);
   const alignmentBadge =
     ALIGNMENT_BADGE[alignmentKey] ?? ALIGNMENT_BADGE["null"];
   const AlignIcon = alignmentBadge.icon;
-  const unemployedFeedback =
-    jobHistory?.find((job) => job.employment_type === "unemployed")?.industry ??
+  const workAlignedReason =
+    alumni.work_aligned_reason ??
+    alumni.alumniProfile?.work_aligned_reason ??
+    alumni.user?.alumniProfile?.work_aligned_reason ??
     null;
-  const employmentFeedback =
-    employmentStatus === "unemployed" ? unemployedFeedback : workAlignedReason;
-  const FeedbackIcon =
+  const jobFeedback =
     employmentStatus === "unemployed"
-      ? AlertCircle
-      : isWorkAligned === true
-        ? CheckCircle2
-        : isWorkAligned === false
-          ? XCircle
-          : HelpCircle;
-  const feedbackTitle =
-    employmentStatus === "unemployed"
-      ? "Current Status Feedback"
-      : "Employment Feedback";
-  const feedbackStyle =
-    employmentStatus === "unemployed"
-      ? "border-amber-200 bg-amber-50 text-amber-700"
-      : alignmentKey === "true"
-        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-        : alignmentKey === "false"
-          ? "border-red-200 bg-red-50 text-red-700"
-          : "border-gray-200 bg-gray-50 text-gray-600";
+      ? (jobHistory?.find((job) => job.employment_type === "unemployed")
+          ?.industry ?? null)
+      : workAlignedReason;
+  const sortedJobHistory = [...(jobHistory ?? [])].sort((first, second) => {
+    if (first.is_current !== second.is_current) {
+      return Number(second.is_current) - Number(first.is_current);
+    }
+
+    const firstDate = new Date(first.start_date || first.created_at).getTime();
+    const secondDate = new Date(
+      second.start_date || second.created_at,
+    ).getTime();
+
+    return secondDate - firstDate;
+  });
+  const feedbackStyle = "border-tpc-gold/20 bg-tpc-gold/5 text-gray-700";
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
         {/* Header with green background */}
-        <div className="relative bg-tpc-greenDeep px-6 pt-6 pb-6">
+        <div className="sticky top-0 z-10 relative bg-tpc-greenDeep px-6 pt-6 pb-6">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 rounded-full p-1.5 text-white/70 hover:text-white hover:bg-white/10 transition"
@@ -371,7 +367,7 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
               </div>
             ) : jobHistory && jobHistory.length > 0 ? (
               <div className="max-h-96 overflow-y-auto space-y-3 pr-2">
-                {jobHistory.map((job) => (
+                {sortedJobHistory.map((job) => (
                   <div
                     key={job.id}
                     className="rounded-xl border border-gray-100 bg-gray-50 p-4 hover:bg-gray-100 transition"
@@ -382,10 +378,12 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
                           <Briefcase className="h-4 w-4 text-tpc-greenDeep" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-gray-800">
+                          <p className="text-sm text-gray-800">
+                            <span className="font-semibold">Position:</span>{" "}
                             {job.position || "—"}
                           </p>
                           <p className="text-xs text-gray-600 mt-0.5">
+                            <span className="font-semibold">Company:</span>{" "}
                             {job.company || "—"}
                           </p>
                           {job.employment_type === "unemployed" &&
@@ -419,9 +417,9 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
           <div className={`rounded-xl border p-4 ${feedbackStyle}`}>
             <div className="flex items-center justify-between gap-2 mb-2">
               <div className="flex items-center gap-2">
-                <FeedbackIcon className="h-4 w-4" />
+                <Briefcase className="h-4 w-4" />
                 <p className="text-xs font-semibold uppercase tracking-widest">
-                  {feedbackTitle}
+                  Job Feedback
                 </p>
               </div>
               {isEmployed && (
@@ -434,7 +432,7 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
               )}
             </div>
             <p className="text-sm leading-relaxed">
-              {employmentFeedback || "Feedback not provided by the alumni."}
+              {jobFeedback || "Feedback not provided by the alumni."}
             </p>
           </div>
         </div>

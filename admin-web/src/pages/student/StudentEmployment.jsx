@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Plus, Pencil, Trash2, Lock } from "lucide-react";
 import employmentService from "../../services/employmentService";
 import alumniService from "../../services/alumniService";
+import api from "../../services/api";
 import { toast } from "react-toastify";
 
 const EMPTY_FORM = {
@@ -24,6 +25,7 @@ export default function StudentEmployment() {
   const [editJob, setEditJob] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
+  const hasCurrentJob = jobs.data.some((job) => job.is_current);
 
   useEffect(() => {
     fetchJobs();
@@ -52,7 +54,7 @@ export default function StudentEmployment() {
     setModalOpen(true);
   };
 
-  const openEditModal = (job) => {
+  const openEditModal = async (job) => {
     setEditJob(job);
     setForm({
       company: job.company || "",
@@ -67,6 +69,23 @@ export default function StudentEmployment() {
     });
     setErrors({});
     setModalOpen(true);
+
+    if (job.is_current && job.employment_type !== "unemployed") {
+      try {
+        const response = await api.get("/student/profile");
+        const profile = response.data?.data?.alumniProfile;
+
+        if (profile) {
+          setForm((current) => ({
+            ...current,
+            is_work_aligned: profile.is_work_aligned ?? null,
+            work_aligned_reason: profile.work_aligned_reason || "",
+          }));
+        }
+      } catch {
+        toast.error("Unable to load the current job feedback.");
+      }
+    }
   };
 
   const closeModal = () => {
@@ -113,9 +132,12 @@ export default function StudentEmployment() {
       next.employment_type = "Please select an employment status.";
     }
 
-    if (form.employment_type === "employed") {
+    if (form.employment_type !== "unemployed") {
       if (!form.company.trim()) next.company = "Company is required.";
       if (!form.position.trim()) next.position = "Position is required.";
+    }
+
+    if (form.employment_type === "employed") {
       if (!form.start_date) next.start_date = "Start date is required.";
       if (!form.is_current && !form.end_date) {
         next.end_date = "End date or current role is required.";
@@ -148,8 +170,8 @@ export default function StudentEmployment() {
     try {
       // ── 1. Save the job entry ──────────────────────────────────────
       const payload = {
-        company: form.employment_type === "employed" ? form.company : "",
-        position: form.employment_type === "employed" ? form.position : "",
+        company: form.employment_type !== "unemployed" ? form.company : "",
+        position: form.employment_type !== "unemployed" ? form.position : "",
         industry: form.industry,
         start_date:
           form.employment_type === "employed" ? form.start_date : null,
@@ -233,80 +255,96 @@ export default function StudentEmployment() {
         </div>
       ) : jobs.data.length ? (
         <div className="space-y-4 sm:space-y-6">
-          {jobs.data.map((job) => (
-            <div
-              key={job.id}
-              className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:rounded-3xl sm:p-6"
-            >
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-base font-semibold text-gray-900 sm:text-lg">
-                      {job.position}
-                    </span>
-                    <span className="text-sm text-gray-600">
-                      @ {job.company}
-                    </span>
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        job.employment_type === "self_employed"
-                          ? "bg-violet-100 text-violet-700"
-                          : job.employment_type === "unemployed"
-                            ? "bg-gray-100 text-gray-700"
-                            : "bg-emerald-100 text-emerald-700"
-                      }`}
-                    >
-                      {job.employment_type === "self_employed"
-                        ? "Self-employed"
-                        : job.employment_type === "unemployed"
-                          ? "Unemployed"
-                          : "Employed"}
-                    </span>
-                    {job.is_current && (
-                      <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
-                        Current
-                      </span>
-                    )}
-                    {job.is_employer_updated && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
-                        <Lock className="h-3.5 w-3.5" /> Employer Locked
-                      </span>
-                    )}
+          {jobs.data.map((job) =>
+            (() => {
+              const isPastJobLocked = hasCurrentJob && !job.is_current;
+
+              return (
+                <div
+                  key={job.id}
+                  className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:rounded-3xl sm:p-6"
+                >
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-base font-semibold text-gray-900 sm:text-lg">
+                          {job.position}
+                        </span>
+                        <span className="text-sm text-gray-600">
+                          @ {job.company}
+                        </span>
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                            job.employment_type === "self_employed"
+                              ? "bg-violet-100 text-violet-700"
+                              : job.employment_type === "unemployed"
+                                ? "bg-gray-100 text-gray-700"
+                                : "bg-emerald-100 text-emerald-700"
+                          }`}
+                        >
+                          {job.employment_type === "self_employed"
+                            ? "Self-employed"
+                            : job.employment_type === "unemployed"
+                              ? "Unemployed"
+                              : "Employed"}
+                        </span>
+                        {job.is_current && (
+                          <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                            Current
+                          </span>
+                        )}
+                        {job.is_employer_updated && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
+                            <Lock className="h-3.5 w-3.5" /> Employer Locked
+                          </span>
+                        )}
+                        {isPastJobLocked && !job.is_employer_updated && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
+                            Past Job Locked
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-2 text-sm text-gray-600">
+                        {job.industry || "Industry not specified"}
+                      </p>
+                      <p className="mt-2 text-sm text-gray-700">
+                        {new Date(job.start_date).toLocaleDateString(
+                          undefined,
+                          {
+                            year: "numeric",
+                            month: "short",
+                          },
+                        )}{" "}
+                        —
+                        {job.is_current
+                          ? " Present"
+                          : job.end_date
+                            ? ` ${new Date(job.end_date).toLocaleDateString(undefined, { year: "numeric", month: "short" })}`
+                            : " —"}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {!isPastJobLocked && (
+                        <button
+                          onClick={() => openEditModal(job)}
+                          disabled={job.is_employer_updated}
+                          className="inline-flex items-center gap-2 rounded-full border border-gray-300 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <Pencil className="h-4 w-4" /> Edit
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDelete(job)}
+                        className="inline-flex items-center gap-2 rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" /> Delete
+                      </button>
+                    </div>
                   </div>
-                  <p className="mt-2 text-sm text-gray-600">
-                    {job.industry || "Industry not specified"}
-                  </p>
-                  <p className="mt-2 text-sm text-gray-700">
-                    {new Date(job.start_date).toLocaleDateString(undefined, {
-                      year: "numeric",
-                      month: "short",
-                    })}{" "}
-                    —
-                    {job.is_current
-                      ? " Present"
-                      : job.end_date
-                        ? ` ${new Date(job.end_date).toLocaleDateString(undefined, { year: "numeric", month: "short" })}`
-                        : " —"}
-                  </p>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => openEditModal(job)}
-                    disabled={job.is_employer_updated}
-                    className="inline-flex items-center gap-2 rounded-full border border-gray-300 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <Pencil className="h-4 w-4" /> Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(job)}
-                    className="inline-flex items-center gap-2 rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" /> Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+              );
+            })(),
+          )}
         </div>
       ) : (
         <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-8 text-center text-gray-500 sm:rounded-3xl sm:p-12">

@@ -14,8 +14,8 @@ class UpdateJobHistoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'company' => ['nullable', 'string', 'max:255', 'required_if:employment_type,employed'],
-            'position' => ['nullable', 'string', 'max:255', 'required_if:employment_type,employed'],
+            'company' => ['nullable', 'string', 'max:255', 'required_unless:employment_type,unemployed'],
+            'position' => ['nullable', 'string', 'max:255', 'required_unless:employment_type,unemployed'],
             'industry' => ['nullable', 'string', 'max:255'],
             'start_date' => ['nullable', 'date', 'required_if:employment_type,employed'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
