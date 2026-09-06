@@ -64,7 +64,7 @@ export default function AnnouncementList({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-bold text-gray-800">Announcements</h1>
         <button
           onClick={() => navigate(`${basePath}/create`)}
@@ -91,7 +91,7 @@ export default function AnnouncementList({
       )}
 
       {announcements.data && announcements.data.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
           {announcements.data.map((announcement) => {
             const images = Array.isArray(announcement.images)
               ? announcement.images
@@ -103,10 +103,10 @@ export default function AnnouncementList({
             return (
               <div
                 key={announcement.id}
-                className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-4"
+                className="flex h-full flex-col gap-4 rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
               >
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                <div className="min-w-0">
+                  <h3 className="mb-2 break-words text-lg font-semibold text-gray-800">
                     {announcement.title}
                   </h3>
                   <p className="text-sm text-gray-600 line-clamp-2 whitespace-pre-line">
@@ -155,39 +155,33 @@ export default function AnnouncementList({
                       className="w-full h-32 object-cover rounded-lg border border-gray-200 cursor-zoom-in"
                     />
                   </button>
-                ) : (
-                  <div className="flex items-center justify-center h-32 bg-gray-100 rounded-lg border border-gray-200 text-gray-500 text-sm">
-                    No image
-                  </div>
-                )}
+                ) : null}
 
-                <div className="flex gap-2 pt-4 border-t border-gray-200">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (previewImage) {
-                        setLightboxImage(previewImage);
-                        return;
-                      }
-                      toast.info("No preview available for this announcement");
-                    }}
-                    className="flex-1 px-4 py-2 text-tpc-green border border-tpc-green rounded-lg hover:bg-tpc-green hover:text-white transition"
-                  >
-                    View
-                  </button>
+                <div
+                  className={`mt-auto grid ${previewImage ? "grid-cols-3" : "grid-cols-2"} gap-2 border-t border-gray-200 pt-4`}
+                >
+                  {previewImage && (
+                    <button
+                      type="button"
+                      onClick={() => setLightboxImage(previewImage)}
+                      className="min-w-0 rounded-lg border border-tpc-green px-2 py-2 text-xs font-medium text-tpc-green transition hover:bg-tpc-green hover:text-white sm:px-3 sm:text-sm"
+                    >
+                      View
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() =>
                       navigate(`${basePath}/${announcement.id}/edit`)
                     }
-                    className="flex-1 px-4 py-2 text-tpc-green border border-tpc-green rounded-lg hover:bg-tpc-green hover:text-white transition"
+                    className="min-w-0 rounded-lg border border-tpc-green px-2 py-2 text-xs font-medium text-tpc-green transition hover:bg-tpc-green hover:text-white sm:px-3 sm:text-sm"
                   >
                     Edit
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDelete(announcement.id)}
-                    className="flex-1 px-4 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-600 hover:text-white transition"
+                    className="min-w-0 rounded-lg border border-red-600 px-2 py-2 text-xs font-medium text-red-600 transition hover:bg-red-600 hover:text-white sm:px-3 sm:text-sm"
                   >
                     Delete
                   </button>
