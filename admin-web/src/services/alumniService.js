@@ -114,9 +114,11 @@ const alumniService = {
    * Alignment summary grouped by department — for admin dashboard.
    * GET /admin/alumni/alignment/summary
    */
-  getAlignmentSummary: async () => {
+  getAlignmentSummary: async (filters = {}) => {
     try {
-      const response = await api.get("/admin/alumni/alignment/summary");
+      const response = await api.get("/admin/alumni/alignment/summary", {
+        params: filters,
+      });
       return response.data.data || [];
     } catch (error) {
       throw error.response?.data || error;

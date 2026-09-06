@@ -479,7 +479,10 @@ function AlignmentLineChart({ rows }) {
       row.department?.name?.length > 8
         ? row.department.name.slice(0, 8) + "…"
         : row.department?.name || `Dept ${row.department_id}`,
-    rate: row.alignment_rate ?? 0,
+    rate:
+      row.total_employed > 0
+        ? ((row.no_response ?? 0) / row.total_employed) * 100
+        : 0,
     employed: row.total_employed ?? 0,
   }));
 
@@ -501,7 +504,7 @@ function AlignmentLineChart({ rows }) {
           marginBottom: "4px",
         }}
       >
-        Alignment Rate by Department
+        Inactive / No-Response Rate by Department
       </p>
       <div
         style={{
@@ -522,7 +525,7 @@ function AlignmentLineChart({ rows }) {
             }}
           />
           <span style={{ fontSize: "11px", color: "#4b5563" }}>
-            Alignment %
+            Inactive / No-Response %
           </span>
         </span>
         <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
@@ -580,7 +583,7 @@ function AlignmentLineChart({ rows }) {
             labelStyle={{ color: "#4b5563", marginBottom: "4px" }}
             formatter={(value, name) =>
               name === "rate"
-                ? [`${value}%`, "Alignment rate"]
+                ? [`${value}%`, "Inactive / no-response rate"]
                 : [value, "Employed"]
             }
           />
@@ -1034,7 +1037,7 @@ function AlignmentSummaryWidget({ onDrillDown, filters, onRowsLoaded }) {
       setError("");
       try {
         const params = {};
-        if (filters?.department) params.department = filters.department;
+        if (filters?.department) params.department_id = filters.department;
         if (filters?.batch) params.batch = filters.batch;
         const data = await alumniService.getAlignmentSummary(params);
         setRows(data);
@@ -1091,8 +1094,11 @@ function AlignmentSummaryWidget({ onDrillDown, filters, onRowsLoaded }) {
           <AlignmentLineChart rows={rows} />
           <div className="divide-y divide-gray-100 rounded-xl border border-gray-100 overflow-hidden">
             {rows.map((row) => {
-              const rate = row.alignment_rate ?? 0;
-              const hasData = row.aligned + row.not_aligned > 0;
+              const rate =
+                row.total_employed > 0
+                  ? ((row.no_response ?? 0) / row.total_employed) * 100
+                  : 0;
+              const hasData = row.total_employed > 0;
               return (
                 <button
                   key={row.department_id}
@@ -1116,7 +1122,7 @@ function AlignmentSummaryWidget({ onDrillDown, filters, onRowsLoaded }) {
                       </span>
                       <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500">
                         <HelpCircle className="h-3 w-3" />
-                        {row.no_response} no response
+                        {row.no_response} inactive account
                       </span>
                     </div>
                     {hasData && (
@@ -1128,7 +1134,7 @@ function AlignmentSummaryWidget({ onDrillDown, filters, onRowsLoaded }) {
                           />
                         </div>
                         <p className="mt-1 text-xs text-gray-400">
-                          {rate}% alignment rate
+                          {rate.toFixed(1)}% inactive / no-response rate
                           <span className="ml-1 text-gray-300">
                             ({row.total_employed} employed)
                           </span>

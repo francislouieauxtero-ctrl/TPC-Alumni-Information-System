@@ -32,7 +32,7 @@ export default function PrintableReport({
   preparedByName,
 }) {
   const [freshStats, setFreshStats] = useState(null);
-  const [freshAlignmentRows, setFreshAlignmentRows] = useState([]);
+  const [freshAlignmentRows, setFreshAlignmentRows] = useState(null);
 
   // Fetch fresh data from backend at time of opening/printing
   useEffect(() => {
@@ -70,10 +70,7 @@ export default function PrintableReport({
   }, [filters]);
 
   const statsToUse = freshStats ?? stats;
-  const alignmentToUse =
-    freshAlignmentRows && freshAlignmentRows.length > 0
-      ? freshAlignmentRows
-      : alignmentRows;
+  const alignmentToUse = freshAlignmentRows ?? alignmentRows;
 
   const overview = computeReportOverview(statsToUse, alignmentToUse);
   const breakdown = buildReportBreakdown(statsToUse, alignmentToUse);
@@ -162,8 +159,8 @@ export default function PrintableReport({
               value={`${overview.employmentRate.toFixed(1)}%`}
             />
             <ReportStat
-              label="Alignment Rate"
-              value={`${overview.alignmentRate.toFixed(1)}%`}
+              label="Inactive / No-Response Rate"
+              value={`${overview.noResponseRate.toFixed(1)}%`}
             />
           </div>
         </section>
@@ -178,13 +175,15 @@ export default function PrintableReport({
         </section>
 
         <section className="report-section report-avoid-break">
-          <h2 className="report-section-title">Job Alignment by Department</h2>
+          <h2 className="report-section-title">
+            Inactive / No-Response Rate by Department
+          </h2>
           <ReportBarChart rows={breakdown} />
         </section>
 
         <section className="report-section report-avoid-break">
           <h2 className="report-section-title">
-            Job Alignment Detail by Department
+            Job Response Detail by Department
           </h2>
           <ReportAlignmentTable rows={breakdown} />
         </section>
@@ -223,18 +222,17 @@ function computeReportOverview(stats, alignmentRows) {
   const employmentRate =
     totalGraduates > 0 ? ((employed + selfEmployed) / totalGraduates) * 100 : 0;
 
-  // Overall alignment rate: weighted average across departments,
-  // weighted by each department's employed count.
   const totalEmployedAcrossDepts = (alignmentRows || []).reduce(
     (sum, r) => sum + (r.total_employed || 0),
     0,
   );
-  const alignmentRate =
+  const totalNoResponseAcrossDepts = (alignmentRows || []).reduce(
+    (sum, r) => sum + (r.no_response || 0),
+    0,
+  );
+  const noResponseRate =
     totalEmployedAcrossDepts > 0
-      ? (alignmentRows || []).reduce(
-          (sum, r) => sum + (r.alignment_rate || 0) * (r.total_employed || 0),
-          0,
-        ) / totalEmployedAcrossDepts
+      ? (totalNoResponseAcrossDepts / totalEmployedAcrossDepts) * 100
       : 0;
 
   return {
@@ -243,7 +241,7 @@ function computeReportOverview(stats, alignmentRows) {
     selfEmployed,
     unemployed,
     employmentRate,
-    alignmentRate,
+    noResponseRate,
   };
 }
 
@@ -257,7 +255,10 @@ function buildReportBreakdown(stats, alignmentRows) {
       employed: empByDept.employed ?? 0,
       selfEmployed: empByDept.self_employed ?? 0,
       unemployed: empByDept.unemployed ?? 0,
-      alignmentRate: row.alignment_rate ?? 0,
+      noResponseRate:
+        row.total_employed > 0
+          ? ((row.no_response ?? 0) / row.total_employed) * 100
+          : 0,
       // ── Job–course alignment counts (same fields AlignmentSummaryWidget
       // uses in Analytics.jsx) — carried through so the report can show
       // the actual "not aligned" figures, not just the alignment rate %.
@@ -382,7 +383,7 @@ function ReportBarChart({ rows }) {
     >
       {rows.map((row, i) => {
         const y = i * (barHeight + gap);
-        const rate = Math.max(0, Math.min(100, row.alignmentRate || 0));
+        const rate = Math.max(0, Math.min(100, row.noResponseRate || 0));
         const width = (rate / 100) * maxBarWidth;
         return (
           <g key={row.department}>
@@ -421,9 +422,7 @@ function ReportBarChart({ rows }) {
 }
 
 // ── Per-department alignment detail table ─────────────────────────────────
-// Shows the actual Aligned / Not Aligned / No Response counts behind each
-// department's alignment rate — the bar chart above only shows the rate %,
-// this makes the "not aligned" figures explicit in the printed report.
+// Shows the response counts behind each department's inactive/no-response rate.
 function ReportAlignmentTable({ rows }) {
   if (!rows || rows.length === 0) {
     return <p className="report-empty">No alignment data available.</p>;
@@ -437,8 +436,8 @@ function ReportAlignmentTable({ rows }) {
           <th>Employed</th>
           <th>Aligned</th>
           <th>Not Aligned</th>
-          <th>No Response</th>
-          <th>Alignment Rate</th>
+          <th>Inactive Account</th>
+          <th>No-Response Rate</th>
         </tr>
       </thead>
       <tbody>
@@ -449,7 +448,7 @@ function ReportAlignmentTable({ rows }) {
             <td>{row.aligned}</td>
             <td className="report-align-not">{row.notAligned}</td>
             <td>{row.noResponse}</td>
-            <td>{row.alignmentRate}%</td>
+            <td>{row.noResponseRate.toFixed(1)}%</td>
           </tr>
         ))}
       </tbody>
