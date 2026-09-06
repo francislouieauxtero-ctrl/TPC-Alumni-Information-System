@@ -764,8 +764,7 @@ export default function Analytics({ onDrillDown }) {
   // Derived chart data
   const studentStatusData = [
     { name: "Verified", value: filtered?.verified_students || 0 },
-    { name: "Pending", value: filtered?.unverified_students || 0 },
-    { name: "Inactive", value: filtered?.inactive_students || 0 },
+    { name: "Inactive Account", value: filtered?.inactive_students || 0 },
   ].filter((d) => d.value > 0);
 
   const employmentData = [
@@ -840,8 +839,8 @@ export default function Analytics({ onDrillDown }) {
           accent="bg-green-500"
         />
         <StatCard
-          title="Pending"
-          value={filtered?.unverified_students ?? "—"}
+          title="Inactive Accounts"
+          value={filtered?.inactive_students ?? "—"}
           icon={<Clock className="w-4 h-4" />}
           accent="bg-amber-500"
         />

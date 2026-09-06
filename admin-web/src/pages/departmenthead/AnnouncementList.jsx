@@ -113,7 +113,7 @@ export default function DepartmentHeadAnnouncementList({
                   <h3 className="text-lg font-semibold text-gray-800 mb-2">
                     {announcement.title}
                   </h3>
-                  <p className="max-h-32 overflow-y-auto pr-1 text-sm text-gray-600 whitespace-pre-line">
+                  <p className="text-sm text-gray-600 line-clamp-2 whitespace-pre-line">
                     {renderTextWithLinks(announcement.content || "")}
                   </p>
                 </div>
@@ -160,7 +160,7 @@ export default function DepartmentHeadAnnouncementList({
                   </div>
                 </div>
 
-                {previewImage ? (
+                {previewImage && (
                   <button
                     type="button"
                     onClick={() => setLightboxImage(previewImage)}
@@ -172,10 +172,6 @@ export default function DepartmentHeadAnnouncementList({
                       className="w-full h-32 object-cover rounded-lg border border-gray-200 cursor-zoom-in"
                     />
                   </button>
-                ) : (
-                  <div className="flex items-center justify-center h-32 bg-gray-100 rounded-lg border border-gray-200 text-gray-500 text-sm">
-                    No image
-                  </div>
                 )}
 
                 <div className="flex gap-2 pt-4 border-t border-gray-200">
