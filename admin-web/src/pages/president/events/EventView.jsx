@@ -184,7 +184,7 @@ export default function EventView() {
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
               Description
             </p>
-            <div className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+            <div className="max-h-64 overflow-y-auto pr-2 text-gray-700 leading-relaxed whitespace-pre-wrap">
               {renderTextWithLinks(event.description)}
             </div>
           </div>

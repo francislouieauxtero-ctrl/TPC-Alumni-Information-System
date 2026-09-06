@@ -110,7 +110,7 @@ export default function AnnouncementList({
                   <h3 className="mb-2 break-words text-lg font-semibold text-gray-800">
                     {announcement.title}
                   </h3>
-                  <p className="text-sm text-gray-600 line-clamp-2 whitespace-pre-line">
+                  <p className="max-h-32 overflow-y-auto pr-1 text-sm text-gray-600 whitespace-pre-line">
                     {renderTextWithLinks(announcement.content || "")}
                   </p>
                 </div>

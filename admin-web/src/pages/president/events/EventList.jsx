@@ -126,7 +126,7 @@ export default function EventList() {
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
                   {event.title}
                 </h3>
-                <p className="text-sm text-gray-600 line-clamp-2 whitespace-pre-line">
+                <p className="max-h-32 overflow-y-auto pr-1 text-sm text-gray-600 whitespace-pre-line">
                   {renderTextWithLinks(event.description || "")}
                 </p>
               </div>

@@ -152,11 +152,7 @@ export default function StudentAnnouncements() {
                       className="w-full h-32 object-cover rounded-lg border border-gray-200 cursor-zoom-in"
                     />
                   </button>
-                ) : (
-                  <div className="flex items-center justify-center h-32 bg-gray-100 rounded-lg border border-gray-200 text-gray-500 text-sm">
-                    No image
-                  </div>
-                )}
+                ) : null}
               </div>
             );
           })}
