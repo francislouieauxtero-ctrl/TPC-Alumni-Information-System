@@ -24,7 +24,6 @@ export default function StudentEmployment() {
   const [editJob, setEditJob] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
-  const hasExistingJob = jobs.data.length > 0;
 
   useEffect(() => {
     fetchJobs();
@@ -379,9 +378,7 @@ export default function StudentEmployment() {
                   className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-tpc-green focus:ring-2 focus:ring-tpc-green/20"
                 >
                   <option value="employed">Employed</option>
-                  {!hasExistingJob && (
-                    <option value="unemployed">Unemployed</option>
-                  )}
+                  <option value="unemployed">Unemployed</option>
                   <option value="self_employed">Self-employed</option>
                 </select>
                 {errors.employment_type && (

@@ -11,6 +11,9 @@ import {
   User,
   Check,
   AlertCircle,
+  CheckCircle2,
+  XCircle,
+  HelpCircle,
 } from "lucide-react";
 import alumniService from "../../services/alumniService";
 import departmentService from "../../services/departmentService";
@@ -156,6 +159,39 @@ function ProfileModal({ alumni, onClose, jobHistory, jobHistoryLoading }) {
     (jobHistory && jobHistory.find
       ? (jobHistory.find((j) => j.is_current)?.company ?? null)
       : null);
+  const workAligned =
+    alumni.is_work_aligned ?? alumni.alumniProfile?.is_work_aligned ?? null;
+  const workAlignedReason =
+    alumni.work_aligned_reason ??
+    alumni.alumniProfile?.work_aligned_reason ??
+    null;
+  const unemployedFeedback =
+    jobHistory?.find((job) => job.employment_type === "unemployed")?.industry ??
+    null;
+  const employmentFeedback =
+    inferredEmploymentStatus === "unemployed"
+      ? unemployedFeedback
+      : workAlignedReason;
+  const FeedbackIcon =
+    inferredEmploymentStatus === "unemployed"
+      ? AlertCircle
+      : workAligned === true
+        ? CheckCircle2
+        : workAligned === false
+          ? XCircle
+          : HelpCircle;
+  const feedbackTitle =
+    inferredEmploymentStatus === "unemployed"
+      ? "Current Status Feedback"
+      : "Employment Feedback";
+  const feedbackStyle =
+    inferredEmploymentStatus === "unemployed"
+      ? "border-amber-200 bg-amber-50 text-amber-700"
+      : workAligned === true
+        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+        : workAligned === false
+          ? "border-red-200 bg-red-50 text-red-700"
+          : "border-gray-200 bg-gray-50 text-gray-600";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
@@ -230,12 +266,38 @@ function ProfileModal({ alumni, onClose, jobHistory, jobHistoryLoading }) {
                   Current Job
                 </p>
               </div>
-              <p className="text-sm font-medium text-gray-800">{currentJob}</p>
-              {company && (
-                <p className="text-xs text-gray-600 mt-1">{company}</p>
-              )}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">
+                    Position
+                  </p>
+                  <p className="text-sm font-medium text-gray-800">
+                    {currentJob}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">
+                    Company
+                  </p>
+                  <p className="text-sm font-medium text-gray-800">
+                    {company || "Data missing"}
+                  </p>
+                </div>
+              </div>
             </div>
           )}
+
+          <div className={`rounded-xl border p-4 ${feedbackStyle}`}>
+            <div className="flex items-center gap-2 mb-2">
+              <FeedbackIcon className="h-4 w-4" />
+              <p className="text-xs font-semibold uppercase tracking-widest">
+                {feedbackTitle}
+              </p>
+            </div>
+            <p className="text-sm leading-relaxed">
+              {employmentFeedback || "Feedback not provided by the alumni."}
+            </p>
+          </div>
 
           {/* Employment history */}
           <div>
@@ -266,6 +328,11 @@ function ProfileModal({ alumni, onClose, jobHistory, jobHistoryLoading }) {
                           <p className="text-xs text-gray-600 mt-0.5">
                             {j.company || "—"}
                           </p>
+                          {j.employment_type === "unemployed" && j.industry && (
+                            <p className="mt-2 text-xs leading-relaxed text-gray-600">
+                              Current status feedback: {j.industry}
+                            </p>
+                          )}
                         </div>
                       </div>
                       {j.is_current && (
@@ -383,11 +450,15 @@ export default function StudentManagement() {
             const found = settled.find((s) => String(s.id) === String(aUserId));
             if (!found) return a;
             const current = found.jobs.find((j) => j.is_current);
-            const derivedStatus = current
-              ? "employed"
-              : found.jobs.length > 0
-                ? "self_employed"
-                : (a.employment_status ?? "unemployed");
+            const derivedStatus =
+              a.employment_status ??
+              a.alumniProfile?.employment_status ??
+              a.user?.alumniProfile?.employment_status ??
+              (current
+                ? "employed"
+                : found.jobs.length > 0
+                  ? "self_employed"
+                  : "unemployed");
             return {
               ...a,
               has_job_history: found.jobs.length > 0,
@@ -445,20 +516,25 @@ export default function StudentManagement() {
       selectedAlumni.user_id ??
       selectedAlumni.userId;
     const current = jobHistory.find((j) => j.is_current);
-    const derivedStatus = current
-      ? "employed"
-      : jobHistory.length > 0
-        ? "self_employed"
-        : "unemployed";
 
     setAlumni((prev) =>
       prev.map((a) => {
         const aUserId = a.user?.id ?? a.user_id ?? a.userId;
         if (String(aUserId) !== String(userId)) return a;
+        const savedStatus =
+          a.employment_status ??
+          a.alumniProfile?.employment_status ??
+          a.user?.alumniProfile?.employment_status;
         return {
           ...a,
           has_job_history: jobHistory.length > 0,
-          employment_status: derivedStatus,
+          employment_status:
+            savedStatus ??
+            (current
+              ? "employed"
+              : jobHistory.length > 0
+                ? "self_employed"
+                : "unemployed"),
           current_job: current?.position ?? null,
           company: current?.company ?? null,
         };
@@ -689,14 +765,17 @@ export default function StudentManagement() {
                   alum.alumniProfile?.current_job ??
                   alum.user?.alumniProfile?.current_job);
 
-            let inferredEmploymentStatus =
-              summary && summary.length > 0
+            const savedEmploymentStatus =
+              alum.employment_status ??
+              alum.alumniProfile?.employment_status ??
+              alum.user?.alumniProfile?.employment_status;
+            const inferredEmploymentStatus =
+              savedEmploymentStatus ??
+              (summary && summary.length > 0
                 ? summary.find((j) => j.is_current)
                   ? "employed"
                   : "self_employed"
-                : (alum.employment_status ??
-                  alum.alumniProfile?.employment_status ??
-                  alum.user?.alumniProfile?.employment_status);
+                : "unemployed");
 
             const company =
               alum.company ??

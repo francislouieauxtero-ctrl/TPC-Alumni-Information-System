@@ -181,6 +181,11 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
     alumni.alumniProfile?.current_job ??
     jobHistory?.find((j) => j.is_current)?.position ??
     "—";
+  const company =
+    alumni.company ??
+    alumni.alumniProfile?.company ??
+    jobHistory?.find((j) => j.is_current)?.company ??
+    null;
   const departmentName = alumni.department?.name ?? "Data missing";
   const emailAddress = user.email ?? "Data missing";
   const studentId = user.schoolId ?? user.school_id ?? "Data missing";
@@ -204,6 +209,31 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
   const alignmentBadge =
     ALIGNMENT_BADGE[alignmentKey] ?? ALIGNMENT_BADGE["null"];
   const AlignIcon = alignmentBadge.icon;
+  const unemployedFeedback =
+    jobHistory?.find((job) => job.employment_type === "unemployed")?.industry ??
+    null;
+  const employmentFeedback =
+    employmentStatus === "unemployed" ? unemployedFeedback : workAlignedReason;
+  const FeedbackIcon =
+    employmentStatus === "unemployed"
+      ? AlertCircle
+      : isWorkAligned === true
+        ? CheckCircle2
+        : isWorkAligned === false
+          ? XCircle
+          : HelpCircle;
+  const feedbackTitle =
+    employmentStatus === "unemployed"
+      ? "Current Status Feedback"
+      : "Employment Feedback";
+  const feedbackStyle =
+    employmentStatus === "unemployed"
+      ? "border-amber-200 bg-amber-50 text-amber-700"
+      : alignmentKey === "true"
+        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+        : alignmentKey === "false"
+          ? "border-red-200 bg-red-50 text-red-700"
+          : "border-gray-200 bg-gray-50 text-gray-600";
 
   return (
     <div
@@ -308,7 +338,24 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
                   Current Job
                 </p>
               </div>
-              <p className="text-sm font-medium text-gray-800">{currentJob}</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">
+                    Position
+                  </p>
+                  <p className="text-sm font-medium text-gray-800">
+                    {currentJob}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">
+                    Company
+                  </p>
+                  <p className="text-sm font-medium text-gray-800">
+                    {company || "Data missing"}
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 
@@ -341,6 +388,12 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
                           <p className="text-xs text-gray-600 mt-0.5">
                             {job.company || "—"}
                           </p>
+                          {job.employment_type === "unemployed" &&
+                            job.industry && (
+                              <p className="mt-2 text-xs leading-relaxed text-gray-600">
+                                Current status feedback: {job.industry}
+                              </p>
+                            )}
                         </div>
                       </div>
                       {job.is_current && (
@@ -363,31 +416,27 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
             )}
           </div>
 
-          {/* ── Job–course alignment — only shown for employed alumni ──── */}
-          {isEmployed && (
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">
-                  Job–Course Alignment
+          <div className={`rounded-xl border p-4 ${feedbackStyle}`}>
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2">
+                <FeedbackIcon className="h-4 w-4" />
+                <p className="text-xs font-semibold uppercase tracking-widest">
+                  {feedbackTitle}
                 </p>
+              </div>
+              {isEmployed && (
                 <span
                   className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium ${alignmentBadge.cls}`}
                 >
                   <AlignIcon className="h-3 w-3" />
                   {alignmentBadge.label}
                 </span>
-              </div>
-              {workAlignedReason ? (
-                <p className="text-xs text-emerald-700 leading-relaxed">
-                  "{workAlignedReason}"
-                </p>
-              ) : (
-                <p className="text-xs text-emerald-600">
-                  Feedback not provided by the alumni.
-                </p>
               )}
             </div>
-          )}
+            <p className="text-sm leading-relaxed">
+              {employmentFeedback || "Feedback not provided by the alumni."}
+            </p>
+          </div>
         </div>
       </div>
     </div>
