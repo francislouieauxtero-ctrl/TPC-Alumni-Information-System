@@ -124,7 +124,7 @@ export default function AnnouncementList({
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600">By:</span>
                     <span className="font-medium text-gray-800">
-                      {announcement.creator?.name || "System"}
+                      {announcement.creator?.name || "Unknown user"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">

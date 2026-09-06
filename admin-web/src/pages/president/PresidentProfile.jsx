@@ -12,7 +12,6 @@ import {
   Key,
   Upload,
   Trash2,
-  Info,
 } from "lucide-react";
 
 const STATUS_STYLES = {
@@ -35,9 +34,11 @@ function getInitials(name) {
 export default function PresidentProfile() {
   const fileInputRef = useRef(null);
   const [profile, setProfile] = useState(null);
+  const [name, setName] = useState("");
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [actionError, setActionError] = useState("");
+  const [savingName, setSavingName] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [removing, setRemoving] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -50,6 +51,7 @@ export default function PresidentProfile() {
         const response = await api.get("/auth/user");
         if (response.data.status) {
           setProfile(response.data.data);
+          setName(response.data.data.name || "");
         } else {
           setLoadError("We couldn't load your profile.");
         }
@@ -62,6 +64,36 @@ export default function PresidentProfile() {
     };
     fetchProfile();
   }, []);
+
+  const handleNameSave = async (event) => {
+    event.preventDefault();
+    const trimmedName = name.trim();
+
+    if (!trimmedName) {
+      setActionError("Please enter your name.");
+      return;
+    }
+
+    try {
+      setSavingName(true);
+      setActionError("");
+      const response = await api.put("/profile", { name: trimmedName });
+      if (response.data.status) {
+        const updatedUser = response.data.data;
+        setProfile(updatedUser);
+        setName(updatedUser.name || "");
+        localStorage.setItem("userName", updatedUser.name || "");
+      } else {
+        setActionError(response.data.message || "Failed to update your name.");
+      }
+    } catch (err) {
+      setActionError(
+        err?.response?.data?.message || "Failed to update your name.",
+      );
+    } finally {
+      setSavingName(false);
+    }
+  };
 
   const validateFile = (file) => {
     if (!file.type.startsWith("image/"))
@@ -176,7 +208,12 @@ export default function PresidentProfile() {
   const details = [
     { icon: User, label: "Full name", value: profile?.name },
     { icon: Mail, label: "Email", value: profile?.email },
-    { icon: Key, label: "Role", value: profile?.role },
+    {
+      icon: Key,
+      label: "Role",
+      value:
+        profile?.role === "super_admin" ? "Alumni President" : profile?.role,
+    },
     { icon: Activity, label: "Status", value: profile?.status },
   ];
 
@@ -272,14 +309,16 @@ export default function PresidentProfile() {
               {profile?.name || "—"}
             </p>
             <p className="mt-1 text-center text-sm text-gray-400 capitalize">
-              {profile?.role || "President"}
+              {profile?.role === "super_admin"
+                ? "Alumni President"
+                : profile?.role || "Alumni President"}
             </p>
 
             {/* Badges */}
             <div className="mt-4 flex w-full flex-col gap-1.5">
               <span className="inline-flex items-center gap-1.5 rounded-lg border border-blue-100 bg-blue-50 px-2.5 py-1.5 text-xs font-medium text-blue-700">
                 <ShieldCheck className="h-3.5 w-3.5" />
-                President
+                Alumni President
               </span>
               <span
                 className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium capitalize ring-1 ring-inset ${statusClasses}`}
@@ -320,6 +359,36 @@ export default function PresidentProfile() {
             <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-gray-400">
               Account details
             </p>
+
+            <form
+              onSubmit={handleNameSave}
+              className="mb-5 rounded-lg border border-gray-100 bg-gray-50 p-4"
+            >
+              <label
+                htmlFor="president-name"
+                className="mb-2 block text-xs font-medium text-gray-500"
+              >
+                Display name
+              </label>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <input
+                  id="president-name"
+                  type="text"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  className="min-w-0 flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-tpc-greenDeep focus:ring-2 focus:ring-tpc-greenDeep/20"
+                  maxLength={255}
+                  disabled={savingName}
+                />
+                <button
+                  type="submit"
+                  disabled={savingName}
+                  className="rounded-lg bg-tpc-greenDeep px-4 py-2 text-sm font-medium text-white transition hover:bg-tpc-green disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {savingName ? "Saving..." : "Save name"}
+                </button>
+              </div>
+            </form>
 
             <div className="divide-y divide-gray-100">
               {details.map(({ icon: Icon, label, value }) => (

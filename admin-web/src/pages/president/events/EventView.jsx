@@ -100,7 +100,7 @@ export default function EventView() {
                 <p>
                   By:{" "}
                   <span className="font-medium text-gray-700">
-                    {event.creator?.name || "System"}
+                    {event.creator?.name || "Unknown user"}
                   </span>
                 </p>
               </div>

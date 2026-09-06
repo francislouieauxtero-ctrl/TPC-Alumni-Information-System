@@ -97,14 +97,14 @@ export default function StudentEvents() {
               <div className="space-y-4 p-5 sm:p-6">
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tpc-navy text-sm font-bold text-white">
-                    {(event.creator?.name || "System")
+                    {(event.creator?.name || "Unknown user")
                       .trim()
                       .charAt(0)
                       .toUpperCase()}
                   </div>
                   <div className="min-w-0">
                     <p className="truncate font-semibold text-gray-900">
-                      {event.creator?.name || "System"}
+                      {event.creator?.name || "Unknown user"}
                     </p>
                     <p className="text-sm text-gray-500">Event organizer</p>
                   </div>

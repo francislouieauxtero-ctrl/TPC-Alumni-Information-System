@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import logo from "../assets/tpcL.jpg";
 import {
@@ -23,19 +23,44 @@ export default function PresidentLayout({ children }) {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [logoutLoading, setLogoutLoading] = useState(false);
+  const [userName, setUserName] = useState(
+    localStorage.getItem("userName") || "User",
+  );
+  const [userEmail, setUserEmail] = useState(
+    localStorage.getItem("userEmail") || "user@example.com",
+  );
+  const [userAvatar, setUserAvatar] = useState(
+    localStorage.getItem("userAvatar") || "",
+  );
+
+  useEffect(() => {
+    const syncUser = async () => {
+      try {
+        const response = await api.get("/auth/user");
+        if (response.data.status) {
+          const user = response.data.data;
+          setUserName(user.name || "User");
+          setUserEmail(user.email || "");
+          setUserAvatar(user.avatar || "");
+          localStorage.setItem("userName", user.name || "");
+          localStorage.setItem("userEmail", user.email || "");
+          localStorage.setItem("userAvatar", user.avatar || "");
+        }
+      } catch (err) {
+        console.error("Failed to sync user:", err);
+      }
+    };
+
+    syncUser();
+  }, []);
 
   const userRole = localStorage.getItem("userRole");
-  const userName = localStorage.getItem("userName") || "User";
-  const userEmail = localStorage.getItem("userEmail") || "user@example.com";
-  const userAvatar = localStorage.getItem("userAvatar") || "";
   const roleLabel =
     userRole === "super_admin"
-      ? "President"
+      ? "Alumni President"
       : userRole === "admin"
         ? "Department Head"
         : "Admin";
-  const roleInitial =
-    userRole === "super_admin" ? "P" : userRole === "admin" ? "D" : "A";
   const displayName =
     userRole === "super_admin" || userRole === "admin" ? userName : "Admin";
 
@@ -77,7 +102,7 @@ export default function PresidentLayout({ children }) {
             />
             {sidebarOpen && (
               <span className="text-white text-xl font-bold tracking-tight">
-                President
+                {roleLabel}
               </span>
             )}
           </div>

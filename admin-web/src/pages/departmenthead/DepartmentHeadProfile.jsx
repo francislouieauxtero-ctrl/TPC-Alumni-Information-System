@@ -13,7 +13,6 @@ import {
   Key,
   Upload,
   Trash2,
-  Info,
 } from "lucide-react";
 
 const STATUS_STYLES = {
@@ -36,9 +35,11 @@ function getInitials(name) {
 export default function DepartmentHeadProfile() {
   const fileInputRef = useRef(null);
   const [profile, setProfile] = useState(null);
+  const [name, setName] = useState("");
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [actionError, setActionError] = useState("");
+  const [savingName, setSavingName] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [removing, setRemoving] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -51,6 +52,7 @@ export default function DepartmentHeadProfile() {
         const response = await api.get("/auth/user");
         if (response.data.status) {
           setProfile(response.data.data);
+          setName(response.data.data.name || "");
         } else {
           setLoadError("We couldn't load your profile.");
         }
@@ -63,6 +65,36 @@ export default function DepartmentHeadProfile() {
     };
     fetchProfile();
   }, []);
+
+  const handleNameSave = async (event) => {
+    event.preventDefault();
+    const trimmedName = name.trim();
+
+    if (!trimmedName) {
+      setActionError("Please enter your name.");
+      return;
+    }
+
+    try {
+      setSavingName(true);
+      setActionError("");
+      const response = await api.put("/profile", { name: trimmedName });
+      if (response.data.status) {
+        const updatedUser = response.data.data;
+        setProfile(updatedUser);
+        setName(updatedUser.name || "");
+        localStorage.setItem("userName", updatedUser.name || "");
+      } else {
+        setActionError(response.data.message || "Failed to update your name.");
+      }
+    } catch (err) {
+      setActionError(
+        err?.response?.data?.message || "Failed to update your name.",
+      );
+    } finally {
+      setSavingName(false);
+    }
+  };
 
   const validateFile = (file) => {
     if (!file.type.startsWith("image/"))
@@ -322,6 +354,36 @@ export default function DepartmentHeadProfile() {
               Account details
             </p>
 
+            <form
+              onSubmit={handleNameSave}
+              className="mb-5 rounded-lg border border-gray-100 bg-gray-50 p-4"
+            >
+              <label
+                htmlFor="department-head-name"
+                className="mb-2 block text-xs font-medium text-gray-500"
+              >
+                Display name
+              </label>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <input
+                  id="department-head-name"
+                  type="text"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  className="min-w-0 flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-tpc-greenDeep focus:ring-2 focus:ring-tpc-greenDeep/20"
+                  maxLength={255}
+                  disabled={savingName}
+                />
+                <button
+                  type="submit"
+                  disabled={savingName}
+                  className="rounded-lg bg-tpc-greenDeep px-4 py-2 text-sm font-medium text-white transition hover:bg-tpc-green disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {savingName ? "Saving..." : "Save name"}
+                </button>
+              </div>
+            </form>
+
             <div className="divide-y divide-gray-100">
               {details.map(({ icon: Icon, label, value }) => (
                 <div key={label} className="flex items-center gap-4 py-5">
@@ -336,14 +398,6 @@ export default function DepartmentHeadProfile() {
                   </div>
                 </div>
               ))}
-            </div>
-
-            {/* Hint */}
-            <div className="mt-5 flex items-start gap-2 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2.5 text-xs text-gray-400">
-              <Info className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
-              <span>
-                To update your name or email, contact your system administrator.
-              </span>
             </div>
           </div>
         </div>

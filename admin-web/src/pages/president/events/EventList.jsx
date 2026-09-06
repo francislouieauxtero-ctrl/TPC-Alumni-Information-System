@@ -143,7 +143,7 @@ export default function EventList() {
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">By:</span>
                   <span className="font-medium text-gray-800">
-                    {event.creator?.name || "System"}
+                    {event.creator?.name || "Unknown user"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
