@@ -1,9 +1,12 @@
+import { useState } from "react";
+
 export default function UserAvatar({
   name,
   avatar,
   size = "md",
   className = "",
 }) {
+  const [imageFailed, setImageFailed] = useState(false);
   const sizeClasses = {
     sm: "w-10 h-10 text-sm",
     md: "w-12 h-12 text-base",
@@ -16,14 +19,12 @@ export default function UserAvatar({
     <div
       className={`flex items-center justify-center overflow-hidden rounded-full bg-white/20 text-white font-bold ring-1 ring-white/30 ${sizeClasses[size] || sizeClasses.md} ${className}`}
     >
-      {avatar ? (
+      {avatar && !imageFailed ? (
         <img
           src={avatar}
           alt={name || "User avatar"}
           className="h-full w-full object-cover"
-          onError={(e) => {
-            e.target.style.display = "none";
-          }}
+          onError={() => setImageFailed(true)}
         />
       ) : (
         <span>{fallbackInitial}</span>

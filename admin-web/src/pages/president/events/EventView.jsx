@@ -2,7 +2,12 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import eventService from "../../../services/eventService";
 import { toast } from "react-toastify";
-import { getAttachmentUrls, renderTextWithLinks } from "../../../utils/media";
+import {
+  getAttachmentUrls,
+  getCreatorRoleLabel,
+  renderTextWithLinks,
+} from "../../../utils/media";
+import UserAvatar from "../../../components/shared/UserAvatar";
 
 export default function EventView() {
   const { id } = useParams();
@@ -99,8 +104,21 @@ export default function EventView() {
                 </p>
                 <p>
                   By:{" "}
-                  <span className="font-medium text-gray-700">
-                    {event.creator?.name || "Unknown user"}
+                  <span className="flex items-center gap-2 font-medium text-gray-700">
+                    <UserAvatar
+                      name={event.creator?.name || "Unknown user"}
+                      avatar={event.creator?.avatar}
+                      size="sm"
+                      className="h-8 w-8 bg-tpc-navy ring-0"
+                    />
+                    <span>
+                      <span className="block">
+                        {event.creator?.name || "Unknown user"}
+                      </span>
+                      <span className="block text-xs font-normal text-gray-500">
+                        {getCreatorRoleLabel(event.creator)}
+                      </span>
+                    </span>
                   </span>
                 </p>
               </div>

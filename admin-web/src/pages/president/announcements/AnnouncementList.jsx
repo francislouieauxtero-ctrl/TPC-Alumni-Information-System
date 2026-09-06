@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import announcementService from "../../../services/announcementService";
-import { renderTextWithLinks } from "../../../utils/media";
+import { getCreatorRoleLabel, renderTextWithLinks } from "../../../utils/media";
 import { toast } from "react-toastify";
+import UserAvatar from "../../../components/shared/UserAvatar";
 
 export default function AnnouncementList({
   basePath = "/president/announcements",
@@ -123,8 +124,21 @@ export default function AnnouncementList({
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600">By:</span>
-                    <span className="font-medium text-gray-800">
-                      {announcement.creator?.name || "Unknown user"}
+                    <span className="flex items-center gap-2 text-right">
+                      <UserAvatar
+                        name={announcement.creator?.name || "Unknown user"}
+                        avatar={announcement.creator?.avatar}
+                        size="sm"
+                        className="h-8 w-8 bg-tpc-navy ring-0"
+                      />
+                      <span>
+                        <span className="block font-medium text-gray-800">
+                          {announcement.creator?.name || "Unknown user"}
+                        </span>
+                        <span className="block text-xs text-gray-500">
+                          {getCreatorRoleLabel(announcement.creator)}
+                        </span>
+                      </span>
                     </span>
                   </div>
                   <div className="flex items-center justify-between">

@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { CalendarDays, Megaphone, Users } from "lucide-react";
 import announcementService from "../../services/announcementService";
-import { renderTextWithLinks } from "../../utils/media";
+import { getCreatorRoleLabel, renderTextWithLinks } from "../../utils/media";
+import UserAvatar from "../../components/shared/UserAvatar";
 
 export default function StudentAnnouncements() {
   const [announcements, setAnnouncements] = useState({ data: [] });
@@ -81,17 +82,19 @@ export default function StudentAnnouncements() {
               >
                 <div className="space-y-4 p-5 sm:p-6">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tpc-navy text-sm font-bold text-white">
-                      {(announcement.creator?.name || "Unknown user")
-                        .trim()
-                        .charAt(0)
-                        .toUpperCase()}
-                    </div>
+                    <UserAvatar
+                      name={announcement.creator?.name || "Unknown user"}
+                      avatar={announcement.creator?.avatar}
+                      size="sm"
+                      className="shrink-0 bg-tpc-navy ring-0"
+                    />
                     <div className="min-w-0">
                       <p className="truncate font-semibold text-gray-900">
                         {announcement.creator?.name || "Unknown user"}
                       </p>
-                      <p className="text-sm text-gray-500">Announcement</p>
+                      <p className="text-sm text-gray-500">
+                        {getCreatorRoleLabel(announcement.creator)}
+                      </p>
                     </div>
                   </div>
 

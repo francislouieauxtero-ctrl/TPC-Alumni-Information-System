@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react";
 import { CalendarDays, CalendarPlus, MapPin, Users } from "lucide-react";
 import eventService from "../../services/eventService";
-import { getAttachmentUrls, renderTextWithLinks } from "../../utils/media";
+import {
+  getAttachmentUrls,
+  getCreatorRoleLabel,
+  renderTextWithLinks,
+} from "../../utils/media";
+import UserAvatar from "../../components/shared/UserAvatar";
 
 export default function StudentEvents() {
   const [events, setEvents] = useState({ data: [] });
@@ -96,17 +101,19 @@ export default function StudentEvents() {
             >
               <div className="space-y-4 p-5 sm:p-6">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tpc-navy text-sm font-bold text-white">
-                    {(event.creator?.name || "Unknown user")
-                      .trim()
-                      .charAt(0)
-                      .toUpperCase()}
-                  </div>
+                  <UserAvatar
+                    name={event.creator?.name || "Unknown user"}
+                    avatar={event.creator?.avatar}
+                    size="sm"
+                    className="shrink-0 bg-tpc-navy ring-0"
+                  />
                   <div className="min-w-0">
                     <p className="truncate font-semibold text-gray-900">
                       {event.creator?.name || "Unknown user"}
                     </p>
-                    <p className="text-sm text-gray-500">Event organizer</p>
+                    <p className="text-sm text-gray-500">
+                      {getCreatorRoleLabel(event.creator)}
+                    </p>
                   </div>
                 </div>
 

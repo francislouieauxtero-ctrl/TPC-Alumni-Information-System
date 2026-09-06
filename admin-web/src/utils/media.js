@@ -58,4 +58,11 @@ export function renderTextWithLinks(text, className = "") {
   });
 }
 
-export default { getAttachmentUrls, renderTextWithLinks };
+export function getCreatorRoleLabel(creator) {
+  if (creator?.role === "super_admin") return "Alumni President";
+  if (creator?.role === "admin") return "Department Head";
+  if (creator?.role === "user") return "Student";
+  return "User";
+}
+
+export default { getAttachmentUrls, renderTextWithLinks, getCreatorRoleLabel };

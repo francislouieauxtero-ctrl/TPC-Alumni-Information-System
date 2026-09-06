@@ -2,7 +2,12 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import eventService from "../../../services/eventService";
 import { toast } from "react-toastify";
-import { getAttachmentUrls, renderTextWithLinks } from "../../../utils/media";
+import {
+  getAttachmentUrls,
+  getCreatorRoleLabel,
+  renderTextWithLinks,
+} from "../../../utils/media";
+import UserAvatar from "../../../components/shared/UserAvatar";
 
 export default function EventList() {
   const navigate = useNavigate();
@@ -142,8 +147,21 @@ export default function EventList() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">By:</span>
-                  <span className="font-medium text-gray-800">
-                    {event.creator?.name || "Unknown user"}
+                  <span className="flex items-center gap-2 text-right">
+                    <UserAvatar
+                      name={event.creator?.name || "Unknown user"}
+                      avatar={event.creator?.avatar}
+                      size="sm"
+                      className="h-8 w-8 bg-tpc-navy ring-0"
+                    />
+                    <span>
+                      <span className="block font-medium text-gray-800">
+                        {event.creator?.name || "Unknown user"}
+                      </span>
+                      <span className="block text-xs text-gray-500">
+                        {getCreatorRoleLabel(event.creator)}
+                      </span>
+                    </span>
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
