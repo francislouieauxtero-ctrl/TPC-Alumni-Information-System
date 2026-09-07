@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import {
   Users,
@@ -10,9 +11,11 @@ import {
   AlertCircle,
   XCircle,
   Sparkles,
+  ArrowRight,
 } from "lucide-react";
 
 export default function DepartmentHeadDashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [events, setEvents] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
@@ -27,8 +30,8 @@ export default function DepartmentHeadDashboard() {
         const [statsResponse, eventsResponse, announcementsResponse] =
           await Promise.all([
             api.get("/department-head/dashboard"),
-            api.get("/events", { params: { limit: 5 } }),
-            api.get("/announcements", { params: { limit: 3 } }),
+            api.get("/events", { params: { limit: 2 } }),
+            api.get("/announcements", { params: { limit: 2 } }),
           ]);
 
         const dashboardData = statsResponse.data?.data || {};
@@ -265,11 +268,18 @@ export default function DepartmentHeadDashboard() {
                   Latest department activities
                 </p>
               </div>
-              <CalendarDays className="h-5 w-5 text-gray-400" />
+              <button
+                type="button"
+                onClick={() => navigate("/department-head/events")}
+                className="inline-flex items-center gap-1 text-sm font-semibold text-tpc-greenDeep hover:text-tpc-green"
+              >
+                View all
+                <ArrowRight className="h-4 w-4" />
+              </button>
             </div>
             {events.length > 0 ? (
               <div className="space-y-4">
-                {events.slice(0, 5).map((event) => (
+                {events.slice(0, 2).map((event) => (
                   <div
                     key={event.id}
                     className="rounded-2xl border border-gray-100 bg-gray-50 p-4"
@@ -308,11 +318,18 @@ export default function DepartmentHeadDashboard() {
                 </h3>
                 <p className="text-sm text-gray-500">Department updates</p>
               </div>
-              <Bell className="h-5 w-5 text-gray-400" />
+              <button
+                type="button"
+                onClick={() => navigate("/department-head/announcements")}
+                className="inline-flex items-center gap-1 text-sm font-semibold text-tpc-greenDeep hover:text-tpc-green"
+              >
+                View all
+                <ArrowRight className="h-4 w-4" />
+              </button>
             </div>
             {announcements.length > 0 ? (
               <div className="space-y-4">
-                {announcements.map((announcement) => (
+                {announcements.slice(0, 2).map((announcement) => (
                   <div
                     key={announcement.id}
                     className="rounded-2xl border border-gray-100 bg-gray-50 p-4"
