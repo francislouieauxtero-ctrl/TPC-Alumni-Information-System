@@ -86,8 +86,8 @@ export default function DepartmentHeadDashboard() {
     stats?.department_name || stats?.department?.name || "Your Department";
 
   const totalAlumni =
-    stats?.total_alumni ??
     stats?.registered_alumni ??
+    stats?.total_alumni ??
     stats?.total_students ??
     0;
   const employedCount = stats?.employed_alumni ?? stats?.total_employed ?? 0;
