@@ -174,15 +174,13 @@ export default function AnnouncementList({
                 <div
                   className={`mt-auto grid ${previewImage ? "grid-cols-3" : "grid-cols-2"} gap-2 border-t border-gray-200 pt-4`}
                 >
-                  {previewImage && (
-                    <button
-                      type="button"
-                      onClick={() => setLightboxImage(previewImage)}
-                      className="min-w-0 rounded-lg border border-tpc-green px-2 py-2 text-xs font-medium text-tpc-green transition hover:bg-tpc-green hover:text-white sm:px-3 sm:text-sm"
-                    >
-                      View
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => navigate(`${basePath}/${announcement.id}`)}
+                    className="min-w-0 rounded-lg border border-tpc-green px-2 py-2 text-xs font-medium text-tpc-green transition hover:bg-tpc-green hover:text-white sm:px-3 sm:text-sm"
+                  >
+                    View
+                  </button>
                   <button
                     type="button"
                     onClick={() =>

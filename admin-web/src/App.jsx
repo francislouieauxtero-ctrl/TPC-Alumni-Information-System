@@ -47,6 +47,7 @@ import PresidentAnnouncementEdit from "./pages/president/announcements/Announcem
 import DepartmentHeadAnnouncementList from "./pages/departmenthead/AnnouncementList";
 import DepartmentHeadAnnouncementCreate from "./pages/departmenthead/AnnouncementCreate";
 import DepartmentHeadAnnouncementEdit from "./pages/departmenthead/AnnouncementEdit";
+import AnnouncementView from "./pages/shared/AnnouncementView";
 import PresidentLayout from "./layouts/President";
 import DepartmentHeadLayout from "./layouts/DepartmentHead";
 import StudentLayout from "./layouts/StudentLayout";
@@ -359,6 +360,16 @@ export default function App() {
               }
             />
             <Route
+              path="/president/announcements/:id"
+              element={
+                <ProtectedRoute requiredRole={["super_admin"]}>
+                  <PresidentLayout>
+                    <AnnouncementView />
+                  </PresidentLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/president/announcements/:id/edit"
               element={
                 <ProtectedRoute requiredRole={["super_admin"]}>
@@ -533,6 +544,16 @@ export default function App() {
               }
             />
             <Route
+              path="/department-head/announcements/:id"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <DepartmentHeadLayout>
+                    <AnnouncementView />
+                  </DepartmentHeadLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/department-head/announcements/:id/edit"
               element={
                 <ProtectedRoute requiredRole="admin">
@@ -601,6 +622,16 @@ export default function App() {
                 <ProtectedRoute requiredRole="user">
                   <StudentLayout>
                     <StudentAnnouncements />
+                  </StudentLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/student/announcements/:id"
+              element={
+                <ProtectedRoute requiredRole="user">
+                  <StudentLayout>
+                    <AnnouncementView />
                   </StudentLayout>
                 </ProtectedRoute>
               }

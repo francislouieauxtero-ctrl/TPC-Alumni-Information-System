@@ -178,11 +178,7 @@ export default function DepartmentHeadAnnouncementList({
                   <button
                     type="button"
                     onClick={() => {
-                      if (previewImage) {
-                        setLightboxImage(previewImage);
-                        return;
-                      }
-                      toast.info("No preview available for this announcement");
+                      navigate(`${basePath}/${announcement.id}`);
                     }}
                     className="flex-1 px-4 py-2 text-tpc-green border border-tpc-green rounded-lg hover:bg-tpc-green hover:text-white transition"
                   >

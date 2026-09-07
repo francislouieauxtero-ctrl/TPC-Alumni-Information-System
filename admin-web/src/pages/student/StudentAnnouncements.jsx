@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { CalendarDays, Megaphone, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import announcementService from "../../services/announcementService";
 import { getCreatorRoleLabel, renderTextWithLinks } from "../../utils/media";
 import UserAvatar from "../../components/shared/UserAvatar";
 
 export default function StudentAnnouncements() {
+  const navigate = useNavigate();
   const [announcements, setAnnouncements] = useState({ data: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -138,6 +140,18 @@ export default function StudentAnnouncements() {
                       {renderTextWithLinks(announcement.content || "")}
                     </p>
                   </div>
+                </div>
+
+                <div className="flex items-center gap-2 border-t border-gray-200 pt-4">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigate(`/student/announcements/${announcement.id}`)
+                    }
+                    className="rounded-lg border border-tpc-green px-4 py-2 text-sm font-medium text-tpc-green transition hover:bg-tpc-green hover:text-white"
+                  >
+                    View
+                  </button>
                 </div>
 
                 {previewImage ? (
