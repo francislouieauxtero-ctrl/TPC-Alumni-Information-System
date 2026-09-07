@@ -33,8 +33,6 @@ export default function DepartmentHeadLayout({ children }) {
   const [departmentHeadAvatar, setDepartmentHeadAvatar] = useState(
     localStorage.getItem("userAvatar") || "",
   );
-  const departmentScope =
-    localStorage.getItem("userDepartmentName") || "This Department";
   useEffect(() => {
     const syncUser = async () => {
       try {
@@ -122,38 +120,38 @@ export default function DepartmentHeadLayout({ children }) {
           <NavLink
             to="/department-head/graduates"
             icon={<GraduationCap className="w-5 h-5" />}
-            label={`${departmentScope} Graduates`}
+            label="Graduates"
             sidebarOpen={sidebarOpen}
           />
 
           <NavLink
             to="/department-head/alumni"
             icon={<UserCheck className="w-5 h-5" />}
-            label={`${departmentScope} Alumni`}
+            label="Alumni"
             sidebarOpen={sidebarOpen}
           />
           <NavLink
             to="/department-head/alumni/pending"
             icon={<Clock className="w-5 h-5" />}
-            label={`Pending ${departmentScope}`}
+            label="Pending Alumni"
             sidebarOpen={sidebarOpen}
           />
           <NavLink
             to="/department-head/alumni/rejected"
             icon={<XCircle className="w-5 h-5" />}
-            label={`Rejected ${departmentScope}`}
+            label="Rejected Alumni"
             sidebarOpen={sidebarOpen}
           />
           <NavLink
             to="/department-head/events"
             icon={<CalendarDays className="w-5 h-5" />}
-            label={`${departmentScope} Events`}
+            label="Events"
             sidebarOpen={sidebarOpen}
           />
           <NavLink
             to="/department-head/announcements"
             icon={<Megaphone className="w-5 h-5" />}
-            label={`${departmentScope} Announcements`}
+            label="Announcements"
             sidebarOpen={sidebarOpen}
           />
           <NavLink

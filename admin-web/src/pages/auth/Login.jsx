@@ -44,6 +44,11 @@ export default function Login() {
     localStorage.setItem("userEmail", user.email);
     localStorage.setItem("userAvatar", user.avatar || "");
     localStorage.setItem("departmentId", user.departmentId || "");
+    localStorage.setItem(
+      "userDepartment",
+      user.department?.id || user.departmentId || "",
+    );
+    localStorage.setItem("userDepartmentName", user.department?.name || "");
     if (user.department) {
       localStorage.setItem("departmentName", user.department.name || "");
     }
