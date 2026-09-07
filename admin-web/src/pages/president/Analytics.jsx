@@ -633,16 +633,21 @@ function AlignmentLineChart({ rows }) {
 }
 
 // ── Filter helpers ────────────────────────────────────────────────────────
-function applyFilters(stats, filters) {
+function applyFilters(stats, filters, departments = []) {
   if (!stats || (!filters.department && !filters.batch)) return stats;
   const result = { ...stats };
 
   if (result.by_department && filters.department) {
+    const selectedDepartment = departments.find(
+      (department) => String(department.id) === String(filters.department),
+    );
+    const selectedDepartmentName =
+      selectedDepartment?.name || filters.department;
     result.by_department = Object.fromEntries(
       Object.entries(result.by_department).filter(
         ([name]) =>
-          name === filters.department ||
-          name?.toLowerCase() === filters.department?.toLowerCase(),
+          name === selectedDepartmentName ||
+          name?.toLowerCase() === selectedDepartmentName?.toLowerCase(),
       ),
     );
   }
@@ -664,6 +669,7 @@ export default function Analytics({ onDrillDown }) {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ department: "", batch: "" });
   const [alignmentRows, setAlignmentRows] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [showReport, setShowReport] = useState(false);
 
   // "admin" = department head (single-department scope).
@@ -689,6 +695,21 @@ export default function Analytics({ onDrillDown }) {
       }
     };
     fetchAnalytics();
+  }, []);
+
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const response = await api.get("/departments");
+        if (response.data?.status && Array.isArray(response.data.data)) {
+          setDepartments(response.data.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch departments:", error);
+      }
+    };
+
+    fetchDepartments();
   }, []);
 
   // Pre-lock department filter for department-head role using stored auth info
@@ -734,15 +755,23 @@ export default function Analytics({ onDrillDown }) {
   }
 
   // Build dropdown options from raw stats
-  const departmentOptions = stats?.by_department
-    ? Object.keys(stats.by_department).map((name) => ({ name }))
-    : [];
+  const departmentOptions =
+    departments.length > 0
+      ? departments.map((department) => ({
+          id: department.id,
+          name: department.name,
+        }))
+      : stats?.by_department
+        ? Object.keys(stats.by_department)
+            .filter((name) => name !== "Unassigned")
+            .map((name) => ({ name }))
+        : [];
   const batchOptions = stats?.graduates_by_year
     ? Object.keys(stats.graduates_by_year).sort((a, b) => b - a)
     : [];
 
   // Client-side filter overlay (graceful fallback if API ignores params)
-  const filtered = applyFilters(stats, filters);
+  const filtered = applyFilters(stats, filters, departmentOptions);
 
   // ── Printable report view ──
   // Swaps the entire page into the print-friendly layout. Reuses the same
@@ -763,7 +792,10 @@ export default function Analytics({ onDrillDown }) {
 
   // Derived chart data
   const studentStatusData = [
-    { name: "Verified", value: filtered?.verified_students || 0 },
+    {
+      name: "Registered Graduates",
+      value: filtered?.registered_alumni || 0,
+    },
     {
       name: "Not Registered Graduates",
       value: filtered?.not_registered_graduates || 0,

@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\AccountActivityLog;
 use App\Models\AlumniProfile;
+use App\Models\Department;
 use App\Models\Graduate;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -136,6 +137,7 @@ class AlumniRepository
                 , 1)                                                            AS alignment_rate
             ")
             ->employed()   // scope on AlumniProfile: excludes STATUS_UNEMPLOYED
+            ->whereHas('department')
             ->groupBy('department_id')
             ->with('department:id,name');
 
@@ -163,8 +165,33 @@ class AlumniRepository
             ->groupBy('department_id')
             ->pluck('total', 'department_id');
 
-        return $query->get()->map(function ($row) use ($notRegisteredByDepartment) {
-            $row->not_registered = (int) ($notRegisteredByDepartment[$row->department_id] ?? 0);
+        $alignmentByDepartment = $query->get()->keyBy('department_id');
+        $departments = Department::query()
+            ->when($actor->isAdmin(), fn ($q) =>
+                $q->whereKey($actor->department_id))
+            ->when(!empty($filters['department_id']), fn ($q) =>
+                $q->whereKey((int) $filters['department_id']))
+            ->get(['id', 'name']);
+
+        return $departments->map(function ($department) use (
+            $alignmentByDepartment,
+            $notRegisteredByDepartment
+        ) {
+            $row = $alignmentByDepartment->get($department->id);
+
+            if (!$row) {
+                $row = (object) [
+                    'department_id' => $department->id,
+                    'total_employed' => 0,
+                    'aligned' => 0,
+                    'not_aligned' => 0,
+                    'no_response' => 0,
+                    'alignment_rate' => 0,
+                    'department' => $department,
+                ];
+            }
+
+            $row->not_registered = (int) ($notRegisteredByDepartment[$department->id] ?? 0);
             return $row;
         });
     }
