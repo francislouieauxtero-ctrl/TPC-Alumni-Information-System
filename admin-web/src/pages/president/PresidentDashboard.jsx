@@ -71,26 +71,26 @@ export default function PresidentDasboard() {
 
         <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           <StatCard
-            title="Graduates"
+            title=" Total Graduates"
             value={stats?.total_graduates || 0}
             icon={<GraduationCap className="h-5 w-5" />}
             color="bg-violet-500"
             detail="Academic completion"
           />
           <StatCard
-            title="Total Alumni"
-            value={stats?.total_students || 0}
+            title="Total Registered Alumni"
+            value={stats?.registered_alumni ?? stats?.total_students ?? 0}
             icon={<Users className="h-5 w-5" />}
             color="bg-tpc-greenDeep"
             detail="All tracked alumni"
           />
-          <StatCard
+          {/* <StatCard
             title="Employed"
             value={stats?.employed_alumni || 0}
             icon={<Briefcase className="h-5 w-5" />}
             color="bg-emerald-600"
             detail="Currently employed"
-          />
+          /> */}
           <StatCard
             title="Verified"
             value={stats?.verified_students || 0}
@@ -118,6 +118,13 @@ export default function PresidentDasboard() {
             icon={<Users className="h-5 w-5" />}
             color="bg-red-500"
             detail="Not currently active"
+          />
+          <StatCard
+            title="Not Registered Graduates"
+            value={stats?.not_registered_graduates || 0}
+            icon={<GraduationCap className="h-5 w-5" />}
+            color="bg-amber-500"
+            detail="Graduates without an alumni account"
           />
         </section>
 
@@ -165,18 +172,18 @@ export default function PresidentDasboard() {
                 color="bg-amber-500"
               />
               <OverviewRow
-                label="Inactive"
-                count={stats?.inactive_students || 0}
+                label="Not registered graduates"
+                count={stats?.not_registered_graduates || 0}
                 percent={
-                  stats?.total_students > 0
+                  stats?.total_graduates > 0
                     ? Math.round(
-                        ((stats?.inactive_students || 0) /
-                          stats.total_students) *
+                        ((stats?.not_registered_graduates || 0) /
+                          stats.total_graduates) *
                           100,
                       )
                     : 0
                 }
-                color="bg-red-500"
+                color="bg-amber-500"
               />
             </div>
           </div>
