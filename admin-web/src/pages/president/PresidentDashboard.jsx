@@ -125,13 +125,13 @@ export default function PresidentDasboard() {
           <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <div className="mb-5 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-800">
-                Student overview
+                Alumini overview
               </h3>
               <a
                 href="/president/students"
                 className="text-sm font-semibold text-tpc-greenDeep hover:text-tpc-green"
               >
-                View all →
+                View Registered Alumi →
               </a>
             </div>
 
@@ -178,20 +178,6 @@ export default function PresidentDasboard() {
                 }
                 color="bg-red-500"
               />
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-800">
-              Quick actions
-            </h3>
-            <div className="mt-5 space-y-3">
-              <a
-                href="/president/students"
-                className="block rounded-xl bg-tpc-greenDeep px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-tpc-green"
-              >
-                Review student applications
-              </a>
             </div>
           </div>
         </section>

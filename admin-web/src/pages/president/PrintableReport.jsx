@@ -154,6 +154,10 @@ export default function PrintableReport({
               label="Total Graduates"
               value={overview.totalGraduates}
             />
+            <ReportStat
+              label="Not Registered Graduates"
+              value={overview.notRegisteredGraduates}
+            />
             <ReportStat label="Employed" value={overview.employed} />
             <ReportStat label="Self-employed" value={overview.selfEmployed} />
             <ReportStat label="Unemployed" value={overview.unemployed} />
@@ -213,6 +217,7 @@ export default function PrintableReport({
 
 function computeReportOverview(stats, alignmentRows) {
   const totalGraduates = stats?.total_graduates ?? 0;
+  const notRegisteredGraduates = stats?.not_registered_graduates ?? 0;
   const employed = stats?.employed_alumni ?? 0;
   const selfEmployed = stats?.self_employed_alumni ?? 0;
   const unemployed = stats?.unemployed_alumni ?? 0;
@@ -239,6 +244,7 @@ function computeReportOverview(stats, alignmentRows) {
 
   return {
     totalGraduates,
+    notRegisteredGraduates,
     employed,
     selfEmployed,
     unemployed,
@@ -264,6 +270,7 @@ function buildReportBreakdown(stats, alignmentRows) {
       aligned: row.aligned ?? 0,
       notAligned: row.not_aligned ?? 0,
       noResponse: row.no_response ?? 0,
+      notRegistered: row.not_registered ?? 0,
       totalEmployed: row.total_employed ?? 0,
     };
   });
@@ -437,7 +444,7 @@ function ReportAlignmentTable({ rows }) {
           <th>Employed</th>
           <th>Aligned</th>
           <th>Not Aligned</th>
-          <th>Inactive Account</th>
+          <th>Not Registered Graduates</th>
           <th>Alignment Rate</th>
         </tr>
       </thead>
@@ -448,7 +455,7 @@ function ReportAlignmentTable({ rows }) {
             <td>{row.totalEmployed}</td>
             <td>{row.aligned}</td>
             <td className="report-align-not">{row.notAligned}</td>
-            <td>{row.noResponse}</td>
+            <td>{row.notRegistered}</td>
             <td>{row.alignmentRate}%</td>
           </tr>
         ))}

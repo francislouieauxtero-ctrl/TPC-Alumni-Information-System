@@ -85,6 +85,9 @@ class AdminController extends Controller
                 $graduatesQuery->where('batch_year', $requestedBatch);
             }
             $totalGraduates = (clone $graduatesQuery)->count();
+            $notRegisteredGraduates = (clone $graduatesQuery)
+                ->whereDoesntHave('alumniProfile')
+                ->count();
             $graduatesByYear = (clone $graduatesQuery)
                 ->selectRaw('batch_year, COUNT(*) as cnt')
                 ->groupBy('batch_year')
@@ -103,6 +106,7 @@ class AdminController extends Controller
                 'unverified_students' => (clone $studentsQuery)->where('is_verified', false)->count(),
                 'active_students' => (clone $studentsQuery)->where('status', User::STATUS_ACTIVE)->count(),
                 'inactive_students' => (clone $studentsQuery)->where('status', User::STATUS_INACTIVE)->count(),
+                'not_registered_graduates' => $notRegisteredGraduates,
                 'employed_alumni' => $employedCount,
                 'self_employed_alumni' => $selfEmployedCount,
                 'unemployed_alumni' => $unemployedCount,

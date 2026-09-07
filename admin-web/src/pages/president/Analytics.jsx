@@ -504,7 +504,7 @@ function AlignmentLineChart({ rows }) {
           marginBottom: "4px",
         }}
       >
-        Inactive / No-Response Rate by Department
+        No-Response Rate by Department
       </p>
       <div
         style={{
@@ -525,7 +525,7 @@ function AlignmentLineChart({ rows }) {
             }}
           />
           <span style={{ fontSize: "11px", color: "#4b5563" }}>
-            Inactive / No-Response %
+            No-Response %
           </span>
         </span>
         <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
@@ -583,7 +583,7 @@ function AlignmentLineChart({ rows }) {
             labelStyle={{ color: "#4b5563", marginBottom: "4px" }}
             formatter={(value, name) =>
               name === "rate"
-                ? [`${value}%`, "Inactive / no-response rate"]
+                ? [`${value}%`, "No-response rate"]
                 : [value, "Employed"]
             }
           />
@@ -764,7 +764,10 @@ export default function Analytics({ onDrillDown }) {
   // Derived chart data
   const studentStatusData = [
     { name: "Verified", value: filtered?.verified_students || 0 },
-    { name: "Inactive Account", value: filtered?.inactive_students || 0 },
+    {
+      name: "Not Registered Graduates",
+      value: filtered?.not_registered_graduates || 0,
+    },
   ].filter((d) => d.value > 0);
 
   const employmentData = [
@@ -840,7 +843,7 @@ export default function Analytics({ onDrillDown }) {
         />
         <StatCard
           title="Inactive Accounts"
-          value={filtered?.inactive_students ?? "—"}
+          value={filtered?.not_registered_graduates ?? "—"}
           icon={<Clock className="w-4 h-4" />}
           accent="bg-amber-500"
         />
@@ -1121,7 +1124,7 @@ function AlignmentSummaryWidget({ onDrillDown, filters, onRowsLoaded }) {
                       </span>
                       <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500">
                         <HelpCircle className="h-3 w-3" />
-                        {row.no_response} inactive account
+                        {row.not_registered ?? 0} not registered graduates
                       </span>
                     </div>
                     {hasData && (

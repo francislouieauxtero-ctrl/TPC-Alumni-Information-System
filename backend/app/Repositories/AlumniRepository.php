@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\AccountActivityLog;
 use App\Models\AlumniProfile;
+use App\Models\Graduate;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -150,7 +151,22 @@ class AlumniRepository
             $query->where('batch_year', trim((string) $filters['batch']));
         }
 
-        return $query->get();
+        $notRegisteredByDepartment = Graduate::query()
+            ->whereDoesntHave('alumniProfile')
+            ->when($actor->isAdmin(), fn ($q) =>
+                $q->where('department_id', $actor->department_id))
+            ->when(!empty($filters['department_id']), fn ($q) =>
+                $q->where('department_id', (int) $filters['department_id']))
+            ->when(!empty($filters['batch']), fn ($q) =>
+                $q->where('batch_year', trim((string) $filters['batch'])))
+            ->selectRaw('department_id, COUNT(*) as total')
+            ->groupBy('department_id')
+            ->pluck('total', 'department_id');
+
+        return $query->get()->map(function ($row) use ($notRegisteredByDepartment) {
+            $row->not_registered = (int) ($notRegisteredByDepartment[$row->department_id] ?? 0);
+            return $row;
+        });
     }
 
     /**
