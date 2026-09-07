@@ -38,7 +38,7 @@ class GraduateRepository
             });
         }
 
-        return $query->with('department')->orderBy('created_at', 'desc')->paginate(15);
+        return $query->with('department')->orderBy('created_at', 'desc')->paginate(20);
     }
 
     /**
