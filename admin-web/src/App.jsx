@@ -259,7 +259,7 @@ export default function App() {
               }
             />
             <Route
-              path="/president/graduates/:id/edit"
+              path="/president/graduates/edit"
               element={
                 <ProtectedRoute requiredRole={["super_admin"]}>
                   <PresidentLayout>
@@ -432,7 +432,7 @@ export default function App() {
             />
 
             <Route
-              path="/department-head/graduates/:id/edit"
+              path="/department-head/graduates/edit"
               element={
                 <ProtectedRoute requiredRole="admin">
                   <DepartmentHeadLayout>

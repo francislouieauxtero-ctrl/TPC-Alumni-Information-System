@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import graduateService from "../../services/graduateService";
 import { toast } from "react-toastify";
 
 export default function EditGraduate() {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const id = sessionStorage.getItem("graduateEditId");
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [errors, setErrors] = useState({});
@@ -17,8 +17,12 @@ export default function EditGraduate() {
   });
 
   useEffect(() => {
-    fetchGraduate();
-  }, []);
+    if (id) {
+      fetchGraduate();
+    } else {
+      navigate("/department-head/graduates", { replace: true });
+    }
+  }, [id, navigate]);
 
   const fetchGraduate = async () => {
     try {
@@ -54,6 +58,7 @@ export default function EditGraduate() {
     try {
       await graduateService.updateAdminGraduate(id, formData);
       toast.success("Graduate updated successfully.");
+      sessionStorage.removeItem("graduateEditId");
       navigate("/department-head/graduates");
     } catch (err) {
       if (err.errors) {

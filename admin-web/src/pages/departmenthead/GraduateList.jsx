@@ -171,7 +171,13 @@ export default function GraduateList() {
                   </td>
                   <td className="px-6 py-4 text-right space-x-4">
                     <button
-                      onClick={() => navigate(`${graduate.id}/edit`)}
+                      onClick={() => {
+                        sessionStorage.setItem(
+                          "graduateEditId",
+                          String(graduate.id),
+                        );
+                        navigate("edit");
+                      }}
                       className="text-tpc-green hover:text-tpc-greenDeep text-sm font-medium"
                     >
                       Edit
