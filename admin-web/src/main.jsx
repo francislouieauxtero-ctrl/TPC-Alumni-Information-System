@@ -19,28 +19,35 @@ import { registerSW } from "virtual:pwa-register";
 import "./index.css";
 import App from "./App.jsx";
 
-function clearDevelopmentServiceWorker() {
+async function clearDevelopmentServiceWorker() {
   if (!import.meta.env.DEV || !("serviceWorker" in navigator)) {
-    return;
+    return true;
   }
 
-  void navigator.serviceWorker.getRegistrations().then((registrations) => {
-    registrations.forEach((registration) => registration.unregister());
-  });
+  const registrations = await navigator.serviceWorker.getRegistrations();
+  await Promise.all(
+    registrations.map((registration) => registration.unregister()),
+  );
 
   if ("caches" in window) {
-    void caches.keys().then((cacheNames) => {
+    const cacheNames = await caches.keys();
+    await Promise.all(
       cacheNames
         .filter(
           (cacheName) =>
             cacheName.startsWith("tpc-") || cacheName.startsWith("workbox-"),
         )
-        .forEach((cacheName) => caches.delete(cacheName));
-    });
+        .map((cacheName) => caches.delete(cacheName)),
+    );
   }
-}
 
-clearDevelopmentServiceWorker();
+  if (navigator.serviceWorker.controller) {
+    window.location.reload();
+    return false;
+  }
+
+  return true;
+}
 
 // ── PWA Update Toast (no extra library needed) ───────────────────────────────
 function UpdateToast({ onUpdate, onDismiss }) {
@@ -136,8 +143,14 @@ function Root() {
 }
 
 // ── Mount ─────────────────────────────────────────────────────────────────────
-createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <Root />
-  </StrictMode>,
-);
+void clearDevelopmentServiceWorker().then((shouldMount) => {
+  if (!shouldMount) {
+    return;
+  }
+
+  createRoot(document.getElementById("root")).render(
+    <StrictMode>
+      <Root />
+    </StrictMode>,
+  );
+});
