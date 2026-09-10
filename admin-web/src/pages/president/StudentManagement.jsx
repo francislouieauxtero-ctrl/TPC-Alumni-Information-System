@@ -772,6 +772,13 @@ export default function StudentManagement() {
               alum.alumniProfile?.company ??
               alum.user?.alumniProfile?.company;
 
+            const employmentDetailsText =
+              inferredEmploymentStatus === "unemployed"
+                ? "Unemployed"
+                : currentJob || company
+                  ? [currentJob, company].filter(Boolean).join(" · ")
+                  : "No employment details yet";
+
             const batchYear = (function () {
               const y =
                 alum.batch_year ??
@@ -811,9 +818,7 @@ export default function StudentManagement() {
 
                   <div className="space-y-1">
                     <p className="truncate text-xs text-gray-500">
-                      {currentJob || company
-                        ? [currentJob, company].filter(Boolean).join(" · ")
-                        : "No employment details yet"}
+                      {employmentDetailsText}
                     </p>
                     <p className="text-xs text-gray-400">Batch {batchYear}</p>
                   </div>

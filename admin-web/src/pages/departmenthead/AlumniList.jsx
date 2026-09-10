@@ -738,7 +738,12 @@ export default function AlumniList() {
 
                     {/* Current position */}
                     <td className="px-5 py-3.5">
-                      {item.current_job || item.alumniProfile?.current_job ? (
+                      {item.employment_status === "unemployed" ? (
+                        <span className="text-sm text-gray-700 font-medium">
+                          Unemployed
+                        </span>
+                      ) : item.current_job ||
+                        item.alumniProfile?.current_job ? (
                         <>
                           <p className="text-sm text-gray-800">
                             {item.current_job ??

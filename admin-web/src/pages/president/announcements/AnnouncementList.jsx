@@ -171,9 +171,7 @@ export default function AnnouncementList({
                   </button>
                 ) : null}
 
-                <div
-                  className={`mt-auto grid ${previewImage ? "grid-cols-3" : "grid-cols-2"} gap-2 border-t border-gray-200 pt-4`}
-                >
+                <div className="mt-auto grid grid-cols-3 gap-2 border-t border-gray-200 pt-4">
                   <button
                     type="button"
                     onClick={() => navigate(`${basePath}/${announcement.id}`)}

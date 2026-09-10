@@ -183,7 +183,7 @@ export default function EditProfileForm({
 
               <div>
                 <label className="block text-xs sm:text-sm text-gray-500 mb-1.5 sm:mb-2">
-                  Location
+                  Current Address
                 </label>
                 <input
                   type="text"

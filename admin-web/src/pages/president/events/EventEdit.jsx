@@ -241,7 +241,7 @@ export default function EventEdit() {
           </div>
 
           {/* Scope */}
-          {!isAdmin ? (
+          {/* {!isAdmin ? (
             <Field label="Visibility" error={errors.scope} required>
               <div className="space-y-3">
                 <label className="flex items-center gap-3 cursor-pointer">
@@ -297,7 +297,7 @@ export default function EventEdit() {
                 className={inputClass(errors.department_id)}
               />
             </Field>
-          )}
+          )} */}
 
           <Field
             label="Image upload (single or multiple)"
