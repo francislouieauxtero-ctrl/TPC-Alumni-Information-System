@@ -142,18 +142,6 @@ export default function StudentAnnouncements() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 border-t border-gray-200 pt-4">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      navigate(`/student/announcements/${announcement.id}`)
-                    }
-                    className="rounded-lg border border-tpc-green px-4 py-2 text-sm font-medium text-tpc-green transition hover:bg-tpc-green hover:text-white"
-                  >
-                    View
-                  </button>
-                </div>
-
                 {previewImage ? (
                   <button
                     type="button"
@@ -167,6 +155,18 @@ export default function StudentAnnouncements() {
                     />
                   </button>
                 ) : null}
+
+                <div className="flex items-center gap-2 border-t border-gray-200 px-5 pt-4 sm:px-6">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigate(`/student/announcements/${announcement.id}`)
+                    }
+                    className="rounded-lg border border-tpc-green px-4 py-2 text-sm font-medium text-tpc-green transition hover:bg-tpc-green hover:text-white"
+                  >
+                    View
+                  </button>
+                </div>
               </div>
             );
           })}

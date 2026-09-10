@@ -15,6 +15,7 @@ export default function StudentEvents() {
   const [filters, setFilters] = useState({ search: "", include_past: false });
   const [currentPage, setCurrentPage] = useState(1);
   const [lightboxImage, setLightboxImage] = useState(null);
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   useEffect(() => {
     fetchEvents();
@@ -238,6 +239,16 @@ export default function StudentEvents() {
                   })}
                 </div>
               )}
+
+              <div className="border-t border-gray-200 px-5 py-4 sm:px-6">
+                <button
+                  type="button"
+                  onClick={() => setSelectedEvent(event)}
+                  className="rounded-lg border border-tpc-green px-4 py-2 text-sm font-medium text-tpc-green transition hover:bg-tpc-green hover:text-white"
+                >
+                  View
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -266,6 +277,146 @@ export default function StudentEvents() {
           >
             Next
           </button>
+        </div>
+      )}
+      {selectedEvent && (
+        <div
+          className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 p-4"
+          onClick={() => setSelectedEvent(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="event-modal-title"
+            className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4 border-b border-gray-200 p-5 sm:p-6">
+              <div className="min-w-0">
+                <h2
+                  id="event-modal-title"
+                  className="break-words text-2xl font-bold text-tpc-navy"
+                >
+                  {selectedEvent.title || "Event"}
+                </h2>
+                <p className="mt-1 text-sm text-gray-500">
+                  Posted by {selectedEvent.creator?.name || "Unknown user"}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedEvent(null)}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-2xl leading-none text-gray-600 transition hover:bg-gray-200"
+                aria-label="Close event details"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="space-y-5 p-5 sm:p-6">
+              <div className="flex flex-wrap gap-2 text-sm text-gray-700">
+                <span className="rounded-lg bg-blue-100 px-3 py-2 font-medium text-blue-700">
+                  {selectedEvent.scope === "school_wide"
+                    ? "School-wide"
+                    : selectedEvent.department?.name || "Department"}
+                </span>
+                <span className="rounded-lg bg-gray-100 px-3 py-2">
+                  {selectedEvent.is_future ? "Upcoming" : "Past"}
+                </span>
+              </div>
+
+              <div className="grid gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700 sm:grid-cols-2">
+                <p>
+                  <span className="font-semibold text-gray-900">Date:</span>{" "}
+                  {new Date(selectedEvent.event_date).toLocaleDateString(
+                    undefined,
+                    {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    },
+                  )}
+                </p>
+                <p>
+                  <span className="font-semibold text-gray-900">Location:</span>{" "}
+                  {selectedEvent.location || "TBA"}
+                </p>
+              </div>
+
+              <div>
+                <h3 className="mb-2 text-lg font-semibold text-gray-900">
+                  Description
+                </h3>
+                <p className="whitespace-pre-line break-words text-sm leading-7 text-gray-700">
+                  {renderTextWithLinks(
+                    selectedEvent.description || "No description available.",
+                  )}
+                </p>
+              </div>
+
+              {getAttachmentUrls(selectedEvent).length > 0 && (
+                <div>
+                  <h3 className="mb-3 text-lg font-semibold text-gray-900">
+                    Attachments
+                  </h3>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {getAttachmentUrls(selectedEvent).map(
+                      (attachment, index) => {
+                        const isImage = /\.(jpg|jpeg|png|webp|gif)$/i.test(
+                          attachment,
+                        );
+                        const isVideo = /\.(mp4|webm|mov|avi)$/i.test(
+                          attachment,
+                        );
+
+                        if (isImage) {
+                          return (
+                            <button
+                              key={`modal-${selectedEvent.id}-${index}`}
+                              type="button"
+                              onClick={() => setLightboxImage(attachment)}
+                              className="block"
+                            >
+                              <img
+                                src={attachment}
+                                alt={`${selectedEvent.title || "Event"} ${index + 1}`}
+                                className="h-48 w-full rounded-xl border border-gray-200 object-cover cursor-zoom-in"
+                              />
+                            </button>
+                          );
+                        }
+
+                        if (isVideo) {
+                          return (
+                            <video
+                              key={`modal-${selectedEvent.id}-${index}`}
+                              src={attachment}
+                              controls
+                              preload="metadata"
+                              className="h-48 w-full rounded-xl border border-gray-200 bg-black object-cover"
+                            />
+                          );
+                        }
+
+                        return (
+                          <a
+                            key={`modal-${selectedEvent.id}-${index}`}
+                            href={attachment}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex min-h-24 items-center justify-center rounded-xl border border-gray-200 bg-gray-100 px-4 text-center text-sm text-gray-600 transition hover:bg-gray-200"
+                          >
+                            Open attachment {index + 1}
+                          </a>
+                        );
+                      },
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
       {lightboxImage && (
