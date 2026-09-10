@@ -763,7 +763,7 @@ export default function Analytics({ onDrillDown }) {
         }))
       : stats?.by_department
         ? Object.keys(stats.by_department)
-            .filter((name) => name !== "Unassigned")
+            .filter((name) => name !== "No department assigned")
             .map((name) => ({ name }))
         : [];
   const batchOptions = stats?.graduates_by_year
@@ -809,10 +809,9 @@ export default function Analytics({ onDrillDown }) {
   ].filter((d) => d.value > 0);
 
   const departmentData = filtered?.by_department
-    ? Object.entries(filtered.by_department).map(([name, count]) => ({
-        name,
-        count,
-      }))
+    ? Object.entries(filtered.by_department)
+        .filter(([name]) => name !== "No department assigned")
+        .map(([name, count]) => ({ name, count }))
     : [];
 
   const graduationTrend = filtered?.graduates_by_year
@@ -974,7 +973,7 @@ export default function Analytics({ onDrillDown }) {
                 <div className="flex flex-col gap-3">
                   {departmentData.map((d) => (
                     <div key={d.name} className="flex items-center gap-3">
-                      <span className="w-24 shrink-0 truncate text-xs text-gray-500 sm:w-32">
+                      <span className="w-40 shrink-0 break-words text-xs leading-5 text-gray-500 sm:w-52">
                         {d.name}
                       </span>
                       <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">

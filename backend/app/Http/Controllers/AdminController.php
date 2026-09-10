@@ -95,10 +95,20 @@ class AdminController extends Controller
                 ->toArray();
 
             // Students grouped by department (names => counts)
-            $studentsForGroup = (clone $studentsQuery)->with('department')->get();
-            $byDepartment = $studentsForGroup->groupBy(function ($u) {
-                return $u->department?->name ?? 'Unassigned';
+            $studentsForGroup = (clone $studentsQuery)
+                ->with(['department', 'alumniProfile.department'])
+                ->get();
+            $studentDepartmentCounts = $studentsForGroup->groupBy(function ($u) {
+                return $u->department?->name
+                    ?? $u->alumniProfile?->department?->name
+                    ?? 'No department assigned';
             })->map(fn ($g) => $g->count())->toArray();
+            $departmentCounts = Department::query()
+                ->when($requestedDept, fn ($query) => $query->whereKey($requestedDept))
+                ->pluck('id', 'name')
+                ->map(fn () => 0)
+                ->toArray();
+            $byDepartment = array_merge($departmentCounts, $studentDepartmentCounts);
 
             $stats = [
                 'total_students' => (clone $studentsQuery)->count(),
@@ -124,7 +134,7 @@ class AdminController extends Controller
                 'graduates_by_year' => $graduatesByYear,
                 'by_department' => $byDepartment,
                 'total_graduates' => $totalGraduates,
-                'total_departments' => count($byDepartment),
+                'total_departments' => count($departmentCounts),
             ];
 
             return response()->json([

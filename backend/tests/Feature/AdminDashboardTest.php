@@ -100,4 +100,37 @@ class AdminDashboardTest extends TestCase
         $this->assertSame(1, $stats['by_department'][$deptOne->name]);
         $this->assertArrayNotHasKey($deptTwo->name, $stats['by_department']);
     }
+
+    public function test_dashboard_uses_alumni_profile_department_when_user_department_is_missing(): void
+    {
+        $superAdmin = User::factory()->create([
+            'role' => User::ROLE_SUPER_ADMIN,
+            'department_id' => null,
+        ]);
+        $department = Department::factory()->create(['name' => 'Information Systems']);
+
+        $user = User::factory()->create([
+            'role' => User::ROLE_USER,
+            'department_id' => null,
+            'is_verified' => true,
+            'status' => User::STATUS_ACTIVE,
+        ]);
+
+        AlumniProfile::create([
+            'user_id' => $user->id,
+            'department_id' => $department->id,
+            'employment_status' => AlumniProfile::STATUS_UNEMPLOYED,
+            'batch_year' => '2024',
+        ]);
+
+        $response = $this->actingAs($superAdmin, 'sanctum')
+            ->getJson('/api/admin/dashboard');
+
+        $response->assertOk();
+        $stats = $response->json('data.stats');
+
+        $this->assertSame(1, $stats['by_department'][$department->name]);
+        $this->assertArrayNotHasKey('No department assigned', $stats['by_department']);
+        $this->assertSame(1, $stats['total_departments']);
+    }
 }
