@@ -100,7 +100,7 @@ export default function StudentEvents() {
               key={event.id}
               className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm sm:rounded-3xl"
             >
-              <div className="space-y-4 p-5 sm:p-6">
+              <div className="space-y-4 p-4 sm:p-6">
                 <div className="flex items-center gap-3">
                   <UserAvatar
                     name={event.creator?.name || "Unknown user"}
@@ -129,12 +129,12 @@ export default function StudentEvents() {
                   </span>
                 </div>
 
-                <div className="flex items-start justify-between gap-3">
-                  <h2 className="min-w-0 text-xl font-bold text-tpc-navy break-words">
+                <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+                  <h2 className="min-w-0 max-w-full flex-1 break-words text-xl font-bold text-tpc-navy">
                     {event.title || "Event"}
                   </h2>
                   <span
-                    className={`shrink-0 rounded-lg px-2 py-1 text-xs font-semibold ${
+                    className={`max-w-full rounded-lg px-2 py-1 text-xs font-semibold leading-5 ${
                       event.scope === "school_wide"
                         ? "bg-blue-100 text-blue-700"
                         : "bg-purple-100 text-purple-700"
@@ -240,11 +240,11 @@ export default function StudentEvents() {
                 </div>
               )}
 
-              <div className="border-t border-gray-200 px-5 py-4 sm:px-6">
+              <div className="border-t border-gray-200 px-4 py-4 sm:px-6">
                 <button
                   type="button"
                   onClick={() => setSelectedEvent(event)}
-                  className="rounded-lg border border-tpc-green px-4 py-2 text-sm font-medium text-tpc-green transition hover:bg-tpc-green hover:text-white"
+                  className="w-full rounded-lg border border-tpc-green px-4 py-2 text-sm font-medium text-tpc-green transition hover:bg-tpc-green hover:text-white sm:w-auto"
                 >
                   View
                 </button>
