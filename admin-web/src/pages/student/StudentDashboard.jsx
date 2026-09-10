@@ -77,7 +77,7 @@ export default function StudentDashboard() {
   const isActive = student?.status === "active";
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen overflow-x-hidden bg-gray-50">
       {/* ── Header banner ── */}
       <div className="bg-tpc-greenDeep px-4 sm:px-8 pt-8 pb-16">
         <p className="text-tpc-green text-xs uppercase tracking-[0.2em] font-medium mb-1">
@@ -94,7 +94,7 @@ export default function StudentDashboard() {
       </div>
 
       {/* ── Main content ── */}
-      <div className="px-4 sm:px-8 -mt-8 pb-10 max-w-5xl mx-auto">
+      <div className="mx-auto -mt-8 max-w-5xl px-3 pb-10 sm:px-8">
         {/* Status + ID row */}
         {/* <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5">
@@ -161,10 +161,10 @@ export default function StudentDashboard() {
         <div className="grid grid-cols-1 min-[850px]:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
           {/* Latest Announcements */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6 flex flex-col">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-2">
                 <Megaphone className="w-4 h-4 text-tpc-greenDeep" />
-                <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-[0.18em]">
+                <h2 className="truncate text-sm font-semibold uppercase tracking-[0.18em] text-gray-700">
                   Announcements
                 </h2>
               </div>
@@ -190,7 +190,7 @@ export default function StudentDashboard() {
                       department={a.department?.name}
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-gray-900 truncate">
+                      <p className="line-clamp-2 break-words text-sm font-semibold text-gray-900">
                         {a.title}
                       </p>
                       <p className="text-xs text-gray-400 mt-0.5">
@@ -209,10 +209,10 @@ export default function StudentDashboard() {
 
           {/* Upcoming Events */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6 flex flex-col">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-2">
                 <CalendarDays className="w-4 h-4 text-tpc-greenDeep" />
-                <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-[0.18em]">
+                <h2 className="truncate text-sm font-semibold uppercase tracking-[0.18em] text-gray-700">
                   Upcoming Events
                 </h2>
               </div>
@@ -245,14 +245,14 @@ export default function StudentDashboard() {
                       </p>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-gray-900 truncate">
+                      <p className="line-clamp-2 break-words text-sm font-semibold text-gray-900">
                         {e.title}
                       </p>
-                      <div className="flex items-center gap-3 mt-0.5">
+                      <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
                         {e.location && (
-                          <span className="flex items-center gap-1 text-xs text-gray-400 truncate">
+                          <span className="flex min-w-0 max-w-full items-center gap-1 text-xs text-gray-400">
                             <MapPin className="w-3 h-3 shrink-0" />
-                            {e.location}
+                            <span className="truncate">{e.location}</span>
                           </span>
                         )}
                         {e.time && (
@@ -313,7 +313,9 @@ function ProfileField({ icon, label, value }) {
         <p className="text-[10px] uppercase tracking-[0.2em] text-gray-400 font-medium mb-0.5">
           {label}
         </p>
-        <p className="text-sm font-semibold text-gray-900 truncate">{value}</p>
+        <p className="break-words text-sm font-semibold text-gray-900">
+          {value}
+        </p>
       </div>
     </div>
   );
@@ -323,7 +325,7 @@ function ScopeBadge({ scope, department }) {
   const isSchoolWide = scope === "school_wide";
   return (
     <span
-      className={`mt-0.5 shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+      className={`mt-0.5 max-w-[45%] shrink-0 truncate rounded-full px-2 py-0.5 text-[10px] font-semibold ${
         isSchoolWide
           ? "bg-blue-100 text-blue-600"
           : "bg-purple-100 text-purple-600"
