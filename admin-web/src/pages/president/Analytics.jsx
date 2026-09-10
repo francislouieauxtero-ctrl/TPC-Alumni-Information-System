@@ -905,7 +905,7 @@ export default function Analytics({ onDrillDown }) {
         </div>
 
         {/* ── Row 1: Donut + Pie ── */}
-        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <ChartCard title="Alumni Status Breakdown">
             {studentStatusData.length > 0 ? (
               <div className="flex items-center gap-6">
@@ -965,7 +965,7 @@ export default function Analytics({ onDrillDown }) {
 
         {/* ── Row 2: Department Bars (super admin only) + Graduation Line ── */}
         <div
-          className={`grid grid-cols-1 items-start gap-4 ${isDeptHead ? "" : "lg:grid-cols-2"}`}
+          className={`grid grid-cols-1 gap-4 ${isDeptHead ? "" : "lg:grid-cols-2"}`}
         >
           {!isDeptHead && (
             <ChartCard title="Alumni per Department">
@@ -1226,7 +1226,7 @@ function StatCard({ title, value, icon, accent }) {
 
 function ChartCard({ title, children }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
+    <div className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
       <div className="mb-4 flex items-center justify-between gap-3 border-b border-gray-100 pb-3">
         <h3 className="min-w-0 text-sm font-semibold text-gray-800">{title}</h3>
         <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-tpc-greenDeep" />
