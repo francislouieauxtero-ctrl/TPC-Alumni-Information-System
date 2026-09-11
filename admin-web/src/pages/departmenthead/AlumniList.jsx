@@ -199,7 +199,12 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
       null);
   const departmentName = alumni.department?.name ?? "Data missing";
   const emailAddress = user.email ?? "Data missing";
-  const studentId = user.schoolId ?? user.school_id ?? "Data missing";
+  const studentId =
+    user.schoolId ??
+    user.school_id ??
+    alumni.student_number ??
+    alumni.graduate?.student_number ??
+    "Data missing";
   const contactNumber =
     alumni.contact_number ??
     alumni.alumniProfile?.contact_number ??
@@ -598,6 +603,13 @@ export default function AlumniList() {
     }
   };
 
+  useEffect(() => {
+    if (search.trim() === "" && searchQuery !== "") {
+      setPage(1);
+      setSearchQuery("");
+    }
+  }, [search, searchQuery]);
+
   const handleFilterChange = (setter, value) => {
     setter(value);
     setPage(1);
@@ -718,6 +730,17 @@ export default function AlumniList() {
                         <p className="text-xs text-gray-400 truncate">
                           {user.email || "—"}
                         </p>
+                        {(user.schoolId ||
+                          user.school_id ||
+                          item.student_number ||
+                          item.graduate?.student_number) && (
+                          <p className="text-[11px] font-mono text-tpc-greenDeep font-medium mt-0.5">
+                            ID: {user.schoolId ||
+                              user.school_id ||
+                              item.student_number ||
+                              item.graduate?.student_number}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="flex-shrink-0">
@@ -812,6 +835,17 @@ export default function AlumniList() {
                             <p className="text-xs text-gray-400 truncate">
                               {user.email || "—"}
                             </p>
+                            {(user.schoolId ||
+                              user.school_id ||
+                              item.student_number ||
+                              item.graduate?.student_number) && (
+                              <p className="text-[11px] font-mono text-tpc-greenDeep font-medium mt-0.5">
+                                ID: {user.schoolId ||
+                                  user.school_id ||
+                                  item.student_number ||
+                                  item.graduate?.student_number}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </td>

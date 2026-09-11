@@ -16,6 +16,8 @@ class UserResource extends JsonResource
             'role'          => $this->role,
             'departmentId'  => $this->department_id,
             'schoolId'      => $this->school_id,
+            'school_id'     => $this->school_id,
+            'student_number' => $this->school_id,
             'department'    => new DepartmentResource($this->whenLoaded('department')),
             'isVerified'    => (bool) $this->is_verified,
             'status'        => $this->status,

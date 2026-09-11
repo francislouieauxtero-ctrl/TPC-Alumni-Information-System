@@ -55,28 +55,49 @@ class AlumniRepository
 
     public function all(User $actor, array $filters = []): LengthAwarePaginator
     {
-        $query = AlumniProfile::with('user', 'department')
+        $query = AlumniProfile::with(['user', 'department', 'graduate'])
             ->whereHas('user', function ($q) {
                 $q->where('is_verified', true);
             });
 
         if ($actor->isAdmin()) {
             $query->where('department_id', $actor->department_id);
+        } elseif (!empty($filters['department_id'])) {
+            $query->where('department_id', $filters['department_id']);
         }
 
-        if (isset($filters['employment_status'])) {
-            $query->where('employment_status', $filters['employment_status']);
-        }
-
-        if (isset($filters['search'])) {
-            $search = $filters['search'];
-            $query->whereHas('user', function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+        if (!empty($filters['batch_year'])) {
+            $batchYear = $filters['batch_year'];
+            $query->where(function ($q) use ($batchYear) {
+                $q->where('batch_year', $batchYear)
+                    ->orWhereHas('graduate', function ($gradQuery) use ($batchYear) {
+                        $gradQuery->where('batch_year', $batchYear);
+                    });
             });
         }
 
-        return $query->orderBy('created_at', 'desc')->paginate(15);
+        if (isset($filters['employment_status']) && $filters['employment_status'] !== '') {
+            $query->where('employment_status', $filters['employment_status']);
+        }
+
+        if (!empty($filters['search'])) {
+            $search = trim($filters['search']);
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('user', function ($userQuery) use ($search) {
+                    $userQuery->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('school_id', 'like', "%{$search}%");
+                })->orWhereHas('graduate', function ($gradQuery) use ($search) {
+                    $gradQuery->where('student_number', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        $perPage = isset($filters['per_page']) && is_numeric($filters['per_page'])
+            ? (int) $filters['per_page']
+            : 15;
+
+        return $query->orderBy('created_at', 'desc')->paginate($perPage);
     }
 
     public function find(int $id): ?AlumniProfile

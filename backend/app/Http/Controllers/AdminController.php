@@ -369,10 +369,14 @@ public function deactivateDepartmentHead(Request $request, int $id): JsonRespons
             }
 
             if ($request->filled('search')) {
-                $search = $request->search;
+                $search = trim($request->search);
                 $query->where(function ($query) use ($search) {
                     $query->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('school_id', 'like', "%{$search}%")
+                        ->orWhereHas('graduate', function ($gradQuery) use ($search) {
+                            $gradQuery->where('student_number', 'like', "%{$search}%");
+                        });
                 });
             }
 

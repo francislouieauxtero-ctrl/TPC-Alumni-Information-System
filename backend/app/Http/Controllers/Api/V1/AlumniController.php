@@ -84,7 +84,13 @@ class AlumniController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $filters = request()->only(['employment_status', 'search']);
+            $filters = request()->only([
+                'employment_status',
+                'search',
+                'department_id',
+                'batch_year',
+                'per_page',
+            ]);
             $alumni  = $this->alumniService->getAll(auth()->user(), $filters);
 
             return $this->successResponse(

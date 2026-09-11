@@ -233,7 +233,12 @@ function ProfileModal({ alumni, onClose, jobHistory, jobHistoryLoading }) {
             <InfoCard
               icon={<GraduationCap className="h-4 w-4" />}
               label="Student ID"
-              value={user.schoolId || user.school_id}
+              value={
+                user.schoolId ||
+                user.school_id ||
+                alumni.student_number ||
+                alumni.graduate?.student_number
+              }
             />
             <InfoCard
               icon={<Building2 className="h-4 w-4" />}
@@ -586,7 +591,10 @@ export default function StudentManagement() {
           user.email,
           user.schoolId,
           user.school_id,
-          alum.graduate_id,
+          user.student_number,
+          alum.student_number,
+          alum.school_id,
+          alum.graduate?.student_number,
           alum.contact_number,
         ]
           .filter(Boolean)
@@ -734,7 +742,10 @@ export default function StudentManagement() {
               type="text"
               placeholder="Search name, email, or student number"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
               onKeyDown={handleSearch}
               className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-10 pr-4 text-sm text-gray-800 placeholder:text-gray-400 outline-none focus:border-tpc-greenDeep focus:ring-2 focus:ring-tpc-greenDeep/20"
             />
@@ -812,9 +823,22 @@ export default function StudentManagement() {
                 />
 
                 <div className="flex-1 min-w-0">
-                  <h3 className="truncate font-semibold text-gray-800">
-                    {user.name ?? "—"}
-                  </h3>
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="truncate font-semibold text-gray-800">
+                      {user.name ?? "—"}
+                    </h3>
+                    {(user.schoolId ||
+                      user.school_id ||
+                      alum.student_number ||
+                      alum.graduate?.student_number) && (
+                      <span className="flex-shrink-0 text-[11px] font-mono font-medium text-tpc-greenDeep bg-tpc-greenDeep/10 px-2 py-0.5 rounded">
+                        ID: {user.schoolId ||
+                          user.school_id ||
+                          alum.student_number ||
+                          alum.graduate?.student_number}
+                      </span>
+                    )}
+                  </div>
                   <p className="mb-1 truncate text-xs text-gray-400">
                     {user.email ?? "—"}
                   </p>
