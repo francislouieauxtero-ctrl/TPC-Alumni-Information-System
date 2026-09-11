@@ -20,6 +20,9 @@ class UpdateEventRequest extends FormRequest
             'location' => ['nullable', 'string', 'max:255'],
             'scope' => ['sometimes', 'in:school_wide,department_specific'],
             'department_id' => ['nullable', 'exists:departments,id'],
+            'attachments' => ['nullable', 'array'],
+            'attachments.*' => ['file', 'mimes:jpg,jpeg,png,webp,pdf,doc,docx', 'max:10240'],
+            'removed_attachments' => ['nullable', 'array'],
         ];
     }
 

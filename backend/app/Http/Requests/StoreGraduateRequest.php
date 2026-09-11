@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Graduate;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class StoreGraduateRequest extends FormRequest
@@ -50,7 +51,8 @@ class StoreGraduateRequest extends FormRequest
                 $query->where('student_number', $studentNumber);
 
                 if (is_numeric($studentNumber)) {
-                    $query->orWhereRaw('CAST(student_number AS UNSIGNED) = ?', [(int) $studentNumber]);
+                    $castType = DB::connection()->getDriverName() === 'mysql' ? 'UNSIGNED' : 'INTEGER';
+                    $query->orWhereRaw("CAST(student_number AS {$castType}) = ?", [(int) $studentNumber]);
                 }
             });
 

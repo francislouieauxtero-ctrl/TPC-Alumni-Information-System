@@ -391,16 +391,6 @@ export default function App() {
               }
             />
             <Route
-              path="/department-head/analytics"
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <DepartmentHeadLayout>
-                    <Analytics />
-                  </DepartmentHeadLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
               path="/department-head/PrintableReport"
               element={
                 <ProtectedRoute requiredRole="admin">

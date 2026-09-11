@@ -38,7 +38,7 @@ export function renderTextWithLinks(text, className = "") {
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
-      .replace(/\"/g, "&quot;")
+      .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
 
   const html = escapeHtml(text).replace(

@@ -32,6 +32,7 @@ class UpdateProfileRequest extends FormRequest
         ],
         'contact_number' => 'sometimes|string|nullable|max:50',
         'location' => 'sometimes|string|nullable|max:255',
+        'batch_year' => 'sometimes|nullable|string|max:20',
     ];
 }
 }

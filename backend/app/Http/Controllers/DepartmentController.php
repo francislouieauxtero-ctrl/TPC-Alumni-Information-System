@@ -100,6 +100,14 @@ class DepartmentController extends Controller
     public function destroy(Department $department): JsonResponse
     {
         try {
+            if ($department->users()->exists() || $department->graduates()->exists()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Cannot delete department with associated users or graduates. Please reassign or remove them first.',
+                    'data' => (object) [],
+                ], 422);
+            }
+
             $this->departments->delete($department);
 
             return response()->json([
