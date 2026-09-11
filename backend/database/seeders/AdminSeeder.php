@@ -15,11 +15,11 @@ class AdminSeeder extends Seeder
     {
         User::updateOrCreate(
             [
-                'email' => 'SystemAdmin@gmail.com',
+                'email' => 'francislouieauxtero@gmail.com',
             ],
             [
                 'name' => 'President',
-                'password' => Hash::make(env('SUPER_ADMIN_PASSWORD', 'superadmin123')),
+                'password' => Hash::make('password'),
                 'department_id' => null,
                 'role' => User::ROLE_SUPER_ADMIN,
                 'is_verified' => true,
