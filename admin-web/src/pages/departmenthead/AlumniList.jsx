@@ -20,6 +20,7 @@ import {
 import alumniService from "../../services/alumniService";
 import api from "../../services/api";
 import { toast } from "react-toastify";
+import { resolveStorageUrl } from "../../utils/media";
 
 const EMPLOYMENT_STATUSES = ["employed", "unemployed", "self_employed"];
 
@@ -52,17 +53,25 @@ function avatarPalette(name = "") {
 }
 
 function Avatar({ src, name = "", size = "md" }) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const resolvedSrc = resolveStorageUrl(src);
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [src]);
+
   const initials = getInitials(name);
   const palette = avatarPalette(name);
-  const sizeClass = size === "lg" ? "h-20 w-20 text-lg" : "h-8 w-8 text-xs";
+  const sizeClass = size === "lg" ? "h-20 w-20 text-lg" : "h-9 w-9 text-xs";
   const shadowClass =
     size === "lg" ? "shadow-lg ring-4 ring-white" : "shadow-sm";
 
-  if (src) {
+  if (resolvedSrc && !imageFailed) {
     return (
       <img
-        src={src}
+        src={resolvedSrc}
         alt={name}
+        onError={() => setImageFailed(true)}
         className={`flex-shrink-0 rounded-full object-cover border-2 border-tpc-greenDeep ${sizeClass} ${shadowClass}`}
       />
     );
@@ -72,7 +81,7 @@ function Avatar({ src, name = "", size = "md" }) {
     <div
       className={`flex-shrink-0 flex items-center justify-center rounded-full font-bold ${sizeClass} ${palette} ${shadowClass} border-2 border-opacity-20`}
     >
-      {initials || <User className="h-5 w-5" />}
+      {initials || <User className="h-4 w-4" />}
     </div>
   );
 }
@@ -595,7 +604,7 @@ export default function AlumniList() {
   };
 
   return (
-    <div className="space-y-5 p-6">
+    <div className="space-y-5 p-4 sm:p-6">
       {/* Page heading */}
       <div>
         <h1 className="text-2xl font-semibold text-gray-800">Alumni</h1>
@@ -669,113 +678,195 @@ export default function AlumniList() {
         </div>
       )}
 
-      {/* Table */}
+      {/* Table & Cards */}
       {loading ? (
         <div className="flex items-center justify-center h-56">
           <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-200 border-t-tpc-greenDeep" />
         </div>
       ) : visibleAlumni.length > 0 ? (
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50">
-                <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-gray-400 w-64">
-                  Alumni
-                </th>
-                <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-gray-400 w-28">
-                  Batch
-                </th>
-                <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-gray-400 w-36">
-                  Employment
-                </th>
-                <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-gray-400">
-                  Current position
-                </th>
-                <th className="px-5 py-3 w-20" />
-              </tr>
-            </thead>
-            <tbody>
-              {visibleAlumni.map((item, i) => {
-                const user = item.user ?? {};
-                const batchYear = formatBatchYear(
-                  item.batch_year ??
-                    item.alumniProfile?.batch_year ??
-                    item.graduate?.batch_year ??
-                    item.user?.alumniProfile?.batch_year,
-                );
-                return (
-                  <tr
-                    key={item.id}
-                    className={`border-b border-gray-100 transition hover:bg-gray-50 ${i === visibleAlumni.length - 1 ? "border-b-0" : ""}`}
-                  >
-                    {/* Name + email */}
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-3">
-                        <Avatar
-                          src={user.avatar || item.profile_photo_url}
-                          name={user.name}
-                        />
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold text-gray-800 truncate">
-                            {user.name || "—"}
-                          </p>
-                          <p className="text-xs text-gray-400 truncate">
-                            {user.email || "—"}
-                          </p>
-                        </div>
+        <>
+          {/* Mobile Card View (< md) */}
+          <div className="block md:hidden space-y-3">
+            {visibleAlumni.map((item) => {
+              const user = item.user ?? {};
+              const batchYear = formatBatchYear(
+                item.batch_year ??
+                  item.alumniProfile?.batch_year ??
+                  item.graduate?.batch_year ??
+                  item.user?.alumniProfile?.batch_year,
+              );
+              const position =
+                item.current_job ?? item.alumniProfile?.current_job;
+              const company = item.company ?? item.alumniProfile?.company;
+
+              return (
+                <div
+                  key={item.id}
+                  className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm space-y-3 hover:border-gray-300 transition"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Avatar
+                        src={user.avatar || item.profile_photo_url}
+                        name={user.name}
+                        size="md"
+                      />
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-800 truncate">
+                          {user.name || "—"}
+                        </p>
+                        <p className="text-xs text-gray-400 truncate">
+                          {user.email || "—"}
+                        </p>
                       </div>
-                    </td>
-
-                    {/* Batch */}
-                    <td className="px-5 py-3.5">
-                      <p className="text-sm text-gray-700">{batchYear}</p>
-                    </td>
-
-                    {/* Status badge */}
-                    <td className="px-5 py-3.5">
+                    </div>
+                    <div className="flex-shrink-0">
                       <StatusBadge status={item.employment_status} />
-                    </td>
+                    </div>
+                  </div>
 
-                    {/* Current position */}
-                    <td className="px-5 py-3.5">
-                      {item.employment_status === "unemployed" ? (
-                        <span className="text-sm text-gray-700 font-medium">
-                          Unemployed
-                        </span>
-                      ) : item.current_job ||
-                        item.alumniProfile?.current_job ? (
-                        <>
-                          <p className="text-sm text-gray-800">
-                            {item.current_job ??
-                              item.alumniProfile?.current_job}
-                          </p>
-                          {(item.company ?? item.alumniProfile?.company) && (
-                            <p className="text-xs text-gray-400 mt-0.5">
-                              {item.company ?? item.alumniProfile?.company}
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100 text-xs">
+                    <div>
+                      <span className="text-gray-400 block uppercase tracking-wider text-[10px] font-medium">
+                        Batch Year
+                      </span>
+                      <span className="font-medium text-gray-700">
+                        {batchYear}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400 block uppercase tracking-wider text-[10px] font-medium">
+                        Current Position
+                      </span>
+                      <span className="font-medium text-gray-700 truncate block">
+                        {item.employment_status === "unemployed"
+                          ? "Unemployed"
+                          : position
+                            ? company
+                              ? `${position} · ${company}`
+                              : position
+                            : "—"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-gray-100 flex justify-end">
+                    <button
+                      onClick={() => setSelectedAlumni(item)}
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-lg border border-tpc-greenDeep/30 bg-transparent px-3 py-2 text-xs font-medium text-tpc-greenDeep transition hover:bg-tpc-greenDeep/8 active:scale-95"
+                    >
+                      <Eye className="h-4 w-4" />
+                      View Profile
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Table View (>= md) */}
+          <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+            <table className="w-full min-w-[680px] text-left">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50">
+                  <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-gray-400 w-64">
+                    Alumni
+                  </th>
+                  <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-gray-400 w-28">
+                    Batch
+                  </th>
+                  <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-gray-400 w-36">
+                    Employment
+                  </th>
+                  <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                    Current position
+                  </th>
+                  <th className="px-5 py-3 w-24 text-right" />
+                </tr>
+              </thead>
+              <tbody>
+                {visibleAlumni.map((item, i) => {
+                  const user = item.user ?? {};
+                  const batchYear = formatBatchYear(
+                    item.batch_year ??
+                      item.alumniProfile?.batch_year ??
+                      item.graduate?.batch_year ??
+                      item.user?.alumniProfile?.batch_year,
+                  );
+                  return (
+                    <tr
+                      key={item.id}
+                      className={`border-b border-gray-100 transition hover:bg-gray-50 ${i === visibleAlumni.length - 1 ? "border-b-0" : ""}`}
+                    >
+                      {/* Name + email */}
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <Avatar
+                            src={user.avatar || item.profile_photo_url}
+                            name={user.name}
+                          />
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-gray-800 truncate">
+                              {user.name || "—"}
                             </p>
-                          )}
-                        </>
-                      ) : (
-                        <span className="text-sm text-gray-300">—</span>
-                      )}
-                    </td>
+                            <p className="text-xs text-gray-400 truncate">
+                              {user.email || "—"}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
 
-                    {/* Action */}
-                    <td className="px-5 py-3.5 text-right">
-                      <button
-                        onClick={() => setSelectedAlumni(item)}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-tpc-greenDeep/30 bg-transparent px-3 py-1.5 text-xs font-medium text-tpc-greenDeep transition hover:bg-tpc-greenDeep/8"
-                      >
-                        <Eye className="h-3.5 w-3.5" />
-                        View
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      {/* Batch */}
+                      <td className="px-5 py-3.5">
+                        <p className="text-sm text-gray-700">{batchYear}</p>
+                      </td>
+
+                      {/* Status badge */}
+                      <td className="px-5 py-3.5">
+                        <StatusBadge status={item.employment_status} />
+                      </td>
+
+                      {/* Current position */}
+                      <td className="px-5 py-3.5">
+                        {item.employment_status === "unemployed" ? (
+                          <span className="text-sm text-gray-700 font-medium">
+                            Unemployed
+                          </span>
+                        ) : item.current_job ||
+                          item.alumniProfile?.current_job ? (
+                          <>
+                            <p className="text-sm text-gray-800">
+                              {item.current_job ??
+                                item.alumniProfile?.current_job}
+                            </p>
+                            {(item.company ?? item.alumniProfile?.company) && (
+                              <p className="text-xs text-gray-400 mt-0.5">
+                                {item.company ?? item.alumniProfile?.company}
+                              </p>
+                            )}
+                          </>
+                        ) : (
+                          <span className="text-sm text-gray-300">—</span>
+                        )}
+                      </td>
+
+                      {/* Action */}
+                      <td className="px-5 py-3.5 text-right">
+                        <button
+                          onClick={() => setSelectedAlumni(item)}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-tpc-greenDeep/30 bg-transparent px-3 py-1.5 text-xs font-medium text-tpc-greenDeep transition hover:bg-tpc-greenDeep/8 active:scale-95"
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       ) : (
         <div className="rounded-xl border border-gray-100 bg-gray-50 py-16 text-center">
           <p className="text-sm text-gray-400">No alumni found.</p>

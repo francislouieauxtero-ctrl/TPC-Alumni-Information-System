@@ -65,4 +65,30 @@ export function getCreatorRoleLabel(creator) {
   return "User";
 }
 
-export default { getAttachmentUrls, renderTextWithLinks, getCreatorRoleLabel };
+export function resolveStorageUrl(url) {
+  if (!url || typeof url !== "string") return "";
+  const trimmed = url.trim();
+  if (!trimmed) return "";
+  if (
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("data:") ||
+    trimmed.startsWith("blob:")
+  ) {
+    return trimmed;
+  }
+  const cleanPath = trimmed.replace(/^\/+/, "");
+  if (cleanPath.startsWith("storage/")) {
+    return `/${cleanPath}`;
+  }
+  return `/storage/${cleanPath}`;
+}
+
+export default {
+  getAttachmentUrls,
+  renderTextWithLinks,
+  getCreatorRoleLabel,
+  resolveStorageUrl,
+};
+
+

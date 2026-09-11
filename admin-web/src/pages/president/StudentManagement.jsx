@@ -15,6 +15,7 @@ import {
 import alumniService from "../../services/alumniService";
 import departmentService from "../../services/departmentService";
 import api from "../../services/api";
+import { resolveStorageUrl } from "../../utils/media";
 
 const EMPLOYMENT_STATUSES = ["employed", "unemployed", "self_employed"];
 const VIEW_TABS = [
@@ -29,33 +30,34 @@ const formatBatchYear = (value) => {
   return Number.isFinite(year) ? `${year}-${year + 1}` : String(value);
 };
 
-const statusBadge = (status) => {
-  const map = {
-    employed: {
-      bg: "bg-green-100",
-      text: "text-green-800",
-      border: "border-green-300",
-      icon: Check,
-    },
-    unemployed: {
-      bg: "bg-red-100",
-      text: "text-red-800",
-      border: "border-red-300",
-      icon: AlertCircle,
-    },
-    self_employed: {
-      bg: "bg-blue-100",
-      text: "text-blue-800",
-      border: "border-blue-300",
-      icon: Briefcase,
-    },
-  };
+const STATUS_BADGES = {
+  employed: {
+    bg: "bg-green-100",
+    text: "text-green-800",
+    border: "border-green-300",
+    icon: Check,
+  },
+  unemployed: {
+    bg: "bg-red-100",
+    text: "text-red-800",
+    border: "border-red-300",
+    icon: AlertCircle,
+  },
+  self_employed: {
+    bg: "bg-blue-100",
+    text: "text-blue-800",
+    border: "border-blue-300",
+    icon: Briefcase,
+  },
+};
+
+function StatusBadge({ status }) {
   const label = {
     employed: "Employed",
     unemployed: "Unemployed",
     self_employed: "Self-Employed",
   };
-  const config = map[status] ?? {
+  const config = STATUS_BADGES[status] ?? {
     bg: "bg-gray-100",
     text: "text-gray-700",
     border: "border-gray-300",
@@ -70,9 +72,18 @@ const statusBadge = (status) => {
       {label[status] ?? status}
     </div>
   );
-};
+}
+
+const statusBadge = (status) => <StatusBadge status={status} />;
 
 function Avatar({ src, name, size = "md" }) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const resolvedSrc = resolveStorageUrl(src);
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [src]);
+
   const dim = size === "lg" ? "h-20 w-20 text-lg" : "h-10 w-10 text-sm";
   const shadowClass =
     size === "lg" ? "shadow-lg ring-4 ring-white" : "shadow-sm";
@@ -85,11 +96,12 @@ function Avatar({ src, name, size = "md" }) {
         .toUpperCase()
     : "?";
 
-  if (src) {
+  if (resolvedSrc && !imageFailed) {
     return (
       <img
-        src={src}
+        src={resolvedSrc}
         alt={name}
+        onError={() => setImageFailed(true)}
         className={`${dim} rounded-full object-cover flex-shrink-0 border-2 border-tpc-greenDeep ${shadowClass}`}
       />
     );
