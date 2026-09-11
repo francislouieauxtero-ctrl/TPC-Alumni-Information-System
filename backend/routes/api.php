@@ -30,7 +30,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::get('user', 'user');
     });
 
-Route::prefix('super-admin')->middleware('role:super_admin')->group(function () {
+Route::prefix('super-admin')->name('super-admin.')->middleware('role:super_admin')->group(function () {
     Route::post('department-admins', [AuthController::class, 'createDepartmentAdmin']);
     Route::get('department-admins', [AdminController::class, 'listDepartmentAdmins']);
     Route::put('department-admins/{id}', [AdminController::class, 'updateDepartmentAdmin']);
@@ -43,7 +43,7 @@ Route::prefix('super-admin')->middleware('role:super_admin')->group(function () 
     Route::apiResource('departments', DepartmentController::class)->except(['index']);
     Route::apiResource('graduates', GraduateController::class);
 });
-Route::prefix('admin')->middleware('role:super_admin,admin')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware('role:super_admin,admin')->group(function () {
     Route::controller(AdminController::class)->group(function () {
         Route::get('dashboard', 'dashboard');
         Route::get('stats', 'stats');
