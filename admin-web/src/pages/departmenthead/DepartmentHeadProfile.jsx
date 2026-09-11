@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import api from "../../services/api";
+import { resolveStorageUrl } from "../../utils/media";
 import {
   Camera,
   Mail,
@@ -44,6 +45,12 @@ export default function DepartmentHeadProfile() {
   const [removing, setRemoving] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [profile?.avatar]);
+
   const busy = uploading || removing;
 
   useEffect(() => {
@@ -262,10 +269,11 @@ export default function DepartmentHeadProfile() {
               }`}
               style={{ width: 120, height: 120 }}
             >
-              {profile?.avatar ? (
+              {profile?.avatar && !imageFailed ? (
                 <img
-                  src={profile.avatar}
+                  src={resolveStorageUrl(profile.avatar)}
                   alt={profile.name}
+                  onError={() => setImageFailed(true)}
                   className="h-full w-full object-cover"
                 />
               ) : (

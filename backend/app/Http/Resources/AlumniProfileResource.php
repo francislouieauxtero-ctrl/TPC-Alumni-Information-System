@@ -10,6 +10,18 @@ class AlumniProfileResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $photo = $this->profile_photo_url;
+        if ($photo && !str_starts_with($photo, 'http://') && !str_starts_with($photo, 'https://') && !str_starts_with($photo, 'data:') && !str_starts_with($photo, 'blob:')) {
+            $clean = ltrim($photo, '/');
+            while (str_starts_with($clean, 'storage/')) {
+                $clean = substr($clean, 8);
+            }
+            if (!str_contains($clean, '/')) {
+                $clean = 'avatars/' . $clean;
+            }
+            $photo = '/storage/' . $clean;
+        }
+
         return [
             'id'                  => $this->id,
             'user_id'             => $this->user_id,
@@ -22,7 +34,7 @@ class AlumniProfileResource extends JsonResource
             'school_id'           => $this->user?->school_id ?? $this->graduate?->student_number,
             'contact_number'      => $this->contact_number,
             'location'            => $this->location,
-            'profile_photo_url'   => $this->profile_photo_url,
+            'profile_photo_url'   => $photo ?: null,
             'current_job'         => $this->current_job,
             'company'             => $this->company,
             'batch_year'          => $this->batch_year,

@@ -77,9 +77,12 @@ export function resolveStorageUrl(url) {
   ) {
     return trimmed;
   }
-  const cleanPath = trimmed.replace(/^\/+/, "");
-  if (cleanPath.startsWith("storage/")) {
-    return `/${cleanPath}`;
+  let cleanPath = trimmed.replace(/^\/+/, "");
+  while (cleanPath.startsWith("storage/")) {
+    cleanPath = cleanPath.slice(8);
+  }
+  if (!cleanPath.includes("/") && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(cleanPath)) {
+    cleanPath = `avatars/${cleanPath}`;
   }
   return `/storage/${cleanPath}`;
 }

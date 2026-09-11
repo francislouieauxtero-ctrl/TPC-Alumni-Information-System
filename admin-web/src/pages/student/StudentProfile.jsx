@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import api from "../../services/api";
 import alumniService from "../../services/alumniService";
 import EditProfileForm from "./EditProfileForm";
+import { resolveStorageUrl } from "../../utils/media";
 import {
   Camera,
   ShieldCheck,
@@ -70,6 +71,12 @@ export default function StudentProfile() {
   const [uploading, setUploading] = useState(false);
   const [removing, setRemoving] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [imageFailed, setImageFailed] = useState(false);
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [profile?.avatar]);
+
   const busy = uploading || removing;
 
   // Modal state
@@ -402,10 +409,11 @@ export default function StudentProfile() {
               <div className="mb-3 flex items-end justify-between">
                 {/* Avatar */}
                 <div className="group relative -mt-10 h-[72px] w-[72px] overflow-hidden rounded-2xl border-4 border-white shadow-md sm:-mt-12 sm:h-24 sm:w-24">
-                  {profile?.avatar ? (
+                  {profile?.avatar && !imageFailed ? (
                     <img
-                      src={profile.avatar}
+                      src={resolveStorageUrl(profile.avatar)}
                       alt={profile.name}
+                      onError={() => setImageFailed(true)}
                       className="h-full w-full object-cover"
                     />
                   ) : (

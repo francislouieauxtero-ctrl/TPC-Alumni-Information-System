@@ -9,6 +9,18 @@ class UserResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $avatar = $this->avatar;
+        if ($avatar && !str_starts_with($avatar, 'http://') && !str_starts_with($avatar, 'https://') && !str_starts_with($avatar, 'data:') && !str_starts_with($avatar, 'blob:')) {
+            $clean = ltrim($avatar, '/');
+            while (str_starts_with($clean, 'storage/')) {
+                $clean = substr($clean, 8);
+            }
+            if (!str_contains($clean, '/')) {
+                $clean = 'avatars/' . $clean;
+            }
+            $avatar = '/storage/' . $clean;
+        }
+
         return [
             'id'            => $this->id,
             'name'          => $this->name,
@@ -21,7 +33,7 @@ class UserResource extends JsonResource
             'department'    => new DepartmentResource($this->whenLoaded('department')),
             'isVerified'    => (bool) $this->is_verified,
             'status'        => $this->status,
-            'avatar'        => $this->avatar ? $this->avatar : null,
+            'avatar'        => $avatar ?: null,
             'alumniProfile' => new AlumniProfileResource($this->whenLoaded('alumniProfile')),
             'createdAt'     => $this->created_at,
             'updatedAt'     => $this->updated_at,

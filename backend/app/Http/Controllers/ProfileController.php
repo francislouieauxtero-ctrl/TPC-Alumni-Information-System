@@ -20,6 +20,10 @@ class ProfileController extends Controller
 
             $path = $request->file('avatar')->store('avatars', 'public');
             $data['avatar'] = "/storage/{$path}";
+
+            if ($user->alumniProfile) {
+                $user->alumniProfile->update(['profile_photo_url' => $data['avatar']]);
+            }
         }
 
         $user->update($data);
@@ -41,7 +45,12 @@ class ProfileController extends Controller
         $this->deleteStoredAvatar($user);
 
         $path = $request->file('avatar')->store('avatars', 'public');
-        $user->update(['avatar' => "/storage/{$path}"]);
+        $avatarUrl = "/storage/{$path}";
+        $user->update(['avatar' => $avatarUrl]);
+
+        if ($user->alumniProfile) {
+            $user->alumniProfile->update(['profile_photo_url' => $avatarUrl]);
+        }
 
         return response()->json([
             'status' => true,
@@ -55,6 +64,10 @@ class ProfileController extends Controller
         $user = $request->user();
         $this->deleteStoredAvatar($user);
         $user->update(['avatar' => null]);
+
+        if ($user->alumniProfile) {
+            $user->alumniProfile->update(['profile_photo_url' => null]);
+        }
 
         return response()->json([
             'status' => true,
