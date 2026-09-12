@@ -18,6 +18,7 @@ class GraduateResource extends JsonResource
             'batch_year' => $this->batch_year,
             'block' => $this->block,
             'registration_status' => $this->registration_status,
+            'is_registered' => $this->isRegistered(),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

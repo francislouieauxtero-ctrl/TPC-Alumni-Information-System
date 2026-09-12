@@ -78,9 +78,9 @@ class StudentController extends Controller
                 $validated['avatar'] = "/storage/{$path}";
             }
 
-            $user->update(Arr::only($validated, ['name', 'email', 'avatar']));
+            $user->update(Arr::only($validated, ['email', 'avatar']));
 
-            $profileData = Arr::only($validated, ['contact_number', 'location', 'batch_year']);
+            $profileData = Arr::only($validated, ['contact_number', 'location']);
             if ($request->hasFile('avatar')) {
                 $profileData['profile_photo_url'] = $validated['avatar'];
             }

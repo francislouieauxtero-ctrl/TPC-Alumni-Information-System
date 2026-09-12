@@ -37,12 +37,24 @@ class UpdateGraduateRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator): void {
+            $graduate = $this->route('graduate');
+            if (! $graduate instanceof Graduate && $graduate) {
+                $graduate = Graduate::find($graduate);
+            }
+
+            if ($graduate && $graduate->isRegistered() && $this->filled('name')) {
+                $newName = trim((string) $this->input('name'));
+                if ($newName !== trim((string) $graduate->name)) {
+                    $validator->errors()->add('name', 'The registered name is locked and cannot be edited because this graduate has already registered as an Alumni.');
+                }
+            }
+
             if (! $this->filled('student_number')) {
                 return;
             }
 
             $studentNumber = trim((string) $this->input('student_number'));
-            $graduateId = $this->route('graduate')?->id ?? $this->route('graduate');
+            $graduateId = $graduate?->id;
 
             if ($studentNumber === '' || $graduateId === null) {
                 return;

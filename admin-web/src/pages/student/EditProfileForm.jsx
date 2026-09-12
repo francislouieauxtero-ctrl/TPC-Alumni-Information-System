@@ -124,27 +124,29 @@ export default function EditProfileForm({
             className="space-y-4"
           >
             <div>
-              <label className="block text-xs sm:text-sm text-gray-500 mb-1.5 sm:mb-2">
-                Full name
-              </label>
+              <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                  Alumni Name
+                </label>
+                <span className="text-[11px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                  Locked
+                </span>
+              </div>
               <input
                 type="text"
-                value={form.name}
-                onChange={(e) =>
-                  setForm((p) => ({ ...p, name: e.target.value }))
-                }
-                className={inputClass(validationErrors.name)}
+                value={form.name || ""}
+                disabled
+                readOnly
+                className="w-full rounded-lg border px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-100 text-gray-500 text-sm sm:text-base cursor-not-allowed border-gray-200"
               />
-              {validationErrors.name && (
-                <p className="mt-1 text-xs sm:text-sm text-red-600">
-                  {validationErrors.name[0]}
-                </p>
-              )}
+              <p className="mt-1 text-xs text-gray-400">
+                Alumni Name cannot be edited.
+              </p>
             </div>
 
             <div>
-              <label className="block text-xs sm:text-sm text-gray-500 mb-1.5 sm:mb-2">
-                Email address
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+                Email Address
               </label>
               <input
                 type="email"
@@ -154,6 +156,9 @@ export default function EditProfileForm({
                 }
                 className={inputClass(validationErrors.email)}
               />
+              <p className="mt-1.5 text-xs text-gray-500">
+                The newly updated email address will automatically become the recipient of all future <span className="font-semibold text-gray-700">events, announcements, and system notifications</span>.
+              </p>
               {validationErrors.email && (
                 <p className="mt-1 text-xs sm:text-sm text-red-600">
                   {validationErrors.email[0]}
@@ -163,8 +168,8 @@ export default function EditProfileForm({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs sm:text-sm text-gray-500 mb-1.5 sm:mb-2">
-                  Contact number
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+                  Contact Number
                 </label>
                 <input
                   type="text"
@@ -182,7 +187,7 @@ export default function EditProfileForm({
               </div>
 
               <div>
-                <label className="block text-xs sm:text-sm text-gray-500 mb-1.5 sm:mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                   Current Address
                 </label>
                 <input
@@ -200,10 +205,15 @@ export default function EditProfileForm({
                 )}
               </div>
 
-              <div>
-                <label className="block text-xs sm:text-sm text-gray-500 mb-1.5 sm:mb-2">
-                  Batch year
-                </label>
+              <div className="sm:col-span-2">
+                <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                    Batch Year
+                  </label>
+                  <span className="text-[11px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                    Locked
+                  </span>
+                </div>
                 <input
                   type="text"
                   value={form?.batch_year || "—"}
@@ -212,7 +222,7 @@ export default function EditProfileForm({
                   className="w-full rounded-lg border px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-100 text-gray-500 text-sm sm:text-base cursor-not-allowed border-gray-200"
                 />
                 <p className="mt-1 text-xs text-gray-400">
-                  Set automatically from your graduate record — can't be edited.
+                  Automatically set based on the graduate record and cannot be edited.
                 </p>
               </div>
             </div>

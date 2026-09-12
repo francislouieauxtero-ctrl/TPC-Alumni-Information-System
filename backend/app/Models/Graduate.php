@@ -47,7 +47,8 @@ class Graduate extends Model
      */
     public function isRegistered(): bool
     {
-        return $this->alumniProfile()->exists();
+        return $this->alumniProfile()->exists()
+            || User::where('school_id', $this->student_number)->where('role', User::ROLE_USER)->exists();
     }
 
     /**

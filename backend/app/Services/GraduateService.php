@@ -49,6 +49,13 @@ class GraduateService
      */
     public function update(Graduate $graduate, array $data): Graduate
     {
+        // Prevent editing name if graduate is already registered as an Alumni
+        if (isset($data['name']) && trim((string) $data['name']) !== trim((string) $graduate->name)) {
+            if ($graduate->isRegistered()) {
+                throw new \Exception('The registered name is locked and cannot be edited because this graduate has already registered as an Alumni.');
+            }
+        }
+
         // Check if changing student number and new one already exists
         if (isset($data['student_number']) && $data['student_number'] !== $graduate->student_number) {
             if ($this->graduateRepository->findByStudentNumber($data['student_number'])) {

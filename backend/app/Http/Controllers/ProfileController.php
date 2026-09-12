@@ -6,6 +6,7 @@ use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
@@ -14,6 +15,10 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $data = $request->validated();
+
+        if ($user->isStudent()) {
+            $data = Arr::except($data, ['name', 'batch_year']);
+        }
 
         if ($request->hasFile('avatar')) {
             $this->deleteStoredAvatar($user);
@@ -26,7 +31,14 @@ class ProfileController extends Controller
             }
         }
 
-        $user->update($data);
+        if ($user->alumniProfile) {
+            $profileUpdates = Arr::only($data, ['contact_number', 'location']);
+            if (!empty($profileUpdates)) {
+                $user->alumniProfile->update($profileUpdates);
+            }
+        }
+
+        $user->update(Arr::only($data, ['name', 'email', 'avatar']));
 
         return response()->json([
             'status' => true,

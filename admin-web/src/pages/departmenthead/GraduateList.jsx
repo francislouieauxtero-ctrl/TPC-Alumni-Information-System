@@ -158,15 +158,19 @@ export default function GraduateList() {
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        graduate.registration_status === "registered"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-amber-100 text-amber-700"
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+                        graduate.registration_status === "registered" || graduate.is_registered
+                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                          : "bg-gray-100 text-gray-600 border border-gray-200"
                       }`}
                     >
-                      {graduate.registration_status === "registered"
-                        ? "Registered"
-                        : "Not Registered"}
+                      {graduate.registration_status === "registered" || graduate.is_registered ? (
+                        <>
+                          <span>🔒</span> Registered
+                        </>
+                      ) : (
+                        "Not Registered"
+                      )}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right space-x-4">
