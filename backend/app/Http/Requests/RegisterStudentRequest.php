@@ -51,6 +51,8 @@ class RegisterStudentRequest extends FormRequest
         }
     }
 
+    protected ?string $canonicalName = null;
+
     public function withValidator($validator): void
     {
         $validator->after(function ($validator): void {
@@ -60,7 +62,7 @@ class RegisterStudentRequest extends FormRequest
                 return;
             }
 
-            $exists = Graduate::query()
+            $graduate = Graduate::query()
                 ->where(function ($query) use ($schoolId): void {
                     $query->where('student_number', $schoolId);
 
@@ -68,12 +70,51 @@ class RegisterStudentRequest extends FormRequest
                         $query->orWhereRaw('CAST(student_number AS UNSIGNED) = ?', [(int) $schoolId]);
                     }
                 })
-                ->exists();
+                ->first();
 
-            if (! $exists) {
-                $validator->errors()->add('school_id', 'This student ID is not found in the graduates student ID list.');
+            if (!$graduate) {
+                $validator->errors()->add('school_id', 'Incorrect ID Number');
+                return;
             }
+
+            $inputName = (string) $this->input('name');
+            if (trim($inputName) === '') {
+                return;
+            }
+
+            if (!$this->namesMatch($inputName, $graduate->name)) {
+                $validator->errors()->add('name', 'Incorrect Credentials');
+                return;
+            }
+
+            // Sync with canonical name registered by the department head
+            $this->canonicalName = $graduate->name;
+            $this->merge(['name' => $graduate->name]);
         });
+    }
+
+    public function validated($key = null, $default = null): mixed
+    {
+        $validated = parent::validated($key, $default);
+
+        if ($key === null && is_array($validated) && !empty($this->canonicalName)) {
+            $validated['name'] = $this->canonicalName;
+        }
+
+        return $key ? data_get($validated, $key, $default) : $validated;
+    }
+
+    protected function namesMatch(string $inputName, string $registeredName): bool
+    {
+        $cleanInput = trim((string) preg_replace('/\s+/', ' ', $inputName));
+        $cleanRegistered = trim((string) preg_replace('/\s+/', ' ', $registeredName));
+
+        if ($cleanInput === '' || $cleanRegistered === '') {
+            return false;
+        }
+
+        // Exact registered name match (case-insensitive, normalized whitespace)
+        return mb_strtolower($cleanInput) === mb_strtolower($cleanRegistered);
     }
 
     public function messages(): array

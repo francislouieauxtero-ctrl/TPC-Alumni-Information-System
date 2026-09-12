@@ -69,8 +69,18 @@ export default function StudentRegister() {
       });
       finishRegistration(form.email);
     } catch (err) {
+      const respErrors = err.response?.data?.errors;
+      if (respErrors) {
+        const fieldErrors = {};
+        Object.keys(respErrors).forEach((key) => {
+          fieldErrors[key] = respErrors[key][0];
+        });
+        setErrors((prev) => ({ ...prev, ...fieldErrors }));
+      }
       const backendMessage =
-        err.response?.data?.errors?.school_id?.[0] ||
+        respErrors?.name?.[0] ||
+        respErrors?.school_id?.[0] ||
+        respErrors?.email?.[0] ||
         err.response?.data?.message ||
         "Registration failed";
       setError(backendMessage);
@@ -100,8 +110,18 @@ export default function StudentRegister() {
 
         finishRegistration(form.email);
       } catch (err) {
+        const respErrors = err.response?.data?.errors;
+        if (respErrors) {
+          const fieldErrors = {};
+          Object.keys(respErrors).forEach((key) => {
+            fieldErrors[key] = respErrors[key][0];
+          });
+          setErrors((prev) => ({ ...prev, ...fieldErrors }));
+        }
         const backendMessage =
-          err.response?.data?.errors?.school_id?.[0] ||
+          respErrors?.name?.[0] ||
+          respErrors?.school_id?.[0] ||
+          respErrors?.email?.[0] ||
           err.response?.data?.message ||
           "Google registration failed";
         setError(backendMessage);
@@ -146,7 +166,7 @@ export default function StudentRegister() {
               <form onSubmit={handleSubmit} className="mt-5 space-y-3 sm:mt-6">
                 <div>
                   <label className="relative block">
-                    <span className="sr-only">Full name</span>
+                    <span className="sr-only">Registered Full Name</span>
                     <User className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-tpc-navy/40" />
                     <input
                       type="text"
@@ -154,7 +174,7 @@ export default function StudentRegister() {
                       onChange={(e) => updateForm("name", e.target.value)}
                       required
                       className={inputClass(errors.name)}
-                      placeholder="Username"
+                      placeholder="Registered Full Name"
                     />
                   </label>
                   {errors.name && (

@@ -69,7 +69,7 @@ class GoogleRegisterRequest extends FormRequest
                 ->exists();
 
             if (! $exists) {
-                $validator->errors()->add('school_id', 'This student ID is not found in the graduates student ID list.');
+                $validator->errors()->add('school_id', 'Incorrect ID Number');
             }
         });
     }

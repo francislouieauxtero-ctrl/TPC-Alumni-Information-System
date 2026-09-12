@@ -74,7 +74,7 @@ class AuthFlowTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['school_id'])
             ->assertJsonFragment([
-                'message' => 'This student ID is not found in the graduates student ID list.',
+                'message' => 'Incorrect ID Number',
             ]);
     }
 
@@ -225,7 +225,7 @@ class AuthFlowTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $rejectedStudent->id]);
 
         $registerResponse = $this->postJson('/api/auth/register', [
-            'name' => 'Jane Rejected',
+            'name' => 'Rejected Student',
             'email' => 'jane.rejected@example.com',
             'password' => 'secret123',
             'password_confirmation' => 'secret123',
@@ -235,6 +235,84 @@ class AuthFlowTest extends TestCase
 
         $registerResponse->assertStatus(201)
             ->assertJsonPath('data.schoolId', 'STU20240007');
+    }
+
+    public function test_registration_fails_when_name_does_not_match_registered_graduate(): void
+    {
+        $department = Department::factory()->create(['name' => 'Engineering']);
+
+        \App\Models\Graduate::factory()->create([
+            'department_id' => $department->id,
+            'student_number' => 'STU20240099',
+            'name' => 'Maria Santos',
+            'batch_year' => '2026',
+        ]);
+
+        $response = $this->postJson('/api/auth/register', [
+            'name' => 'Wrong Name',
+            'email' => 'maria@example.com',
+            'password' => 'secret123',
+            'password_confirmation' => 'secret123',
+            'department_id' => $department->id,
+            'school_id' => 'STU20240099',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['name'])
+            ->assertJsonFragment([
+                'message' => 'Incorrect Credentials',
+            ]);
+    }
+
+    public function test_registration_fails_when_name_is_inverted_or_different(): void
+    {
+        $department = Department::factory()->create(['name' => 'Engineering']);
+
+        \App\Models\Graduate::factory()->create([
+            'department_id' => $department->id,
+            'student_number' => 'STU20240100',
+            'name' => 'Juan Dela Cruz',
+            'batch_year' => '2026',
+        ]);
+
+        $response = $this->postJson('/api/auth/register', [
+            'name' => 'dela cruz, juan',
+            'email' => 'juan@example.com',
+            'password' => 'secret123',
+            'password_confirmation' => 'secret123',
+            'department_id' => $department->id,
+            'school_id' => 'STU20240100',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['name'])
+            ->assertJsonFragment([
+                'message' => 'Incorrect Credentials',
+            ]);
+    }
+
+    public function test_registration_accepts_exact_registered_name(): void
+    {
+        $department = Department::factory()->create(['name' => 'Engineering']);
+
+        \App\Models\Graduate::factory()->create([
+            'department_id' => $department->id,
+            'student_number' => 'STU20240101',
+            'name' => 'Juan Dela Cruz',
+            'batch_year' => '2026',
+        ]);
+
+        $response = $this->postJson('/api/auth/register', [
+            'name' => 'juan dela cruz',
+            'email' => 'juan.exact@example.com',
+            'password' => 'secret123',
+            'password_confirmation' => 'secret123',
+            'department_id' => $department->id,
+            'school_id' => 'STU20240101',
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('data.name', 'Juan Dela Cruz');
     }
 
     public function test_verified_student_can_login_and_access_profile(): void
