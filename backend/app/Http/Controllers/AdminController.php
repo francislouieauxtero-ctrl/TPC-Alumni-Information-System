@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\UserResource;
-use App\Mail\AccountRejectedMail;
 use App\Models\AlumniProfile;
 use App\Models\Department;
 use App\Models\Graduate;
@@ -113,14 +112,11 @@ class AdminController extends Controller
             $stats = [
                 'total_students' => (clone $studentsQuery)->count(),
                 'verified_students' => (clone $studentsQuery)->where('is_verified', true)->count(),
-                'unverified_students' => (clone $studentsQuery)->where('is_verified', false)->count(),
+                'unverified_students' => 0,
                 'active_students' => (clone $studentsQuery)->where('status', User::STATUS_ACTIVE)->count(),
                 'inactive_students' => (clone $studentsQuery)->where('status', User::STATUS_INACTIVE)->count(),
                 'registered_alumni' => $totalGraduates - $notRegisteredGraduates,
-                'pending_approvals' => (clone $studentsQuery)
-                    ->where('is_verified', false)
-                    ->where('status', User::STATUS_ACTIVE)
-                    ->count(),
+                'pending_approvals' => 0,
                 'not_registered_graduates' => $notRegisteredGraduates,
                 'employed_alumni' => $employedCount,
                 'self_employed_alumni' => $selfEmployedCount,
@@ -447,49 +443,6 @@ public function deactivateDepartmentHead(Request $request, int $id): JsonRespons
         }
     }
 
-    public function verifyStudent(Request $request, $id): JsonResponse
-    {
-        return $this->updateStudentState($request, $id, ['is_verified' => true], 'Student approved successfully');
-    }
-
-    public function rejectStudent(Request $request, $id): JsonResponse
-    {
-        try {
-            $student = User::students()->findOrFail($id);
-
-            if (Gate::denies('delete', $student)) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Unauthorized for this student',
-                    'data' => (object) [],
-                ], 403);
-            }
-
-            Mail::to($student->email)->queue(new AccountRejectedMail(
-                $student->name,
-                $student->email,
-                $request->input('reason'),
-            ));
-
-            $student->tokens()->delete();
-            $student->forceDelete();
-
-            return response()->json([
-                'status' => true,
-                'message' => 'Student application rejected',
-                'data' => (object) [],
-            ]);
-        } catch (\Throwable $e) {
-            report($e);
-
-            return response()->json([
-                'status' => false,
-                'message' => 'Failed to reject student',
-                'data' => (object) [],
-            ], 500);
-        }
-    }
-
     public function deactivateStudent(Request $request, $id): JsonResponse
     {
         return $this->updateStudentState($request, $id, ['status' => User::STATUS_INACTIVE], 'Student deactivated successfully', true);
@@ -502,7 +455,34 @@ public function deactivateDepartmentHead(Request $request, int $id): JsonRespons
 
     public function deleteStudent(Request $request, $id): JsonResponse
     {
-        return $this->rejectStudent($request, $id);
+        try {
+            $student = User::students()->findOrFail($id);
+
+            if (Gate::denies('delete', $student)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Unauthorized for this student',
+                    'data' => (object) [],
+                ], 403);
+            }
+
+            $student->tokens()->delete();
+            $student->forceDelete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Student deleted successfully',
+                'data' => (object) [],
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to delete student',
+                'data' => (object) [],
+            ], 500);
+        }
     }
 
     private function updateStudentState(Request $request, $id, array $changes, string $message, bool $revokeTokens = false): JsonResponse
@@ -510,7 +490,7 @@ public function deactivateDepartmentHead(Request $request, int $id): JsonRespons
         try {
             $student = User::students()->with('department')->findOrFail($id);
 
-            if (Gate::denies('approve', $student)) {
+            if (Gate::denies('update', $student)) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Unauthorized for this student',

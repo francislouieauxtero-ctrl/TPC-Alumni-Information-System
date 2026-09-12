@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Concerns\ApiResponder;
-use App\Http\Requests\ApproveAlumniRequest;
-use App\Http\Requests\RejectAlumniRequest;
 use App\Http\Requests\UpdateWorkAlignmentRequest;
 use App\Http\Resources\AlumniProfileResource;
 use App\Http\Resources\UserResource;
@@ -20,62 +18,6 @@ class AlumniController extends Controller
 
     public function __construct(protected AlumniService $alumniService)
     {
-    }
-
-    /**
-     * Get pending alumni awaiting approval
-     */
-    public function pending(): JsonResponse
-    {
-        try {
-            $pending = $this->alumniService->getPendingAlumni(auth()->user());
-
-            return $this->successResponse(
-                UserResource::collection($pending),
-                'Pending alumni retrieved successfully'
-            );
-        } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage(), 500);
-        }
-    }
-
-    /**
-     * Get rejected alumni registrations
-     */
-    public function rejected(): JsonResponse
-    {
-        try {
-            $rejected = $this->alumniService->getRejectedAlumni(auth()->user());
-
-            return $this->successResponse(
-                $rejected,
-                'Rejected alumni retrieved successfully'
-            );
-        } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage(), 500);
-        }
-    }
-
-    public function deleteRejected(AccountActivityLog $rejection): JsonResponse
-    {
-        try {
-            if ($rejection->action !== 'rejected_alumni') {
-                return $this->errorResponse('Rejected alumni record not found', 404);
-            }
-
-            $deleted = $this->alumniService->deleteRejectedAlumni(
-                $rejection->id,
-                auth()->user(),
-            );
-
-            if (!$deleted) {
-                return $this->errorResponse('Rejected alumni record not found', 404);
-            }
-
-            return $this->successResponse(null, 'Rejected alumni record deleted successfully');
-        } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage(), 500);
-        }
     }
 
     /**
@@ -97,45 +39,6 @@ class AlumniController extends Controller
                 AlumniProfileResource::collection($alumni),
                 'Alumni retrieved successfully'
             );
-        } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage(), 500);
-        }
-    }
-
-    /**
-     * Approve alumni registration
-     */
-    public function approve(User $alumni, ApproveAlumniRequest $request): JsonResponse
-    {
-        try {
-            $this->authorize('approve', $alumni);
-
-            $profile = $this->alumniService->approveAlumni($alumni, auth()->user());
-
-            return $this->successResponse(
-                new AlumniProfileResource($profile),
-                'Alumni approved successfully'
-            );
-        } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage(), 500);
-        }
-    }
-
-    /**
-     * Reject alumni registration
-     */
-    public function reject(User $alumni, RejectAlumniRequest $request): JsonResponse
-    {
-        try {
-            $this->authorize('reject', $alumni);
-
-            $this->alumniService->rejectAlumni(
-                $alumni,
-                auth()->user(),
-                $request->input('reason')
-            );
-
-            return $this->successResponse(null, 'Alumni rejected successfully');
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 500);
         }

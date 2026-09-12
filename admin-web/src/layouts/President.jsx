@@ -85,9 +85,8 @@ export default function PresidentLayout({ children }) {
     <div className="flex h-screen bg-white text-gray-900 font-sans">
       {/* Sidebar */}
       <div
-        className={`${
-          sidebarOpen ? "w-70" : "w-20"
-        } flex flex-col bg-tpc-greenDeep border-r border-white/10 px-3 py-6 transition-all duration-300`}
+        className={`${sidebarOpen ? "w-70" : "w-20"
+          } flex flex-col bg-tpc-greenDeep border-r border-white/10 px-3 py-6 transition-all duration-300`}
       >
         {/* Logo */}
         <div className="px-3 pb-5 border-b border-white/20">
@@ -143,14 +142,6 @@ export default function PresidentLayout({ children }) {
               sidebarOpen={sidebarOpen}
             />
           )}
-          {/* {userRole === "super_admin" && (
-            <NavLink
-              to="/president/alumni"
-              icon={<UserCheck className="w-5 h-5" />}
-              label="Alumni Approval"
-              sidebarOpen={sidebarOpen}
-            />
-          )} */}
           {userRole === "super_admin" && (
             <NavLink
               to="/president/events"
@@ -207,9 +198,8 @@ export default function PresidentLayout({ children }) {
           <button
             onClick={handleLogout}
             disabled={logoutLoading}
-            className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white/10 text-white text-sm font-medium hover:bg-white/20 disabled:opacity-50 transition-colors ${
-              !sidebarOpen && "p-2"
-            }`}
+            className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white/10 text-white text-sm font-medium hover:bg-white/20 disabled:opacity-50 transition-colors ${!sidebarOpen && "p-2"
+              }`}
           >
             <LogOut className="w-5 h-5" />
             {sidebarOpen && (
@@ -269,11 +259,10 @@ function NavLink({ to, icon, label, sidebarOpen }) {
   return (
     <button
       onClick={() => navigate(to)}
-      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-        isActive
+      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive
           ? "bg-white/20 text-white"
           : "text-white/70 hover:bg-white/10 hover:text-white"
-      }`}
+        }`}
     >
       {icon}
       {sidebarOpen && <span>{label}</span>}

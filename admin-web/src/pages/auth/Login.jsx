@@ -1,5 +1,5 @@
 import { useGoogleLogin } from "@react-oauth/google";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { useState, useEffect } from "react";
 import api from "../../services/api";
@@ -9,11 +9,15 @@ import { getDashboardPath } from "../../utils/roleRedirect";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState(
+    location.state?.success || ""
+  );
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -30,6 +34,8 @@ export default function Login() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    setError("");
+    setSuccessMessage("");
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -53,12 +59,6 @@ export default function Login() {
       localStorage.setItem("departmentName", user.department.name || "");
     }
 
-    if (user.role === "user" && !user.isVerified) {
-      setError("Your account is pending department approval. Please wait.");
-      localStorage.removeItem("token");
-      localStorage.removeItem("userRole");
-      return;
-    }
 
     if (user.status !== "active") {
       setError("Your account is inactive. Please contact admin.");
@@ -73,6 +73,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccessMessage("");
     setLoading(true);
 
     try {
@@ -140,6 +141,12 @@ export default function Login() {
               <h1 className="text-xl font-semibold text-tpc-navy sm:text-2xl">
                 Welcome Back
               </h1>
+
+              {successMessage && (
+                <div className="mt-4 rounded-md border border-emerald-500/25 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                  {successMessage}
+                </div>
+              )}
 
               {error && (
                 <div className="mt-4 rounded-md border border-text-danger/25 bg-text-danger/10 px-4 py-3 text-sm text-text-danger">

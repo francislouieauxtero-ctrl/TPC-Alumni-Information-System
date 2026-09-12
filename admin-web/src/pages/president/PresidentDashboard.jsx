@@ -99,13 +99,6 @@ export default function PresidentDasboard() {
             detail="Approved records"
           />
           <StatCard
-            title="Pending"
-            value={stats?.unverified_students || 0}
-            icon={<AlertCircle className="h-5 w-5" />}
-            color="bg-amber-500"
-            detail="Awaiting review"
-          />
-          <StatCard
             title="Active"
             value={stats?.active_students || 0}
             icon={<ToggleRight className="h-5 w-5" />}
@@ -156,20 +149,6 @@ export default function PresidentDasboard() {
                     : 0
                 }
                 color="bg-green-500"
-              />
-              <OverviewRow
-                label="Pending verification"
-                count={stats?.unverified_students || 0}
-                percent={
-                  stats?.total_students > 0
-                    ? Math.round(
-                        ((stats?.unverified_students || 0) /
-                          stats.total_students) *
-                          100,
-                      )
-                    : 0
-                }
-                color="bg-amber-500"
               />
               <OverviewRow
                 label="Not registered graduates"

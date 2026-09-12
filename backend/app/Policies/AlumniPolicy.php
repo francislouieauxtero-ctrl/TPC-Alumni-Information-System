@@ -30,28 +30,6 @@ class AlumniPolicy
         return false;
     }
 
-    public function approve(User $user, User $target): bool
-    {
-        if (!$target->isStudent()) {
-            return false;
-        }
-
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
-
-        if ($user->isAdmin()) {
-            return $target->department_id === $user->department_id;
-        }
-
-        return false;
-    }
-
-    public function reject(User $user, User $target): bool
-    {
-        return $this->approve($user, $target);
-    }
-
     public function update(User $user, AlumniProfile $alumni): bool
     {
         // Alumni can only update own profile

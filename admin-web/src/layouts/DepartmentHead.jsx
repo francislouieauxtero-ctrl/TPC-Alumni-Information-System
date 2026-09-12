@@ -9,11 +9,9 @@ import {
   User,
   GraduationCap,
   UserCheck,
-  Clock,
   CalendarDays,
   BarChart3,
   Megaphone,
-  XCircle,
 } from "lucide-react";
 import api from "../services/api";
 import UserAvatar from "../components/shared/UserAvatar";
@@ -128,18 +126,6 @@ export default function DepartmentHeadLayout({ children }) {
             to="/department-head/alumni"
             icon={<UserCheck className="w-5 h-5" />}
             label="Alumni"
-            sidebarOpen={sidebarOpen}
-          />
-          <NavLink
-            to="/department-head/alumni/pending"
-            icon={<Clock className="w-5 h-5" />}
-            label="Pending Alumni"
-            sidebarOpen={sidebarOpen}
-          />
-          <NavLink
-            to="/department-head/alumni/rejected"
-            icon={<XCircle className="w-5 h-5" />}
-            label="Rejected Alumni"
             sidebarOpen={sidebarOpen}
           />
           <NavLink

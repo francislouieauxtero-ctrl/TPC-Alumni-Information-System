@@ -48,8 +48,6 @@ Route::prefix('admin')->name('admin.')->middleware('role:super_admin,admin')->gr
         Route::get('dashboard', 'dashboard');
         Route::get('stats', 'stats');
         Route::get('students', 'listStudents');
-        Route::post('students/{id}/verify', 'verifyStudent');
-        Route::post('students/{id}/reject', 'rejectStudent');
         Route::post('profile', 'updateProfile');
         Route::put('profile', 'updateProfile');
         Route::post('students/{id}/deactivate', 'deactivateStudent');
@@ -59,11 +57,6 @@ Route::prefix('admin')->name('admin.')->middleware('role:super_admin,admin')->gr
 
     Route::controller(AlumniController::class)->group(function () {
         Route::get('alumni', 'index');
-        Route::get('alumni/pending', 'pending');
-        Route::get('alumni/rejected', 'rejected');
-        Route::delete('alumni/rejected/{rejection}', 'deleteRejected');
-        Route::patch('alumni/{alumni}/approve', 'approve');
-        Route::patch('alumni/{alumni}/reject', 'reject');
         Route::get('alumni/alignment/summary',               'alignmentSummary');
         Route::get('alumni/alignment/detail/{departmentId}', 'alignmentDetail');
     });
@@ -78,8 +71,6 @@ Route::prefix('admin')->name('admin.')->middleware('role:super_admin,admin')->gr
             Route::get('dashboard', 'dashboard');
             Route::get('stats', 'stats');
             Route::get('students', 'listStudents');
-            Route::post('students/{id}/verify', 'verifyStudent');
-            Route::post('students/{id}/reject', 'rejectStudent');
             Route::post('students/{id}/deactivate', 'deactivateStudent');
             Route::post('students/{id}/activate', 'activateStudent');
             Route::delete('students/{id}', 'deleteStudent');

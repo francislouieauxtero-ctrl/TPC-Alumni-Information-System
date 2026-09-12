@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Mail\AccountRejectedMail;
+use App\Mail\AlumniRegistrationConfirmedMail;
 use App\Models\Department;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -37,7 +37,7 @@ class AuthFlowTest extends TestCase
         $response->assertStatus(201)
             ->assertJson([
                 'status' => true,
-                'message' => 'Student account registered and pending approval',
+                'message' => 'Registration successful! You can now log in.',
                 'data' => [
                     'email' => 'jane@example.com',
                     'role' => User::ROLE_USER,
@@ -51,10 +51,10 @@ class AuthFlowTest extends TestCase
             'password' => 'secret123',
         ]);
 
-        $login->assertStatus(403)
+        $login->assertStatus(200)
             ->assertJson([
-                'status' => false,
-                'message' => 'Your account is pending department approval. Please wait.',
+                'status' => true,
+                'message' => 'Login successful',
             ]);
     }
 
@@ -128,35 +128,7 @@ class AuthFlowTest extends TestCase
             ]);
     }
 
-    public function test_admin_can_reject_student_registration_and_remove_user_from_database(): void
-    {
-        $department = Department::factory()->create(['name' => 'Business']);
-
-        $admin = User::factory()->create([
-            'role' => User::ROLE_ADMIN,
-            'department_id' => $department->id,
-            'status' => User::STATUS_ACTIVE,
-            'is_verified' => true,
-        ]);
-
-        $student = User::factory()->create([
-            'role' => User::ROLE_USER,
-            'department_id' => $department->id,
-            'school_id' => 'STU20240005',
-            'is_verified' => false,
-            'status' => User::STATUS_ACTIVE,
-        ]);
-
-        $response = $this->actingAs($admin, 'sanctum')
-            ->withHeader('Accept', 'application/json')
-            ->postJson("/api/admin/students/{$student->id}/reject");
-
-        $response->assertOk();
-        $response->assertJsonPath('status', true);
-        $this->assertDatabaseMissing('users', ['id' => $student->id]);
-    }
-
-    public function test_admin_rejection_sends_notification_email_to_the_student(): void
+    public function test_admin_can_delete_student_without_rejection_email(): void
     {
         Mail::fake();
 
@@ -172,69 +144,19 @@ class AuthFlowTest extends TestCase
         $student = User::factory()->create([
             'role' => User::ROLE_USER,
             'department_id' => $department->id,
-            'school_id' => 'STU20240008',
-            'email' => 'rejected.student@example.com',
-            'is_verified' => false,
+            'school_id' => 'STU20240005',
+            'is_verified' => true,
             'status' => User::STATUS_ACTIVE,
         ]);
 
         $response = $this->actingAs($admin, 'sanctum')
             ->withHeader('Accept', 'application/json')
-            ->postJson("/api/admin/students/{$student->id}/reject", [
-                'reason' => 'Your information did not match the records.',
-            ]);
+            ->deleteJson("/api/admin/students/{$student->id}");
 
         $response->assertOk();
-
-        Mail::assertQueued(AccountRejectedMail::class, function (AccountRejectedMail $mail) use ($student): bool {
-            return $mail->hasTo($student->email);
-        });
-    }
-
-    public function test_student_can_register_with_same_school_id_after_rejection(): void
-    {
-        $department = Department::factory()->create(['name' => 'Business']);
-
-        $admin = User::factory()->create([
-            'role' => User::ROLE_ADMIN,
-            'department_id' => $department->id,
-            'status' => User::STATUS_ACTIVE,
-            'is_verified' => true,
-        ]);
-
-        $graduate = \App\Models\Graduate::factory()->create([
-            'department_id' => $department->id,
-            'student_number' => 'STU20240007',
-            'name' => 'Rejected Student',
-            'batch_year' => '2026',
-        ]);
-
-        $rejectedStudent = User::factory()->create([
-            'role' => User::ROLE_USER,
-            'department_id' => $department->id,
-            'school_id' => 'STU20240007',
-            'is_verified' => false,
-            'status' => User::STATUS_ACTIVE,
-        ]);
-
-        $rejectResponse = $this->actingAs($admin, 'sanctum')
-            ->withHeader('Accept', 'application/json')
-            ->postJson("/api/admin/students/{$rejectedStudent->id}/reject");
-
-        $rejectResponse->assertOk();
-        $this->assertDatabaseMissing('users', ['id' => $rejectedStudent->id]);
-
-        $registerResponse = $this->postJson('/api/auth/register', [
-            'name' => 'Rejected Student',
-            'email' => 'jane.rejected@example.com',
-            'password' => 'secret123',
-            'password_confirmation' => 'secret123',
-            'department_id' => $department->id,
-            'school_id' => 'STU20240007',
-        ]);
-
-        $registerResponse->assertStatus(201)
-            ->assertJsonPath('data.schoolId', 'STU20240007');
+        $response->assertJsonPath('status', true);
+        $this->assertDatabaseMissing('users', ['id' => $student->id]);
+        Mail::assertNothingQueued();
     }
 
     public function test_registration_fails_when_name_does_not_match_registered_graduate(): void
@@ -364,4 +286,126 @@ class AuthFlowTest extends TestCase
                 ],
             ]);
     }
+
+    public function test_registration_sends_confirmation_email_to_registered_gmail_address(): void
+    {
+        Mail::fake();
+
+        $department = Department::factory()->create(['name' => 'Information Technology']);
+
+        \App\Models\Graduate::factory()->create([
+            'department_id' => $department->id,
+            'student_number' => 'STU20249999',
+            'name' => 'Maria Clara',
+            'batch_year' => '2026',
+        ]);
+
+        $response = $this->postJson('/api/auth/register', [
+            'name' => 'Maria Clara',
+            'email' => 'mariaclara@gmail.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'department_id' => $department->id,
+            'school_id' => 'STU20249999',
+        ]);
+
+        $response->assertStatus(201);
+
+        Mail::assertQueued(AlumniRegistrationConfirmedMail::class, function ($mail) {
+            $rendered = $mail->render();
+
+            return $mail->hasTo('mariaclara@gmail.com')
+                && str_contains($rendered, 'TPC Alumni Employment and Career Management System')
+                && str_contains($rendered, 'Your Alumni account has been successfully created')
+                && str_contains($rendered, 'events, announcements, and other important updates')
+                && str_contains($rendered, 'Thank you for becoming part of the TPC Alumni community!');
+        });
+
+        // Verify AlumniProfile was also automatically created and linked
+        $user = User::where('email', 'mariaclara@gmail.com')->first();
+        $this->assertNotNull($user);
+        $this->assertTrue($user->is_verified);
+        $this->assertSame(User::STATUS_ACTIVE, $user->status);
+        $this->assertNotNull($user->alumniProfile);
+        $this->assertSame($department->id, $user->alumniProfile->department_id);
+    }
+
+    public function test_registration_does_not_send_email_when_credentials_invalid(): void
+    {
+        Mail::fake();
+
+        $department = Department::factory()->create(['name' => 'Information Technology']);
+
+        \App\Models\Graduate::factory()->create([
+            'department_id' => $department->id,
+            'student_number' => 'STU20248888',
+            'name' => 'Crisostomo Ibarra',
+            'batch_year' => '2026',
+        ]);
+
+        // 1. Unknown school ID
+        $response1 = $this->postJson('/api/auth/register', [
+            'name' => 'Crisostomo Ibarra',
+            'email' => 'ibarra@gmail.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'department_id' => $department->id,
+            'school_id' => 'WRONG-ID-999',
+        ]);
+        $response1->assertStatus(422);
+
+        // 2. Mismatched name
+        $response2 = $this->postJson('/api/auth/register', [
+            'name' => 'Wrong Name',
+            'email' => 'ibarra@gmail.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'department_id' => $department->id,
+            'school_id' => 'STU20248888',
+        ]);
+        $response2->assertStatus(422);
+
+        Mail::assertNothingQueued();
+    }
+
+    public function test_duplicate_registration_does_not_send_duplicate_confirmation_email(): void
+    {
+        Mail::fake();
+
+        $department = Department::factory()->create(['name' => 'Information Technology']);
+
+        \App\Models\Graduate::factory()->create([
+            'department_id' => $department->id,
+            'student_number' => 'STU20247777',
+            'name' => 'Elias Salome',
+            'batch_year' => '2026',
+        ]);
+
+        // First successful registration
+        $first = $this->postJson('/api/auth/register', [
+            'name' => 'Elias Salome',
+            'email' => 'elias@gmail.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'department_id' => $department->id,
+            'school_id' => 'STU20247777',
+        ]);
+        $first->assertStatus(201);
+        Mail::assertQueuedCount(1);
+
+        // Duplicate attempt with same credentials
+        $second = $this->postJson('/api/auth/register', [
+            'name' => 'Elias Salome',
+            'email' => 'elias@gmail.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'department_id' => $department->id,
+            'school_id' => 'STU20247777',
+        ]);
+        $second->assertStatus(422);
+
+        // Mail queue count must still be exactly 1
+        Mail::assertQueuedCount(1);
+    }
 }
+

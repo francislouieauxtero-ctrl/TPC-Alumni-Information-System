@@ -41,9 +41,16 @@ export default function StudentRegister() {
 
   const updateForm = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
   };
 
-  const finishRegistration = (email) => {
+  const finishRegistration = () => {
     setForm({
       name: "",
       email: "",
@@ -52,8 +59,11 @@ export default function StudentRegister() {
       password_confirmation: "",
     });
     setError("");
-    localStorage.setItem("studentEmail", email);
-    navigate("/pending-approval", { replace: true });
+    localStorage.removeItem("studentEmail");
+    navigate("/login", {
+      replace: true,
+      state: { success: "Registration successful! You can now log in." },
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -67,7 +77,7 @@ export default function StudentRegister() {
       await api.post("/auth/register", {
         ...form,
       });
-      finishRegistration(form.email);
+      finishRegistration();
     } catch (err) {
       const respErrors = err.response?.data?.errors;
       if (respErrors) {
@@ -108,7 +118,7 @@ export default function StudentRegister() {
           school_id: form.school_id,
         });
 
-        finishRegistration(form.email);
+        finishRegistration();
       } catch (err) {
         const respErrors = err.response?.data?.errors;
         if (respErrors) {

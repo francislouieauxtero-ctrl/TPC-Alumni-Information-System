@@ -10,28 +10,32 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class AccountApprovedMail extends Mailable implements ShouldQueue
+class AlumniRegistrationConfirmedMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public function __construct(protected User $user)
-    {
+    public function __construct(
+        public User $user
+    ) {
     }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your Alumni Account Has Been Approved',
+            subject: 'Registration Confirmed: TPC Alumni Employment and Career Management System',
         );
     }
 
     public function content(): Content
     {
+        $loginUrl = rtrim((string) config('app.frontend_url', 'http://localhost:3000'), '/') . '/login';
+
         return new Content(
-            markdown: 'mail.account-approved',
+            markdown: 'mail.alumni-registration-confirmed',
             with: [
                 'name' => $this->user->name,
                 'email' => $this->user->email,
+                'loginUrl' => $loginUrl,
             ],
         );
     }

@@ -12,47 +12,6 @@ use Illuminate\Support\Collection;
 
 class AlumniRepository
 {
-    public function pendingAlumni(User $actor): LengthAwarePaginator
-    {
-        $query = User::where('role', User::ROLE_USER)
-            ->where('is_verified', false)
-            ->where('status', User::STATUS_ACTIVE)
-            ->orderBy('created_at', 'desc');
-
-        if ($actor->isAdmin()) {
-            $query->where('department_id', $actor->department_id);
-        }
-
-        return $query->paginate(15);
-    }
-
-    public function rejectedAlumni(User $actor): LengthAwarePaginator
-    {
-        $query = AccountActivityLog::query()
-            ->where('action', 'rejected_alumni')
-            ->with(['actor:id,name,email', 'target:id,name,email'])
-            ->orderByDesc('created_at');
-
-        if ($actor->isAdmin()) {
-            $query->where('actor_id', $actor->id);
-        }
-
-        return $query->paginate(15);
-    }
-
-    public function deleteRejected(int $rejectionId, User $actor): bool
-    {
-        $query = AccountActivityLog::query()
-            ->whereKey($rejectionId)
-            ->where('action', 'rejected_alumni');
-
-        if ($actor->isAdmin()) {
-            $query->where('actor_id', $actor->id);
-        }
-
-        return (bool) $query->delete();
-    }
-
     public function all(User $actor, array $filters = []): LengthAwarePaginator
     {
         $query = AlumniProfile::with(['user', 'department', 'graduate'])

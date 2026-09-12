@@ -28,23 +28,46 @@ class RegisterStudentRequest extends FormRequest
         ];
     }
 
-    protected function prepareForValidation(): void
+    protected function findGraduate(string $schoolId): ?Graduate
     {
-        $schoolId = trim((string) $this->input('school_id'));
-
+        $schoolId = trim($schoolId);
         if ($schoolId === '') {
-            return;
+            return null;
+        }
+
+        $candidates = [$schoolId];
+        if (is_numeric($schoolId)) {
+            $unpadded = ltrim($schoolId, '0');
+            if ($unpadded !== '') {
+                $candidates[] = $unpadded;
+            }
         }
 
         $graduate = Graduate::query()
-            ->where(function ($query) use ($schoolId): void {
-                $query->where('student_number', $schoolId);
-
-                if (is_numeric($schoolId)) {
-                    $query->orWhereRaw('CAST(student_number AS UNSIGNED) = ?', [(int) $schoolId]);
-                }
-            })
+            ->whereIn('student_number', array_unique($candidates))
             ->first();
+
+        if ($graduate) {
+            return $graduate;
+        }
+
+        if (is_numeric($schoolId)) {
+            $unpadded = ltrim($schoolId, '0');
+            $all = Graduate::query()->get();
+            foreach ($all as $g) {
+                if (is_numeric($g->student_number) && ltrim((string) $g->student_number, '0') === $unpadded) {
+                    return $g;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $schoolId = (string) $this->input('school_id');
+        $graduate = $this->findGraduate($schoolId);
 
         if ($graduate) {
             $this->merge(['department_id' => $graduate->department_id]);
@@ -56,21 +79,12 @@ class RegisterStudentRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator): void {
-            $schoolId = trim((string) $this->input('school_id'));
-
-            if ($schoolId === '') {
+            $schoolId = (string) $this->input('school_id');
+            if (trim($schoolId) === '') {
                 return;
             }
 
-            $graduate = Graduate::query()
-                ->where(function ($query) use ($schoolId): void {
-                    $query->where('student_number', $schoolId);
-
-                    if (is_numeric($schoolId)) {
-                        $query->orWhereRaw('CAST(student_number AS UNSIGNED) = ?', [(int) $schoolId]);
-                    }
-                })
-                ->first();
+            $graduate = $this->findGraduate($schoolId);
 
             if (!$graduate) {
                 $validator->errors()->add('school_id', 'Incorrect ID Number');

@@ -22,16 +22,6 @@ class DepartmentHeadController extends AdminController
         return parent::listStudents($request);
     }
 
-    public function verifyStudent(Request $request, $id): JsonResponse
-    {
-        return parent::verifyStudent($request, $id);
-    }
-
-    public function rejectStudent(Request $request, $id): JsonResponse
-    {
-        return parent::rejectStudent($request, $id);
-    }
-
     public function deactivateStudent(Request $request, $id): JsonResponse
     {
         return parent::deactivateStudent($request, $id);

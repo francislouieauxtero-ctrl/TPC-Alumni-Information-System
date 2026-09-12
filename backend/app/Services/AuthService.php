@@ -8,10 +8,14 @@ use App\Exceptions\Auth\InvalidCredentialsException;
 use App\Exceptions\Auth\InvalidGoogleTokenException;
 use App\Exceptions\Auth\PendingApprovalException;
 use App\Exceptions\Auth\StudentNotFoundException;
+use App\Mail\AlumniRegistrationConfirmedMail;
+use App\Models\AlumniProfile;
 use App\Models\User;
 use App\Repositories\UserRepository;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 
 class AuthService
 {
@@ -21,16 +25,33 @@ class AuthService
 
     public function createStudent(array $attributes): User
     {
-        return $this->users->create([
-            'name' => $attributes['name'],
-            'email' => $attributes['email'],
-            'password' => Hash::make($attributes['password']),
-            'department_id' => $attributes['department_id'],
-            'school_id' => $attributes['school_id'] ?? null,
-            'role' => User::ROLE_USER,
-            'is_verified' => false,
-            'status' => User::STATUS_ACTIVE,
-        ]);
+        return DB::transaction(function () use ($attributes) {
+            $user = $this->users->create([
+                'name' => $attributes['name'],
+                'email' => $attributes['email'],
+                'password' => Hash::make($attributes['password']),
+                'department_id' => $attributes['department_id'],
+                'school_id' => $attributes['school_id'] ?? null,
+                'role' => User::ROLE_USER,
+                'is_verified' => true,
+                'status' => User::STATUS_ACTIVE,
+            ]);
+
+            $graduate = $user->graduate;
+            AlumniProfile::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'department_id'     => $user->department_id,
+                    'graduate_id'       => $graduate?->id,
+                    'batch_year'        => $graduate?->batch_year,
+                    'employment_status' => AlumniProfile::STATUS_UNEMPLOYED,
+                ]
+            );
+
+            Mail::to($user->email)->queue(new AlumniRegistrationConfirmedMail($user));
+
+            return $user;
+        });
     }
 
     public function createDepartmentAdmin(array $attributes): User
@@ -48,18 +69,35 @@ class AuthService
 
     public function createStudentFromGoogle(array $profile, int $departmentId, ?string $schoolId = null): User
     {
-        return $this->users->create([
-            'name' => $profile['name'] ?? $profile['email'],
-            'email' => $profile['email'],
-            'google_id' => $profile['sub'],
-            'avatar' => $profile['picture'] ?? null,
-            'department_id' => $departmentId,
-            'school_id' => $schoolId,
-            'role' => User::ROLE_USER,
-            'is_verified' => false,
-            'status' => User::STATUS_ACTIVE,
-            'password' => null,
-        ]);
+        return DB::transaction(function () use ($profile, $departmentId, $schoolId) {
+            $user = $this->users->create([
+                'name' => $profile['name'] ?? $profile['email'],
+                'email' => $profile['email'],
+                'google_id' => $profile['sub'],
+                'avatar' => $profile['picture'] ?? null,
+                'department_id' => $departmentId,
+                'school_id' => $schoolId,
+                'role' => User::ROLE_USER,
+                'is_verified' => true,
+                'status' => User::STATUS_ACTIVE,
+                'password' => null,
+            ]);
+
+            $graduate = $user->graduate;
+            AlumniProfile::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'department_id'     => $user->department_id,
+                    'graduate_id'       => $graduate?->id,
+                    'batch_year'        => $graduate?->batch_year,
+                    'employment_status' => AlumniProfile::STATUS_UNEMPLOYED,
+                ]
+            );
+
+            Mail::to($user->email)->queue(new AlumniRegistrationConfirmedMail($user));
+
+            return $user;
+        });
     }
 
     public function attemptLogin(string $email, string $password): User

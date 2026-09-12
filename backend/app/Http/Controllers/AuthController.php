@@ -32,7 +32,7 @@ class AuthController extends Controller
         $user = $this->authService->createStudent($request->validated());
 
         return $this->success(
-            'Student account registered and pending approval',
+            'Registration successful! You can now log in.',
             new UserResource($user->load('department')),
             201
         );
@@ -99,7 +99,7 @@ class AuthController extends Controller
         );
 
         return $this->success(
-            'Student account registered and pending approval',
+            'Registration successful! You can now log in.',
             new UserResource($user->load('department')),
             201
         );

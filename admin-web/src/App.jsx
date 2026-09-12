@@ -281,23 +281,11 @@ export default function App() {
             />
             <Route
               path="/president/alumni"
-              element={
-                <ProtectedRoute requiredRole={["super_admin"]}>
-                  <PresidentLayout>
-                    <AlumniApproval />
-                  </PresidentLayout>
-                </ProtectedRoute>
-              }
+              element={<Navigate to="/president/students" replace />}
             />
             <Route
               path="/president/alumni/rejected"
-              element={
-                <ProtectedRoute requiredRole={["super_admin"]}>
-                  <PresidentLayout>
-                    <RejectedAlumniList />
-                  </PresidentLayout>
-                </ProtectedRoute>
-              }
+              element={<Navigate to="/president/students" replace />}
             />
             <Route
               path="/president/events"
@@ -455,23 +443,11 @@ export default function App() {
 
             <Route
               path="/department-head/alumni/pending"
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <DepartmentHeadLayout>
-                    <DepartmentHeadAlumniApproval />
-                  </DepartmentHeadLayout>
-                </ProtectedRoute>
-              }
+              element={<Navigate to="/department-head/alumni" replace />}
             />
             <Route
               path="/department-head/alumni/rejected"
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <DepartmentHeadLayout>
-                    <RejectedAlumniList />
-                  </DepartmentHeadLayout>
-                </ProtectedRoute>
-              }
+              element={<Navigate to="/department-head/alumni" replace />}
             />
             <Route
               path="/department-head/events"

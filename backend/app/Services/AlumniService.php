@@ -6,12 +6,9 @@ use App\Models\User;
 use App\Models\AlumniProfile;
 use App\Models\AccountActivityLog;
 use App\Repositories\AlumniRepository;
-use App\Mail\AccountApprovedMail;
-use App\Mail\AccountRejectedMail;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 
 class AlumniService
 {
@@ -22,110 +19,12 @@ class AlumniService
         $this->alumniRepository = $alumniRepository;
     }
 
-    // ─── Approval Flow ────────────────────────────────────────────────────────
-
-    /**
-     * Get pending alumni awaiting approval
-     */
-    public function getPendingAlumni(User $actor): LengthAwarePaginator
-    {
-        return $this->alumniRepository->pendingAlumni($actor);
-    }
-
-    /**
-     * Get rejected alumni registrations
-     */
-    public function getRejectedAlumni(User $actor): LengthAwarePaginator
-    {
-        return $this->alumniRepository->rejectedAlumni($actor);
-    }
-
-    public function deleteRejectedAlumni(int $rejectionId, User $actor): bool
-    {
-        return $this->alumniRepository->deleteRejected($rejectionId, $actor);
-    }
-
     /**
      * Get all alumni
      */
     public function getAll(User $actor, array $filters = []): LengthAwarePaginator
     {
         return $this->alumniRepository->all($actor, $filters);
-    }
-
-    /**
-     * Approve alumni (set verified and create profile)
-     */
-    public function approveAlumni(User $alumni, User $actor): AlumniProfile
-    {
-        return DB::transaction(function () use ($alumni, $actor) {
-            // Mark user as verified
-            $alumni->update([
-                'is_verified' => true,
-                'status'      => User::STATUS_ACTIVE,
-            ]);
-
-            // Pull graduate record via school_id → student_number
-            $graduate = $alumni->graduate;
-
-            // Create or update alumni profile
-            $profile = AlumniProfile::updateOrCreate(
-                ['user_id' => $alumni->id],
-                [
-                    'department_id'     => $alumni->department_id,
-                    'graduate_id'       => $graduate?->id,
-                    'batch_year'        => $graduate?->batch_year,
-                    'employment_status' => AlumniProfile::STATUS_UNEMPLOYED,
-                    // is_work_aligned intentionally left null — not answered yet
-                ]
-            );
-
-            // Log the action
-            AccountActivityLog::create([
-                'actor_id'  => $actor->id,
-                'target_id' => $alumni->id,
-                'action'    => 'approved_alumni',
-                'metadata'  => [
-                    'alumni_email' => $alumni->email,
-                    'alumni_name'  => $alumni->name,
-                ],
-            ]);
-
-            // Queue approval notification email
-            Mail::to($alumni->email)->queue(new AccountApprovedMail($alumni));
-
-            return $profile;
-        });
-    }
-
-    /**
-     * Reject alumni registration
-     */
-    public function rejectAlumni(User $alumni, User $actor, ?string $reason = null): void
-    {
-        DB::transaction(function () use ($alumni, $actor, $reason) {
-            $alumni->tokens()->delete();
-
-            // Log the action before permanently deleting the user.
-            AccountActivityLog::create([
-                'actor_id'  => $actor->id,
-                'target_id' => $alumni->id,
-                'action'    => 'rejected_alumni',
-                'reason'    => $reason,
-                'metadata'  => [
-                    'alumni_email' => $alumni->email,
-                    'alumni_name'  => $alumni->name,
-                ],
-            ]);
-
-            Mail::to($alumni->email)->queue(new AccountRejectedMail(
-                $alumni->name,
-                $alumni->email,
-                $reason,
-            ));
-
-            $alumni->forceDelete();
-        });
     }
 
     // ─── Profile ──────────────────────────────────────────────────────────────

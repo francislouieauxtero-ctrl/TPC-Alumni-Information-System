@@ -621,7 +621,7 @@ export default function AlumniList() {
       <div>
         <h1 className="text-2xl font-semibold text-gray-800">Alumni</h1>
         <p className="text-sm text-gray-500 mt-1">
-          Browse approved alumni for your department.
+          Browse registered alumni for your department.
         </p>
       </div>
 

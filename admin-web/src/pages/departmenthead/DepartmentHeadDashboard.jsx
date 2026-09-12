@@ -126,7 +126,7 @@ export default function DepartmentHeadDashboard() {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <StatCard
             title="Total Graduates"
             value={stats?.total_graduates ?? stats?.total_graduate_count ?? 0}
@@ -140,13 +140,6 @@ export default function DepartmentHeadDashboard() {
             icon={<Sparkles className="w-5 h-5" />}
             color="bg-violet-500"
             detail="Verified and active alumni"
-          />
-          <StatCard
-            title="Pending Approvals"
-            value={stats?.pending_approvals ?? stats?.pending_alumni ?? 0}
-            icon={<AlertCircle className="w-5 h-5" />}
-            color="bg-amber-500"
-            detail="Awaiting review"
           />
           <StatCard
             title="Employed Alumni"

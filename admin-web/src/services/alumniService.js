@@ -2,47 +2,6 @@ import api from "./api";
 
 const alumniService = {
   /**
-   * Get pending alumni (returns array)
-   */
-  getPending: async () => {
-    try {
-      const response = await api.get("/admin/alumni/pending");
-      return response.data.data || [];
-    } catch (error) {
-      throw error.response?.data || error;
-    }
-  },
-
-  /**
-   * Get rejected alumni registrations
-   */
-  getRejected: async () => {
-    try {
-      const response = await api.get("/admin/alumni/rejected");
-      const payload = response.data?.data ?? [];
-
-      if (Array.isArray(payload)) {
-        return payload;
-      }
-
-      return payload.data ?? [];
-    } catch (error) {
-      throw error.response?.data || error;
-    }
-  },
-
-  deleteRejected: async (rejectionId) => {
-    try {
-      const response = await api.delete(
-        `/admin/alumni/rejected/${rejectionId}`,
-      );
-      return response.data;
-    } catch (error) {
-      throw error.response?.data || error;
-    }
-  },
-
-  /**
    * Get all alumni (returns paginated collection)
    */
   getAll: async (filters = {}) => {
@@ -58,32 +17,6 @@ const alumniService = {
       }
 
       return raw;
-    } catch (error) {
-      throw error.response?.data || error;
-    }
-  },
-
-  /**
-   * Approve alumni
-   */
-  approve: async (alumniId) => {
-    try {
-      const response = await api.patch(`/admin/alumni/${alumniId}/approve`);
-      return response.data.data;
-    } catch (error) {
-      throw error.response?.data || error;
-    }
-  },
-
-  /**
-   * Reject alumni
-   */
-  reject: async (alumniId, reason = "") => {
-    try {
-      const response = await api.patch(`/admin/alumni/${alumniId}/reject`, {
-        reason,
-      });
-      return response.data;
     } catch (error) {
       throw error.response?.data || error;
     }

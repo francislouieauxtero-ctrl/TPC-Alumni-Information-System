@@ -25,16 +25,6 @@ class UserPolicy
         return $this->canAccessUser($actor, $target);
     }
 
-    public function approve(User $actor, User $target): bool
-    {
-        return $target->isStudent() && $this->canAccessUser($actor, $target);
-    }
-
-    public function reject(User $actor, User $target): bool
-    {
-        return $this->approve($actor, $target);
-    }
-
     private function canAccessUser(User $actor, User $target): bool
     {
         if ($actor->isSuperAdmin()) {
