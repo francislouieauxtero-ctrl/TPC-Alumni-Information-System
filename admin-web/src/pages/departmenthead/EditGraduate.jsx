@@ -59,14 +59,14 @@ export default function EditGraduate() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isRegistered) {
+      return;
+    }
     setLoading(true);
     setErrors({});
 
     try {
-      const payload = isRegistered
-        ? { ...formData, name: originalName }
-        : formData;
-      await graduateService.updateAdminGraduate(id, payload);
+      await graduateService.updateAdminGraduate(id, formData);
       toast.success("Graduate updated successfully.");
       sessionStorage.removeItem("graduateEditId");
       navigate("/department-head/graduates");
@@ -105,18 +105,6 @@ export default function EditGraduate() {
           Edit Department Graduate
         </h1>
 
-        {isRegistered && (
-          <div className="mb-6 rounded-lg bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800 flex items-start gap-2.5">
-            <span className="text-base">🔒</span>
-            <div>
-              <p className="font-semibold">Registered Alumni Record</p>
-              <p className="mt-0.5 text-xs text-amber-700">
-                This graduate has already registered as an Alumni. The registered name is locked and cannot be edited to maintain consistency with registration records.
-              </p>
-            </div>
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -127,10 +115,16 @@ export default function EditGraduate() {
               name="student_number"
               value={formData.student_number}
               onChange={handleChange}
+              disabled={isRegistered}
+              readOnly={isRegistered}
               required
               placeholder="e.g. 2024-001"
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-tpc-green ${
-                errors.student_number ? "border-red-500" : "border-gray-300"
+                isRegistered
+                  ? "bg-gray-100 text-gray-500 cursor-not-allowed border-gray-300"
+                  : errors.student_number
+                  ? "border-red-500"
+                  : "border-gray-300"
               }`}
             />
             {errors.student_number && (
@@ -141,16 +135,9 @@ export default function EditGraduate() {
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Full Name *
-              </label>
-              {isRegistered && (
-                <span className="text-[11px] font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300">
-                  Locked
-                </span>
-              )}
-            </div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Full Name *
+            </label>
             <input
               type="text"
               name="name"
@@ -168,13 +155,9 @@ export default function EditGraduate() {
                   : "border-gray-300"
               }`}
             />
-            {isRegistered ? (
-              <p className="text-xs text-amber-700 mt-1">
-                The Department Head cannot edit a graduate's name once they are registered as an Alumni.
-              </p>
-            ) : errors.name ? (
+            {errors.name && (
               <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-            ) : null}
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -187,10 +170,16 @@ export default function EditGraduate() {
                 name="batch_year"
                 value={formData.batch_year}
                 onChange={handleChange}
+                disabled={isRegistered}
+                readOnly={isRegistered}
                 required
                 placeholder="e.g. 2026 or 2026-2027"
                 className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-tpc-green ${
-                  errors.batch_year ? "border-red-500" : "border-gray-300"
+                  isRegistered
+                    ? "bg-gray-100 text-gray-500 cursor-not-allowed border-gray-300"
+                    : errors.batch_year
+                    ? "border-red-500"
+                    : "border-gray-300"
                 }`}
               />
               {errors.batch_year && (
@@ -206,8 +195,16 @@ export default function EditGraduate() {
                 name="block"
                 value={formData.block}
                 onChange={handleChange}
+                disabled={isRegistered}
+                readOnly={isRegistered}
                 placeholder="e.g. Block 1"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-tpc-green"
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-tpc-green ${
+                  isRegistered
+                    ? "bg-gray-100 text-gray-500 cursor-not-allowed border-gray-300"
+                    : errors.block
+                    ? "border-red-500"
+                    : "border-gray-300"
+                }`}
               />
               {errors.block && (
                 <p className="text-red-500 text-sm mt-1">{errors.block}</p>
@@ -218,7 +215,7 @@ export default function EditGraduate() {
           <div className="flex gap-4">
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || isRegistered}
               className="flex-1 px-6 py-2 bg-tpc-greenDeep hover:bg-tpc-green text-white rounded-full transition disabled:opacity-50"
             >
               {loading ? "Saving..." : "Save Changes"}

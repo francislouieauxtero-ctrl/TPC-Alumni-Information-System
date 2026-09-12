@@ -139,9 +139,6 @@ export default function EditProfileForm({
                 readOnly
                 className="w-full rounded-lg border px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-100 text-gray-500 text-sm sm:text-base cursor-not-allowed border-gray-200"
               />
-              <p className="mt-1 text-xs text-gray-400">
-                Alumni Name cannot be edited.
-              </p>
             </div>
 
             <div>
@@ -156,9 +153,6 @@ export default function EditProfileForm({
                 }
                 className={inputClass(validationErrors.email)}
               />
-              <p className="mt-1.5 text-xs text-gray-500">
-                The newly updated email address will automatically become the recipient of all future <span className="font-semibold text-gray-700">events, announcements, and system notifications</span>.
-              </p>
               {validationErrors.email && (
                 <p className="mt-1 text-xs sm:text-sm text-red-600">
                   {validationErrors.email[0]}

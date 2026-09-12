@@ -164,13 +164,9 @@ export default function GraduateList() {
                           : "bg-gray-100 text-gray-600 border border-gray-200"
                       }`}
                     >
-                      {graduate.registration_status === "registered" || graduate.is_registered ? (
-                        <>
-                          <span>🔒</span> Registered
-                        </>
-                      ) : (
-                        "Not Registered"
-                      )}
+                      {graduate.registration_status === "registered" || graduate.is_registered
+                        ? "Registered"
+                        : "Not Registered"}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right space-x-4">

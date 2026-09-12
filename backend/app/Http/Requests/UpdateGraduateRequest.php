@@ -11,7 +11,7 @@ class UpdateGraduateRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->user()->isSuperAdmin() || auth()->user()->isAdmin();
+        return auth()->user()->isAdmin() && !auth()->user()->isSuperAdmin();
     }
 
     public function rules(): array
@@ -42,10 +42,34 @@ class UpdateGraduateRequest extends FormRequest
                 $graduate = Graduate::find($graduate);
             }
 
-            if ($graduate && $graduate->isRegistered() && $this->filled('name')) {
-                $newName = trim((string) $this->input('name'));
-                if ($newName !== trim((string) $graduate->name)) {
-                    $validator->errors()->add('name', 'The registered name is locked and cannot be edited because this graduate has already registered as an Alumni.');
+            if ($graduate && $graduate->isRegistered()) {
+                if ($this->has('student_number')) {
+                    $newStudentNumber = trim((string) $this->input('student_number'));
+                    if ($newStudentNumber !== '' && $newStudentNumber !== trim((string) $graduate->student_number)) {
+                        $validator->errors()->add('student_number', 'The ID number is locked and cannot be edited because this graduate has already registered as an Alumni.');
+                    }
+                }
+
+                if ($this->has('name')) {
+                    $newName = trim((string) $this->input('name'));
+                    if ($newName !== '' && $newName !== trim((string) $graduate->name)) {
+                        $validator->errors()->add('name', 'The registered name is locked and cannot be edited because this graduate has already registered as an Alumni.');
+                    }
+                }
+
+                if ($this->has('batch_year')) {
+                    $newBatchYear = trim((string) $this->input('batch_year'));
+                    if ($newBatchYear !== '' && $newBatchYear !== trim((string) $graduate->batch_year)) {
+                        $validator->errors()->add('batch_year', 'The year graduated is locked and cannot be edited because this graduate has already registered as an Alumni.');
+                    }
+                }
+
+                if ($this->has('block')) {
+                    $newBlock = trim((string) ($this->input('block') ?? ''));
+                    $currentBlock = trim((string) ($graduate->block ?? ''));
+                    if ($newBlock !== $currentBlock) {
+                        $validator->errors()->add('block', 'The block is locked and cannot be edited because this graduate has already registered as an Alumni.');
+                    }
                 }
             }
 

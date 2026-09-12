@@ -27,16 +27,12 @@ class GraduatePolicy
 
     public function create(User $user): bool
     {
-        return $user->isSuperAdmin() || $user->isAdmin();
+        return $user->isAdmin() && !$user->isSuperAdmin();
     }
 
     public function update(User $user, Graduate $graduate): bool
     {
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
-
-        if ($user->isAdmin()) {
+        if ($user->isAdmin() && !$user->isSuperAdmin()) {
             return $user->department_id === $graduate->department_id;
         }
 

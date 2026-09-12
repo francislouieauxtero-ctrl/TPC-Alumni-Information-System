@@ -22,7 +22,12 @@ import api from "../../services/api";
 import { toast } from "react-toastify";
 import { resolveStorageUrl } from "../../utils/media";
 
-const EMPLOYMENT_STATUSES = ["employed", "unemployed", "self_employed"];
+const EMPLOYMENT_STATUSES = [
+  "not_specified",
+  "employed",
+  "unemployed",
+  "self_employed",
+];
 
 const formatBatchYear = (value) => {
   if (value === null || value === undefined || value === "") return "—";
@@ -87,6 +92,14 @@ function Avatar({ src, name = "", size = "md" }) {
 }
 
 const BADGE_MAP = {
+  not_specified: {
+    dot: "bg-gray-400",
+    text: "text-gray-700",
+    bg: "bg-gray-100",
+    icon: HelpCircle,
+    label: "Not Specified",
+    borderColor: "border-gray-300",
+  },
   employed: {
     dot: "bg-green-500",
     text: "text-green-800",
@@ -184,7 +197,7 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
   const employmentStatus =
     alumni.employment_status ??
     alumni.alumniProfile?.employment_status ??
-    "unemployed";
+    "not_specified";
   const currentJob = loading
     ? (alumni.current_job ?? alumni.alumniProfile?.current_job ?? "—")
     : (jobHistory?.find((j) => j.is_current)?.position ??
@@ -340,7 +353,19 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
           </div>
 
           {/* Current Job Card */}
-          {currentJob && currentJob !== "—" && (
+          {employmentStatus === "not_specified" ? (
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Briefcase className="h-4 w-4 text-gray-400" />
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+                  Current Position
+                </p>
+              </div>
+              <p className="text-sm font-medium text-gray-600">
+                Not Specified
+              </p>
+            </div>
+          ) : currentJob && currentJob !== "—" && (
             <div className="rounded-xl border border-tpc-gold/20 bg-tpc-gold/5 p-4">
               <div className="flex items-center gap-2 mb-1.5">
                 <Briefcase className="h-4 w-4 text-tpc-goldDeep" />
@@ -764,11 +789,16 @@ export default function AlumniList() {
                       <span className="font-medium text-gray-700 truncate block">
                         {item.employment_status === "unemployed"
                           ? "Unemployed"
-                          : position
-                            ? company
-                              ? `${position} · ${company}`
-                              : position
-                            : "—"}
+                          : item.employment_status === "not_specified" ||
+                            (!position &&
+                              item.employment_status !== "employed" &&
+                              item.employment_status !== "self_employed")
+                            ? "Not Specified"
+                            : position
+                              ? company
+                                ? `${position} · ${company}`
+                                : position
+                              : "—"}
                       </span>
                     </div>
                   </div>
@@ -865,6 +895,14 @@ export default function AlumniList() {
                         {item.employment_status === "unemployed" ? (
                           <span className="text-sm text-gray-700 font-medium">
                             Unemployed
+                          </span>
+                        ) : item.employment_status === "not_specified" ||
+                          (!item.current_job &&
+                            !item.alumniProfile?.current_job &&
+                            item.employment_status !== "employed" &&
+                            item.employment_status !== "self_employed") ? (
+                          <span className="text-sm text-gray-500 font-medium">
+                            Not Specified
                           </span>
                         ) : item.current_job ||
                           item.alumniProfile?.current_job ? (

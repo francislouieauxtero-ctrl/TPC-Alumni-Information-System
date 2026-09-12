@@ -74,6 +74,7 @@ class AdminController extends Controller
             $employedCount = (clone $alumniQuery)->where('employment_status', AlumniProfile::STATUS_EMPLOYED)->count();
             $selfEmployedCount = (clone $alumniQuery)->where('employment_status', AlumniProfile::STATUS_SELF_EMPLOYED)->count();
             $unemployedCount = (clone $alumniQuery)->where('employment_status', AlumniProfile::STATUS_UNEMPLOYED)->count();
+            $notSpecifiedCount = (clone $alumniQuery)->where('employment_status', AlumniProfile::STATUS_NOT_SPECIFIED)->count();
 
             // Graduates per year and total graduates (apply same scoping)
             $graduatesQuery = Graduate::query();
@@ -116,11 +117,11 @@ class AdminController extends Controller
                 'active_students' => (clone $studentsQuery)->where('status', User::STATUS_ACTIVE)->count(),
                 'inactive_students' => (clone $studentsQuery)->where('status', User::STATUS_INACTIVE)->count(),
                 'registered_alumni' => $totalGraduates - $notRegisteredGraduates,
-                'pending_approvals' => 0,
                 'not_registered_graduates' => $notRegisteredGraduates,
                 'employed_alumni' => $employedCount,
                 'self_employed_alumni' => $selfEmployedCount,
                 'unemployed_alumni' => $unemployedCount,
+                'not_specified_alumni' => $notSpecifiedCount,
                 'total_department_heads' => (clone $departmentHeads)->count(),
                 'verified_department_heads' => (clone $departmentHeads)->where('is_verified', true)->count(),
                 'unverified_department_heads' => (clone $departmentHeads)->where('is_verified', false)->count(),

@@ -11,6 +11,7 @@ export default function GraduateEdit() {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [errors, setErrors] = useState({});
+  const [isRegistered, setIsRegistered] = useState(false);
   const [formData, setFormData] = useState({
     department_id: "",
     student_number: "",
@@ -20,13 +21,8 @@ export default function GraduateEdit() {
   });
 
   useEffect(() => {
-    fetchDepartments();
-    if (id) {
-      fetchGraduate();
-    } else {
-      navigate("/president/graduates", { replace: true });
-    }
-  }, [id, navigate]);
+    navigate("/president/graduates", { replace: true });
+  }, [navigate]);
 
   const fetchDepartments = async () => {
     try {
@@ -41,6 +37,10 @@ export default function GraduateEdit() {
     try {
       setFetching(true);
       const graduate = await graduateService.getById(id);
+      const registered = Boolean(
+        graduate.is_registered || graduate.registration_status === "registered"
+      );
+      setIsRegistered(registered);
       setFormData({
         department_id: graduate.department_id ?? "",
         student_number: graduate.student_number ?? "",
@@ -66,6 +66,10 @@ export default function GraduateEdit() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isRegistered) {
+      toast.info("This record is locked because the graduate has registered as an Alumni.");
+      return;
+    }
     setLoading(true);
     setErrors({});
 
@@ -117,9 +121,14 @@ export default function GraduateEdit() {
               name="department_id"
               value={formData.department_id}
               onChange={handleChange}
+              disabled={isRegistered}
               required
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-tpc-green ${
-                errors.department_id ? "border-red-500" : "border-gray-300"
+                isRegistered
+                  ? "bg-gray-100 text-gray-500 cursor-not-allowed border-gray-300"
+                  : errors.department_id
+                  ? "border-red-500"
+                  : "border-gray-300"
               }`}
             >
               <option value="">Select Department</option>
@@ -146,10 +155,16 @@ export default function GraduateEdit() {
               name="student_number"
               value={formData.student_number}
               onChange={handleChange}
+              disabled={isRegistered}
+              readOnly={isRegistered}
               required
               placeholder="e.g., 2021-001"
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-tpc-green ${
-                errors.student_number ? "border-red-500" : "border-gray-300"
+                isRegistered
+                  ? "bg-gray-100 text-gray-500 cursor-not-allowed border-gray-300"
+                  : errors.student_number
+                  ? "border-red-500"
+                  : "border-gray-300"
               }`}
             />
             {errors.student_number && (
@@ -169,10 +184,16 @@ export default function GraduateEdit() {
               name="name"
               value={formData.name}
               onChange={handleChange}
+              disabled={isRegistered}
+              readOnly={isRegistered}
               required
               placeholder="John Doe"
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-tpc-green ${
-                errors.name ? "border-red-500" : "border-gray-300"
+                isRegistered
+                  ? "bg-gray-100 text-gray-500 cursor-not-allowed border-gray-300"
+                  : errors.name
+                  ? "border-red-500"
+                  : "border-gray-300"
               }`}
             />
             {errors.name && (
@@ -190,10 +211,16 @@ export default function GraduateEdit() {
               name="batch_year"
               value={formData.batch_year}
               onChange={handleChange}
+              disabled={isRegistered}
+              readOnly={isRegistered}
               required
               placeholder="e.g., 2026 or 2026-2027"
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-tpc-green ${
-                errors.batch_year ? "border-red-500" : "border-gray-300"
+                isRegistered
+                  ? "bg-gray-100 text-gray-500 cursor-not-allowed border-gray-300"
+                  : errors.batch_year
+                  ? "border-red-500"
+                  : "border-gray-300"
               }`}
             />
             {errors.batch_year && (
@@ -211,8 +238,16 @@ export default function GraduateEdit() {
               name="block"
               value={formData.block}
               onChange={handleChange}
+              disabled={isRegistered}
+              readOnly={isRegistered}
               placeholder="e.g., Block 1"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-tpc-green"
+              className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-tpc-green ${
+                isRegistered
+                  ? "bg-gray-100 text-gray-500 cursor-not-allowed border-gray-300"
+                  : errors.block
+                  ? "border-red-500"
+                  : "border-gray-300"
+              }`}
             />
             {errors.block && (
               <p className="text-red-500 text-sm mt-1">{errors.block}</p>
@@ -223,7 +258,7 @@ export default function GraduateEdit() {
           <div className="flex gap-4">
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || isRegistered}
               className="flex-1 px-6 py-2 bg-tpc-greenDeep hover:bg-tpc-green text-white rounded-full transition disabled:opacity-50"
             >
               {loading ? "Saving..." : "Save Changes"}

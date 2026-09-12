@@ -26,7 +26,7 @@ export default function StudentRegister() {
 
     if (!form.name) newErrors.name = "Full name is required";
     if (!form.email) newErrors.email = "Email is required";
-    if (!form.school_id) newErrors.school_id = "School ID is required";
+    if (!form.school_id) newErrors.school_id = "ID Number is required";
     if (!form.password) newErrors.password = "Password is required";
     if (form.password && form.password.length < 8) {
       newErrors.password = "Password must be at least 8 characters";
@@ -88,8 +88,8 @@ export default function StudentRegister() {
         setErrors((prev) => ({ ...prev, ...fieldErrors }));
       }
       const backendMessage =
-        respErrors?.name?.[0] ||
         respErrors?.school_id?.[0] ||
+        respErrors?.name?.[0] ||
         respErrors?.email?.[0] ||
         err.response?.data?.message ||
         "Registration failed";
@@ -102,9 +102,9 @@ export default function StudentRegister() {
   const handleGoogleRegister = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       if (!form.school_id) {
-        setErrors({ school_id: "School ID is required" });
+        setErrors({ school_id: "ID Number is required" });
         setError(
-          "Please enter your School ID before using Google registration.",
+          "Please enter your ID Number before using Google registration.",
         );
         return;
       }
@@ -129,8 +129,8 @@ export default function StudentRegister() {
           setErrors((prev) => ({ ...prev, ...fieldErrors }));
         }
         const backendMessage =
-          respErrors?.name?.[0] ||
           respErrors?.school_id?.[0] ||
+          respErrors?.name?.[0] ||
           respErrors?.email?.[0] ||
           err.response?.data?.message ||
           "Google registration failed";
@@ -216,14 +216,14 @@ export default function StudentRegister() {
 
                 <div>
                   <label className="relative block">
-                    <span className="sr-only">School ID</span>
+                    <span className="sr-only">ID Number</span>
                     <input
                       type="text"
                       value={form.school_id}
                       onChange={(e) => updateForm("school_id", e.target.value)}
                       required
                       className={`${inputClass(errors.school_id)} pl-4`}
-                      placeholder="Student number"
+                      placeholder="ID Number (e.g. 2020-1-2020)"
                     />
                   </label>
                   {errors.school_id && (

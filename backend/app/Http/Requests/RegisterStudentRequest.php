@@ -91,6 +91,11 @@ class RegisterStudentRequest extends FormRequest
                 return;
             }
 
+            if ($graduate->isRegistered()) {
+                $validator->errors()->add('school_id', 'This ID number has already been registered as an Alumni.');
+                return;
+            }
+
             $inputName = (string) $this->input('name');
             if (trim($inputName) === '') {
                 return;
@@ -134,8 +139,8 @@ class RegisterStudentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'school_id.required' => 'Student ID is required.',
-            'school_id.unique' => 'This student ID has already been registered, did you forget your password?',
+            'school_id.required' => 'ID Number is required.',
+            'school_id.unique' => 'This ID number has already been registered as an Alumni.',
         ];
     }
 }

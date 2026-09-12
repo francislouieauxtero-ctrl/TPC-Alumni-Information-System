@@ -157,16 +157,16 @@ export default function Login() {
               <form onSubmit={handleSubmit} className="mt-5 space-y-3 sm:mt-6">
                 <div>
                   <label className="relative block">
-                    <span className="sr-only">Email Address</span>
+                    <span className="sr-only">Email Address or Username</span>
                     <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-tpc-navy/40" />
                     <input
-                      type="email"
+                      type="text"
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
                       required
                       className={inputClass(false)}
-                      placeholder="E-mail"
+                      placeholder="E-mail or Username"
                     />
                   </label>
                 </div>

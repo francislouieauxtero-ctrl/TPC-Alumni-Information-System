@@ -43,7 +43,8 @@ class StudentController extends Controller
             ['user_id' => $user->id],
             [
                 'department_id'     => $user->department_id,
-                'employment_status' => AlumniProfile::STATUS_UNEMPLOYED,
+                'employment_status' => AlumniProfile::STATUS_NOT_SPECIFIED,
+                'current_job'       => 'Not Specified',
             ]
         );
 
@@ -90,7 +91,8 @@ class StudentController extends Controller
                 $profile->fill($profileData);
                 $profile->department_id = $user->department_id;
                 if (! $profile->exists) {
-                    $profile->employment_status = $profile->employment_status ?? AlumniProfile::STATUS_UNEMPLOYED;
+                    $profile->employment_status = $profile->employment_status ?? AlumniProfile::STATUS_NOT_SPECIFIED;
+                    $profile->current_job = $profile->current_job ?? 'Not Specified';
                 }
                 $profile->save();
             }

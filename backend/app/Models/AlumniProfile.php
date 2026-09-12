@@ -13,6 +13,7 @@ class AlumniProfile extends Model
     use HasFactory, SoftDeletes;
 
     // Employment status constants
+    public const STATUS_NOT_SPECIFIED = 'not_specified';
     public const STATUS_EMPLOYED      = 'employed';
     public const STATUS_UNEMPLOYED    = 'unemployed';
     public const STATUS_SELF_EMPLOYED = 'self_employed';
@@ -88,7 +89,7 @@ class AlumniProfile extends Model
      */
     public function scopeEmployed(Builder $query): Builder
     {
-        return $query->where('employment_status', '!=', self::STATUS_UNEMPLOYED);
+        return $query->whereIn('employment_status', [self::STATUS_EMPLOYED, self::STATUS_SELF_EMPLOYED]);
     }
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -109,15 +110,34 @@ class AlumniProfile extends Model
     {
         $jobs = $this->user->jobHistories();
 
-        $hasCurrentJob = $jobs->where('is_current', true)->exists();
-        $hasAnyJob     = $jobs->exists();
+        $currentJob = $jobs->where('is_current', true)->where('employment_type', self::STATUS_EMPLOYED)->latest('start_date')->first();
+        $hasSelfEmployed = $jobs->where('is_current', true)->where('employment_type', self::STATUS_SELF_EMPLOYED)->exists();
+        $hasUnemployed = $jobs->where('is_current', true)->where('employment_type', self::STATUS_UNEMPLOYED)->exists();
 
-        $status = match (true) {
-            $hasCurrentJob => self::STATUS_EMPLOYED,
-            $hasAnyJob     => self::STATUS_SELF_EMPLOYED,
-            default        => self::STATUS_UNEMPLOYED,
-        };
-
-        $this->updateQuietly(['employment_status' => $status]);
+        if ($currentJob) {
+            $this->updateQuietly([
+                'employment_status' => self::STATUS_EMPLOYED,
+                'current_job'       => $currentJob->position,
+                'company'           => $currentJob->company,
+            ]);
+        } elseif ($hasSelfEmployed) {
+            $this->updateQuietly([
+                'employment_status' => self::STATUS_SELF_EMPLOYED,
+                'current_job'       => null,
+                'company'           => null,
+            ]);
+        } elseif ($hasUnemployed) {
+            $this->updateQuietly([
+                'employment_status' => self::STATUS_UNEMPLOYED,
+                'current_job'       => null,
+                'company'           => null,
+            ]);
+        } else {
+            $this->updateQuietly([
+                'employment_status' => self::STATUS_NOT_SPECIFIED,
+                'current_job'       => 'Not Specified',
+                'company'           => null,
+            ]);
+        }
     }
 }

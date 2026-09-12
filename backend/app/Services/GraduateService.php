@@ -49,10 +49,22 @@ class GraduateService
      */
     public function update(Graduate $graduate, array $data): Graduate
     {
-        // Prevent editing name if graduate is already registered as an Alumni
-        if (isset($data['name']) && trim((string) $data['name']) !== trim((string) $graduate->name)) {
-            if ($graduate->isRegistered()) {
+        // Prevent editing fields if graduate is already registered as an Alumni
+        if ($graduate->isRegistered()) {
+            if (isset($data['student_number']) && trim((string) $data['student_number']) !== trim((string) $graduate->student_number)) {
+                throw new \Exception('The ID number is locked and cannot be edited because this graduate has already registered as an Alumni.');
+            }
+
+            if (isset($data['name']) && trim((string) $data['name']) !== trim((string) $graduate->name)) {
                 throw new \Exception('The registered name is locked and cannot be edited because this graduate has already registered as an Alumni.');
+            }
+
+            if (isset($data['batch_year']) && trim((string) $data['batch_year']) !== trim((string) $graduate->batch_year)) {
+                throw new \Exception('The year graduated is locked and cannot be edited because this graduate has already registered as an Alumni.');
+            }
+
+            if (array_key_exists('block', $data) && trim((string) ($data['block'] ?? '')) !== trim((string) ($graduate->block ?? ''))) {
+                throw new \Exception('The block is locked and cannot be edited because this graduate has already registered as an Alumni.');
             }
         }
 

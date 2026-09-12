@@ -26,7 +26,7 @@ class EnsureStudentIsVerified
         if ($request->user()->isStudent() && !$request->user()->is_verified) {
             return response()->json([
                 'status' => false,
-                'message' => 'Your account is pending department approval',
+                'message' => 'Account is unverified',
                 'data' => (object) [],
             ], 403);
         }

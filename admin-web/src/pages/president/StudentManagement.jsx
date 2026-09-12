@@ -11,13 +11,19 @@ import {
   User,
   Check,
   AlertCircle,
+  HelpCircle,
 } from "lucide-react";
 import alumniService from "../../services/alumniService";
 import departmentService from "../../services/departmentService";
 import api from "../../services/api";
 import { resolveStorageUrl } from "../../utils/media";
 
-const EMPLOYMENT_STATUSES = ["employed", "unemployed", "self_employed"];
+const EMPLOYMENT_STATUSES = [
+  "not_specified",
+  "employed",
+  "unemployed",
+  "self_employed",
+];
 const VIEW_TABS = [
   { key: "all", label: "All" },
   { key: "department", label: "By Department" },
@@ -31,6 +37,12 @@ const formatBatchYear = (value) => {
 };
 
 const STATUS_BADGES = {
+  not_specified: {
+    bg: "bg-gray-100",
+    text: "text-gray-700",
+    border: "border-gray-300",
+    icon: HelpCircle,
+  },
   employed: {
     bg: "bg-green-100",
     text: "text-green-800",
@@ -53,6 +65,7 @@ const STATUS_BADGES = {
 
 function StatusBadge({ status }) {
   const label = {
+    not_specified: "Not Specified",
     employed: "Employed",
     unemployed: "Unemployed",
     self_employed: "Self-Employed",
@@ -153,12 +166,12 @@ function ProfileModal({ alumni, onClose, jobHistory, jobHistoryLoading }) {
         inferredEmploymentStatus = "employed";
       else if (jobHistory.length > 0)
         inferredEmploymentStatus = "self_employed";
-      else inferredEmploymentStatus = "unemployed";
+      else inferredEmploymentStatus = "not_specified";
     } else {
       if (profileCurrentJob) inferredEmploymentStatus = "employed";
       else if (alumni.has_job_history || alumni.user?.has_job_history)
         inferredEmploymentStatus = "self_employed";
-      else inferredEmploymentStatus = "unemployed";
+      else inferredEmploymentStatus = "not_specified";
     }
   }
   const company = jobHistoryLoading
@@ -263,7 +276,19 @@ function ProfileModal({ alumni, onClose, jobHistory, jobHistoryLoading }) {
           </div>
 
           {/* Current Job Card */}
-          {currentJob && (
+          {inferredEmploymentStatus === "not_specified" ? (
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Briefcase className="h-4 w-4 text-gray-400" />
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+                  Current Position
+                </p>
+              </div>
+              <p className="text-sm font-medium text-gray-600">
+                Not Specified
+              </p>
+            </div>
+          ) : currentJob && (
             <div className="rounded-xl border border-tpc-gold/20 bg-tpc-gold/5 p-4">
               <div className="flex items-center gap-2 mb-1.5">
                 <Briefcase className="h-4 w-4 text-tpc-goldDeep" />
@@ -465,7 +490,7 @@ export default function StudentManagement() {
                 ? "employed"
                 : found.jobs.length > 0
                   ? "self_employed"
-                  : "unemployed");
+                  : "not_specified");
             return {
               ...a,
               has_job_history: found.jobs.length > 0,
@@ -541,7 +566,7 @@ export default function StudentManagement() {
               ? "employed"
               : jobHistory.length > 0
                 ? "self_employed"
-                : "unemployed"),
+                : "not_specified"),
           current_job: current?.position ?? null,
           company: current?.company ?? null,
         };
@@ -788,7 +813,7 @@ export default function StudentManagement() {
                 ? summary.find((j) => j.is_current)
                   ? "employed"
                   : "self_employed"
-                : "unemployed");
+                : "not_specified");
 
             const company =
               alum.company ??
@@ -798,9 +823,11 @@ export default function StudentManagement() {
             const employmentDetailsText =
               inferredEmploymentStatus === "unemployed"
                 ? "Unemployed"
-                : currentJob || company
-                  ? [currentJob, company].filter(Boolean).join(" · ")
-                  : "No employment details yet";
+                : inferredEmploymentStatus === "not_specified"
+                  ? "Not Specified"
+                  : currentJob || company
+                    ? [currentJob, company].filter(Boolean).join(" · ")
+                    : "Not Specified";
 
             const batchYear = (function () {
               const y =

@@ -35,10 +35,10 @@ class AlumniProfileResource extends JsonResource
             'contact_number'      => $this->contact_number,
             'location'            => $this->location,
             'profile_photo_url'   => $photo ?: null,
-            'current_job'         => $this->current_job,
+            'current_job'         => $this->current_job ?: ($this->employment_status === \App\Models\AlumniProfile::STATUS_NOT_SPECIFIED ? 'Not Specified' : null),
             'company'             => $this->company,
             'batch_year'          => $this->batch_year,
-            'employment_status'   => $this->employment_status,
+            'employment_status'   => $this->employment_status ?: \App\Models\AlumniProfile::STATUS_NOT_SPECIFIED,
             'has_job_history'     => (bool) JobHistory::where('user_id', $this->user_id)->exists(),
 
             // ─── Work Alignment ───────────────────────────────────────────────

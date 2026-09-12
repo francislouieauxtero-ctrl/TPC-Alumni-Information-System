@@ -11,7 +11,7 @@ class StoreGraduateRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->user()->isSuperAdmin() || auth()->user()->isAdmin();
+        return auth()->user()->isAdmin() && !auth()->user()->isSuperAdmin();
     }
 
     public function rules(): array

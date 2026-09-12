@@ -33,7 +33,7 @@ class JobHistoryService
         return DB::transaction(function () use ($user, $data) {
             $data['user_id'] = $user->id;
             $data['is_current'] = $data['is_current'] ?? false;
-            $data['employment_type'] = $data['employment_type'] ?? AlumniProfile::STATUS_UNEMPLOYED;
+            $data['employment_type'] = $data['employment_type'] ?? AlumniProfile::STATUS_EMPLOYED;
             $data = $this->normalizePayload($data);
 
             if ($data['is_current']) {
@@ -103,45 +103,54 @@ class JobHistoryService
         return $data;
     }
 
-   private function syncAlumniEmploymentStatus(User $user, ?string $explicitType = null): void
-{
-    $alumni = AlumniProfile::where('user_id', $user->id)->first();
+    private function syncAlumniEmploymentStatus(User $user, ?string $explicitType = null): void
+    {
+        $alumni = AlumniProfile::where('user_id', $user->id)->first();
 
-    if (! $alumni) {
-        return;
-    }
+        if (! $alumni) {
+            return;
+        }
 
-    $latestEntry = JobHistory::where('user_id', $user->id)
-        ->latest('created_at')
-        ->first();
-
-    $type = $explicitType ?? $latestEntry?->employment_type ?? AlumniProfile::STATUS_UNEMPLOYED;
-
-    if ($type === AlumniProfile::STATUS_EMPLOYED) {
-        $currentJob = JobHistory::where('user_id', $user->id)
-            ->where('is_current', true)
-            ->latest('start_date')
+        $latestEntry = JobHistory::where('user_id', $user->id)
+            ->latest('created_at')
             ->first();
 
-        $alumni->update([
-            'employment_status' => AlumniProfile::STATUS_EMPLOYED,
-            'current_job'       => $currentJob?->position,
-            'company'           => $currentJob?->company,
-        ]);
-    } elseif ($type === AlumniProfile::STATUS_SELF_EMPLOYED) {
-        $alumni->update([
-            'employment_status' => AlumniProfile::STATUS_SELF_EMPLOYED,
-            'current_job'       => null,
-            'company'           => null,
-        ]);
-    } else {
-        $alumni->update([
-            'employment_status' => AlumniProfile::STATUS_UNEMPLOYED,
-            'current_job'       => null,
-            'company'           => null,
-            'is_work_aligned'   => null,
-            'work_aligned_reason' => null,
-        ]);
+        $type = $explicitType ?? $latestEntry?->employment_type;
+
+        if (! $type) {
+            $alumni->update([
+                'employment_status' => AlumniProfile::STATUS_NOT_SPECIFIED,
+                'current_job'       => 'Not Specified',
+                'company'           => null,
+            ]);
+            return;
+        }
+
+        if ($type === AlumniProfile::STATUS_EMPLOYED) {
+            $currentJob = JobHistory::where('user_id', $user->id)
+                ->where('is_current', true)
+                ->latest('start_date')
+                ->first();
+
+            $alumni->update([
+                'employment_status' => AlumniProfile::STATUS_EMPLOYED,
+                'current_job'       => $currentJob?->position,
+                'company'           => $currentJob?->company,
+            ]);
+        } elseif ($type === AlumniProfile::STATUS_SELF_EMPLOYED) {
+            $alumni->update([
+                'employment_status' => AlumniProfile::STATUS_SELF_EMPLOYED,
+                'current_job'       => null,
+                'company'           => null,
+            ]);
+        } elseif ($type === AlumniProfile::STATUS_UNEMPLOYED) {
+            $alumni->update([
+                'employment_status' => AlumniProfile::STATUS_UNEMPLOYED,
+                'current_job'       => null,
+                'company'           => null,
+                'is_work_aligned'   => null,
+                'work_aligned_reason' => null,
+            ]);
+        }
     }
-}
 }

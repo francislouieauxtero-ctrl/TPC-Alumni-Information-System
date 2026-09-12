@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('profile_photo_url')->nullable();
             $table->string('current_job')->nullable();
             $table->string('company')->nullable();
-            $table->enum('employment_status', ['employed', 'unemployed', 'self_employed'])->default('unemployed');
+            $table->string('employment_status', 50)->default('not_specified');
             $table->timestamps();
             $table->softDeletes();
 

@@ -50,6 +50,8 @@ class GraduateController extends Controller
      */
     public function store(StoreGraduateRequest $request): JsonResponse
     {
+        $this->authorize('create', Graduate::class);
+
         try {
             $data = $request->validated();
 
@@ -74,9 +76,9 @@ class GraduateController extends Controller
      */
     public function show(Graduate $graduate): JsonResponse
     {
-        try {
-            $this->authorize('view', $graduate);
+        $this->authorize('view', $graduate);
 
+        try {
             return $this->successResponse(
                 new GraduateResource($graduate->load('department')),
                 'Graduate retrieved successfully'
@@ -91,9 +93,9 @@ class GraduateController extends Controller
      */
     public function update(UpdateGraduateRequest $request, Graduate $graduate): JsonResponse
     {
-        try {
-            $this->authorize('update', $graduate);
+        $this->authorize('update', $graduate);
 
+        try {
             $data = $request->validated();
 
             $updated = $this->graduateService->update($graduate, $data);
@@ -112,8 +114,9 @@ class GraduateController extends Controller
      */
     public function destroy(Graduate $graduate): JsonResponse
     {
+        $this->authorize('delete', $graduate);
+
         try {
-            $this->authorize('delete', $graduate);
             $this->graduateService->delete($graduate);
 
             return $this->successResponse(null, 'Graduate deleted successfully');

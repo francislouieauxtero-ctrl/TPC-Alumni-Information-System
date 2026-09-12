@@ -12,7 +12,17 @@ class DepartmentSeeder extends Seeder
      */
     public function run(): void
     {
-        foreach (['BSOA', 'BSIT', 'Criminology'] as $name) {
+        $departments = [
+            'Bachelor of Arts in English Language',
+            'Bachelor of Arts in Political Science',
+            'Bachelor of Early Childhood Education',
+            'Bachelor of Science in Accounting Information System',
+            'Bachelor of Science in Agriculture',
+            'Bachelor of Science in Criminology',
+            'Bachelor of Science in Information System',
+        ];
+
+        foreach ($departments as $name) {
             Department::firstOrCreate(['name' => $name]);
         }
     }

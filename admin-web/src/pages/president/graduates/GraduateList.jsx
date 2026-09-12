@@ -56,19 +56,6 @@ export default function GraduateList() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this graduate?"))
-      return;
-
-    try {
-      await graduateService.delete(id);
-      toast.success("Graduate deleted successfully");
-      fetchGraduates();
-    } catch (err) {
-      toast.error(err.message || "Failed to delete graduate");
-    }
-  };
-
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters({ ...filters, [name]: value });
@@ -168,9 +155,6 @@ export default function GraduateList() {
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">
                   Status
                 </th>
-                <th className="px-6 py-3 text-right text-sm font-semibold text-gray-600">
-                  Actions
-                </th>
               </tr>
             </thead>
             <tbody>
@@ -206,26 +190,6 @@ export default function GraduateList() {
                         ? "Registered"
                         : "Not Registered"}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 text-right space-x-4">
-                    <button
-                      onClick={() => {
-                        sessionStorage.setItem(
-                          "graduateEditId",
-                          String(graduate.id),
-                        );
-                        navigate("edit");
-                      }}
-                      className="text-tpc-green hover:text-tpc-greenDeep text-sm font-medium"
-                    >
-                      Edit
-                    </button>
-                    {/* <button
-                      onClick={() => handleDelete(graduate.id)}
-                      className="text-red-600 hover:text-red-800 text-sm font-medium"
-                    >
-                      Delete
-                    </button> */}
                   </td>
                 </tr>
               ))}

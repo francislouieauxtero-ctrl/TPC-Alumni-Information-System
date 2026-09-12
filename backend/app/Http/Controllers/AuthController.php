@@ -40,9 +40,9 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request): JsonResponse
     {
-        $credentials = $request->validated();
+        $login = $request->input('email') ?? $request->input('username');
 
-        $user = $this->authService->attemptLogin($request->email, $request->password);
+        $user = $this->authService->attemptLogin((string) $login, $request->password);
 
         return $this->issueTokenResponse($user, 'Login successful');
     }

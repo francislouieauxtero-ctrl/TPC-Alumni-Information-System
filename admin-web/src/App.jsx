@@ -9,7 +9,6 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import About from "./pages/landingpage/About";
 import StudentRegister from "./pages/auth/StudentRegister";
-import PendingApproval from "./pages/student/PendingApproval";
 import PresidentDashboard from "./pages/president/PresidentDashboard";
 import PrintableReport from "./pages/president/PrintableReport";
 import EditDepartment from "./pages/president/Department/EditDeparment";
@@ -155,7 +154,6 @@ export default function App() {
             <Route path="/home" element={<Welcome />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/pending-approval" element={<PendingApproval />} />
             <Route path="/terms-privacy" element={<TermsAndPrivacy />} />
             {/* President Routes */}
             <Route
@@ -441,14 +439,6 @@ export default function App() {
               }
             />
 
-            <Route
-              path="/department-head/alumni/pending"
-              element={<Navigate to="/department-head/alumni" replace />}
-            />
-            <Route
-              path="/department-head/alumni/rejected"
-              element={<Navigate to="/department-head/alumni" replace />}
-            />
             <Route
               path="/department-head/events"
               element={
