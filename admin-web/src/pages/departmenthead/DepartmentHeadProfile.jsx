@@ -91,6 +91,8 @@ export default function DepartmentHeadProfile() {
         setProfile(updatedUser);
         setName(updatedUser.name || "");
         localStorage.setItem("userName", updatedUser.name || "");
+        if (updatedUser.email) localStorage.setItem("userEmail", updatedUser.email);
+        window.dispatchEvent(new Event("user-profile-updated"));
       } else {
         setActionError(response.data.message || "Failed to update your name.");
       }
@@ -135,6 +137,7 @@ export default function DepartmentHeadProfile() {
         const updatedUser = response.data.data;
         setProfile(updatedUser);
         localStorage.setItem("userAvatar", updatedUser.avatar || "");
+        window.dispatchEvent(new Event("user-profile-updated"));
       } else {
         setActionError(response.data.message || "Failed to upload photo.");
       }
@@ -169,6 +172,7 @@ export default function DepartmentHeadProfile() {
         const updatedUser = response.data.data;
         setProfile(updatedUser);
         localStorage.setItem("userAvatar", updatedUser.avatar || "");
+        window.dispatchEvent(new Event("user-profile-updated"));
       } else {
         setActionError(response.data.message || "Failed to remove photo.");
       }

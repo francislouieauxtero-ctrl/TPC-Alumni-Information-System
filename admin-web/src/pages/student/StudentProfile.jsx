@@ -139,6 +139,7 @@ export default function StudentProfile() {
         const updatedUser = response.data.data;
         setProfile((prev) => ({ ...prev, ...updatedUser }));
         localStorage.setItem("userAvatar", updatedUser.avatar || "");
+        window.dispatchEvent(new Event("user-profile-updated"));
       } else {
         setActionError(response.data.message || "Failed to upload photo.");
       }
@@ -165,6 +166,7 @@ export default function StudentProfile() {
         const updatedUser = response.data.data;
         setProfile((prev) => ({ ...prev, ...updatedUser }));
         localStorage.setItem("userAvatar", "");
+        window.dispatchEvent(new Event("user-profile-updated"));
       } else {
         setActionError(response.data.message || "Failed to remove photo.");
       }
@@ -274,7 +276,10 @@ export default function StudentProfile() {
         },
       }));
 
+      if (data?.name) localStorage.setItem("userName", data.name);
+      if (data?.email) localStorage.setItem("userEmail", data.email);
       localStorage.setItem("userAvatar", data.avatar || "");
+      window.dispatchEvent(new Event("user-profile-updated"));
       closeModal();
     } catch (err) {
       const res = err.response;

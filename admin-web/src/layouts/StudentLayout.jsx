@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import logo from "../assets/tpcL.jpg";
 import {
@@ -28,10 +28,36 @@ export default function StudentLayout({ children }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
 
-  const studentName = localStorage.getItem("userName") || "Student";
-  const studentEmail =
-    localStorage.getItem("userEmail") || "student@example.com";
-  const studentAvatar = localStorage.getItem("userAvatar") || "";
+  const [studentName, setStudentName] = useState(
+    localStorage.getItem("userName") || "Student",
+  );
+  const [studentEmail, setStudentEmail] = useState(
+    localStorage.getItem("userEmail") || "",
+  );
+  const [studentAvatar, setStudentAvatar] = useState(
+    localStorage.getItem("userAvatar") || "",
+  );
+
+  useEffect(() => {
+    const syncUser = () => {
+      const storedName = localStorage.getItem("userName");
+      const storedEmail = localStorage.getItem("userEmail");
+      const storedAvatar = localStorage.getItem("userAvatar");
+
+      if (storedName) setStudentName(storedName);
+      if (storedEmail !== null) setStudentEmail(storedEmail || "");
+      if (storedAvatar !== null) setStudentAvatar(storedAvatar || "");
+    };
+
+    syncUser();
+    window.addEventListener("user-profile-updated", syncUser);
+    window.addEventListener("storage", syncUser);
+
+    return () => {
+      window.removeEventListener("user-profile-updated", syncUser);
+      window.removeEventListener("storage", syncUser);
+    };
+  }, []);
 
   const handleLogout = async () => {
     try {

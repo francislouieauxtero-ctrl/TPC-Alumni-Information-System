@@ -440,23 +440,21 @@ function ReportAlignmentTable({ rows }) {
     <table className="report-align-table">
       <thead>
         <tr>
-          <th>Department</th>
-          <th>Employed</th>
-          <th>Aligned</th>
-          <th>Not Aligned</th>
-          <th>Not Registered Graduates</th>
-          <th>Alignment Rate</th>
+          <th className="col-dept">Department</th>
+          <th className="col-aligned">Aligned</th>
+          <th className="col-not-aligned">Not Aligned</th>
+          <th className="col-not-reg">Not Registered Graduates</th>
+          <th className="col-rate">Alignment Rate</th>
         </tr>
       </thead>
       <tbody>
         {rows.map((row) => (
           <tr key={row.department}>
-            <td>{row.department}</td>
-            <td>{row.totalEmployed}</td>
-            <td>{row.aligned}</td>
-            <td className="report-align-not">{row.notAligned}</td>
-            <td>{row.notRegistered}</td>
-            <td>{row.alignmentRate}%</td>
+            <td className="col-dept">{row.department}</td>
+            <td className="col-aligned">{row.aligned}</td>
+            <td className="col-not-aligned report-align-not">{row.notAligned}</td>
+            <td className="col-not-reg">{row.notRegistered}</td>
+            <td className="col-rate">{row.alignmentRate}%</td>
           </tr>
         ))}
       </tbody>
@@ -529,25 +527,53 @@ const reportPrintStyles = `
   .report-avoid-break { break-inside: avoid; page-break-inside: avoid; }
   .report-align-table {
     width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
-    font-size: 12px;
+    font-size: 11.5px;
+    line-height: 1.35;
   }
   .report-align-table th {
-    text-align: left;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.02em;
-    color: #6b7280;
-    border-bottom: 1px solid #e5e7eb;
-    padding: 4px 4px;
+    letter-spacing: 0.03em;
+    color: #4b5563;
+    border-bottom: 1.5px solid #d1d5db;
+    padding: 6px 8px;
+    vertical-align: bottom;
+    word-break: normal;
   }
   .report-align-table td {
-    padding: 4px 4px;
-    border-bottom: 1px dotted #e5e7eb;
+    padding: 6px 8px;
+    border-bottom: 1px solid #f3f4f6;
     color: #374151;
+    vertical-align: middle;
   }
   .report-align-table tr:last-child td { border-bottom: none; }
+  .report-align-table .col-dept {
+    width: 40%;
+    text-align: left;
+    white-space: normal;
+    word-wrap: break-word;
+    font-weight: 500;
+  }
+  .report-align-table .col-aligned {
+    width: 13%;
+    text-align: center;
+  }
+  .report-align-table .col-not-aligned {
+    width: 14%;
+    text-align: center;
+  }
+  .report-align-table .col-not-reg {
+    width: 18%;
+    text-align: center;
+  }
+  .report-align-table .col-rate {
+    width: 15%;
+    text-align: center;
+    font-weight: 600;
+  }
   .report-align-not { color: #b91c1c; font-weight: 600; }
 
   @media print {

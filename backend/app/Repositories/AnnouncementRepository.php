@@ -11,7 +11,7 @@ class AnnouncementRepository
     public function allVisible(User $actor, array $filters = []): LengthAwarePaginator|\Illuminate\Support\Collection
     {
         $query = Announcement::query()->with([
-            'creator:id,name,avatar',
+            'creator:id,name,avatar,role',
             'department:id,name',
         ]);
 
@@ -48,7 +48,7 @@ class AnnouncementRepository
     public function find(int $id): ?Announcement
     {
         return Announcement::with([
-            'creator:id,name,avatar',
+            'creator:id,name,avatar,role',
             'department:id,name',
         ])->find($id);
     }

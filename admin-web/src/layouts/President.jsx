@@ -27,20 +27,31 @@ export default function PresidentLayout({ children }) {
     localStorage.getItem("userName") || "User",
   );
   const [userEmail, setUserEmail] = useState(
-    localStorage.getItem("userEmail") || "user@example.com",
+    localStorage.getItem("userEmail") || "",
   );
   const [userAvatar, setUserAvatar] = useState(
     localStorage.getItem("userAvatar") || "",
   );
 
   useEffect(() => {
-    const storedName = localStorage.getItem("userName");
-    const storedEmail = localStorage.getItem("userEmail");
-    const storedAvatar = localStorage.getItem("userAvatar");
+    const syncUser = () => {
+      const storedName = localStorage.getItem("userName");
+      const storedEmail = localStorage.getItem("userEmail");
+      const storedAvatar = localStorage.getItem("userAvatar");
 
-    if (storedName) setUserName(storedName);
-    if (storedEmail) setUserEmail(storedEmail);
-    if (storedAvatar) setUserAvatar(storedAvatar);
+      if (storedName) setUserName(storedName);
+      if (storedEmail !== null) setUserEmail(storedEmail || "");
+      if (storedAvatar !== null) setUserAvatar(storedAvatar || "");
+    };
+
+    syncUser();
+    window.addEventListener("user-profile-updated", syncUser);
+    window.addEventListener("storage", syncUser);
+
+    return () => {
+      window.removeEventListener("user-profile-updated", syncUser);
+      window.removeEventListener("storage", syncUser);
+    };
   }, []);
 
   const userRole = localStorage.getItem("userRole");

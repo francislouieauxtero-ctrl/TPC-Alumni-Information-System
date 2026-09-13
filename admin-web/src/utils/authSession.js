@@ -16,15 +16,16 @@ export const extractAuthSession = (responseData) => {
 };
 
 export const storeAuthSession = (token, user) => {
-  const departmentId = user?.departmentId ?? "";
-  const schoolId = user?.schoolId ?? "";
+  const departmentId = user?.departmentId ?? user?.department?.id ?? "";
+  const schoolId = user?.schoolId ?? user?.school_id ?? "";
+  const departmentName = user?.department?.name ?? "";
 
   localStorage.setItem("token", token ?? "");
   localStorage.setItem("userId", user?.id != null ? String(user.id) : "");
   localStorage.setItem("userRole", user?.role ?? "");
   localStorage.setItem("userName", user?.name ?? "");
-  localStorage.setItem("userEmail", "");
-  localStorage.setItem("userAvatar", "");
+  localStorage.setItem("userEmail", user?.email ?? "");
+  localStorage.setItem("userAvatar", user?.avatar ?? "");
   localStorage.setItem(
     "departmentId",
     departmentId !== "" ? String(departmentId) : "",
@@ -37,6 +38,7 @@ export const storeAuthSession = (token, user) => {
     "userDepartment",
     departmentId !== "" ? String(departmentId) : "",
   );
-  localStorage.setItem("userDepartmentName", "");
+  localStorage.setItem("userDepartmentName", departmentName);
   localStorage.removeItem("departmentName");
+  window.dispatchEvent(new Event("user-profile-updated"));
 };

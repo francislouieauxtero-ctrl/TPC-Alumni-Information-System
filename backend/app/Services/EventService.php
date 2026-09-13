@@ -202,14 +202,16 @@ class EventService
             $event->load('creator');
             $creatorName = $event->creator?->name ?? 'Administrator';
 
-            $recipients = $event->scope === Event::SCOPE_DEPARTMENT_SPECIFIC
-                ? User::where('department_id', $event->department_id)
-                    ->where('role', User::ROLE_USER)
-                    ->where('status', User::STATUS_ACTIVE)
-                    ->get()
-                : User::where('role', User::ROLE_USER)
-                    ->where('status', User::STATUS_ACTIVE)
-                    ->get();
+            $targetRoles = [User::ROLE_USER, User::ROLE_ADMIN];
+
+            $query = User::whereIn('role', $targetRoles)
+                ->where('status', User::STATUS_ACTIVE);
+
+            if ($event->scope === Event::SCOPE_DEPARTMENT_SPECIFIC) {
+                $query->where('department_id', $event->department_id);
+            }
+
+            $recipients = $query->get();
 
             foreach ($recipients as $recipient) {
                 try {

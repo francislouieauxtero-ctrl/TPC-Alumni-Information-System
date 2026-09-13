@@ -30,11 +30,11 @@ class UserResource extends JsonResource
             'schoolId'      => $this->school_id,
             'school_id'     => $this->school_id,
             'student_number' => $this->school_id,
-            'department'    => new DepartmentResource($this->whenLoaded('department')),
+            'department'    => $this->whenLoaded('department', fn () => new DepartmentResource($this->department)),
             'isVerified'    => (bool) $this->is_verified,
             'status'        => $this->status,
             'avatar'        => $avatar ?: null,
-            'alumniProfile' => new AlumniProfileResource($this->whenLoaded('alumniProfile')),
+            'alumniProfile' => $this->whenLoaded('alumniProfile', fn () => new AlumniProfileResource($this->alumniProfile)),
             'createdAt'     => $this->created_at,
             'updatedAt'     => $this->updated_at,
         ];

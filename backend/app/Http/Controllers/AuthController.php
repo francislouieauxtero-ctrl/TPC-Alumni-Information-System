@@ -56,7 +56,7 @@ class AuthController extends Controller
             return $this->error('Unauthorized', 401);
         }
 
-        return $this->success('Success', new AuthSessionResource($user));
+        return $this->success('Success', new AuthSessionResource($user->load('department', 'alumniProfile')));
     }
 
     public function logout(): JsonResponse
@@ -136,7 +136,7 @@ class AuthController extends Controller
     {
         return $this->success($message, [
             'token' => $this->authService->issueToken($user),
-            'user' => new AuthSessionResource($user),
+            'user' => new AuthSessionResource($user->load('department', 'alumniProfile')),
         ]);
     }
 }

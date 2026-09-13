@@ -26,19 +26,36 @@ export default function DepartmentHeadLayout({ children }) {
     localStorage.getItem("userName") || "Department Head",
   );
   const [departmentHeadEmail, setDepartmentHeadEmail] = useState(
-    localStorage.getItem("userEmail") || "departmenthead@example.com",
+    localStorage.getItem("userEmail") || "",
   );
   const [departmentHeadAvatar, setDepartmentHeadAvatar] = useState(
     localStorage.getItem("userAvatar") || "",
   );
-  useEffect(() => {
-    const storedName = localStorage.getItem("userName");
-    const storedEmail = localStorage.getItem("userEmail");
-    const storedAvatar = localStorage.getItem("userAvatar");
+  const [departmentHeadDept, setDepartmentHeadDept] = useState(
+    localStorage.getItem("userDepartmentName") || "",
+  );
 
-    if (storedName) setDepartmentHeadName(storedName);
-    if (storedEmail) setDepartmentHeadEmail(storedEmail);
-    if (storedAvatar) setDepartmentHeadAvatar(storedAvatar);
+  useEffect(() => {
+    const syncUser = () => {
+      const storedName = localStorage.getItem("userName");
+      const storedEmail = localStorage.getItem("userEmail");
+      const storedAvatar = localStorage.getItem("userAvatar");
+      const storedDept = localStorage.getItem("userDepartmentName");
+
+      if (storedName) setDepartmentHeadName(storedName);
+      if (storedEmail !== null) setDepartmentHeadEmail(storedEmail || "");
+      if (storedAvatar !== null) setDepartmentHeadAvatar(storedAvatar || "");
+      if (storedDept !== null) setDepartmentHeadDept(storedDept || "");
+    };
+
+    syncUser();
+    window.addEventListener("user-profile-updated", syncUser);
+    window.addEventListener("storage", syncUser);
+
+    return () => {
+      window.removeEventListener("user-profile-updated", syncUser);
+      window.removeEventListener("storage", syncUser);
+    };
   }, []);
 
   const handleLogout = async () => {
