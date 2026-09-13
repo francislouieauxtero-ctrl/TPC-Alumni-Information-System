@@ -11,5 +11,5 @@ export const getDashboardPath = (role) => {
     return "/student/dashboard";
   }
 
-  return "/welcome";
+  return "/home";
 };

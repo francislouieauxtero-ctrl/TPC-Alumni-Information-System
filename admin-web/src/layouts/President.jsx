@@ -34,24 +34,13 @@ export default function PresidentLayout({ children }) {
   );
 
   useEffect(() => {
-    const syncUser = async () => {
-      try {
-        const response = await api.get("/auth/user");
-        if (response.data.status) {
-          const user = response.data.data;
-          setUserName(user.name || "User");
-          setUserEmail(user.email || "");
-          setUserAvatar(user.avatar || "");
-          localStorage.setItem("userName", user.name || "");
-          localStorage.setItem("userEmail", user.email || "");
-          localStorage.setItem("userAvatar", user.avatar || "");
-        }
-      } catch (err) {
-        console.error("Failed to sync user:", err);
-      }
-    };
+    const storedName = localStorage.getItem("userName");
+    const storedEmail = localStorage.getItem("userEmail");
+    const storedAvatar = localStorage.getItem("userAvatar");
 
-    syncUser();
+    if (storedName) setUserName(storedName);
+    if (storedEmail) setUserEmail(storedEmail);
+    if (storedAvatar) setUserAvatar(storedAvatar);
   }, []);
 
   const userRole = localStorage.getItem("userRole");

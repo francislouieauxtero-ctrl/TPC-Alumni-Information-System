@@ -9,6 +9,11 @@ class GraduateResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $attributes = $this->resource->getAttributes();
+        $isRegistered = array_key_exists('is_registered', $attributes)
+            ? (bool) $attributes['is_registered']
+            : $this->isRegistered();
+
         return [
             'id' => $this->id,
             'department_id' => $this->department_id,
@@ -17,8 +22,8 @@ class GraduateResource extends JsonResource
             'name' => $this->name,
             'batch_year' => $this->batch_year,
             'block' => $this->block,
-            'registration_status' => $this->registration_status,
-            'is_registered' => $this->isRegistered(),
+            'registration_status' => $isRegistered ? 'registered' : 'not_registered',
+            'is_registered' => $isRegistered,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

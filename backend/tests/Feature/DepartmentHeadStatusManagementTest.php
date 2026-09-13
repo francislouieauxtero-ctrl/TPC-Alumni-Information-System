@@ -65,6 +65,44 @@ class DepartmentHeadStatusManagementTest extends TestCase
         $this->assertSame($activeHead->id, $response->json('data.0.id'));
     }
 
+    public function test_list_department_admins_supports_server_side_search_and_pagination(): void
+    {
+        $superAdmin = User::factory()->create([
+            'role' => User::ROLE_SUPER_ADMIN,
+            'status' => User::STATUS_ACTIVE,
+        ]);
+
+        $department = Department::factory()->create();
+
+        $match = User::factory()->create([
+            'role' => User::ROLE_ADMIN,
+            'department_id' => $department->id,
+            'name' => 'Alice Department Head',
+            'email' => 'alice.department@example.com',
+            'status' => User::STATUS_ACTIVE,
+            'is_verified' => true,
+        ]);
+
+        User::factory()->create([
+            'role' => User::ROLE_ADMIN,
+            'department_id' => $department->id,
+            'name' => 'Bob Department Head',
+            'email' => 'bob.department@example.com',
+            'status' => User::STATUS_ACTIVE,
+            'is_verified' => true,
+        ]);
+
+        $response = $this->actingAs($superAdmin, 'sanctum')
+            ->withHeader('Accept', 'application/json')
+            ->getJson('/api/super-admin/department-admins?search=alice&verified=true&per_page=1');
+
+        $response->assertOk();
+        $response->assertJsonPath('status', true);
+        $response->assertJsonPath('meta.total', 1);
+        $response->assertJsonCount(1, 'data');
+        $this->assertSame($match->id, $response->json('data.0.id'));
+    }
+
     public function test_super_admin_cannot_activate_when_another_active_head_exists_in_department(): void
     {
         $superAdmin = User::factory()->create([

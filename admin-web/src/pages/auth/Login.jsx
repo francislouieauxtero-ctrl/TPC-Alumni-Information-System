@@ -6,6 +6,10 @@ import api from "../../services/api";
 import logo from "../../assets/tpcL.jpg";
 import bg from "../../assets/tpc.png";
 import { getDashboardPath } from "../../utils/roleRedirect";
+import {
+  extractAuthSession,
+  storeAuthSession,
+} from "../../utils/authSession";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -43,31 +47,8 @@ export default function Login() {
   };
 
   const completeLogin = (token, user) => {
-    localStorage.setItem("token", token);
-    localStorage.setItem("userId", user.id);
-    localStorage.setItem("userRole", user.role);
-    localStorage.setItem("userName", user.name);
-    localStorage.setItem("userEmail", user.email);
-    localStorage.setItem("userAvatar", user.avatar || "");
-    localStorage.setItem("departmentId", user.departmentId || "");
-    localStorage.setItem(
-      "userDepartment",
-      user.department?.id || user.departmentId || "",
-    );
-    localStorage.setItem("userDepartmentName", user.department?.name || "");
-    if (user.department) {
-      localStorage.setItem("departmentName", user.department.name || "");
-    }
-
-
-    if (user.status !== "active") {
-      setError("Your account is inactive. Please contact admin.");
-      localStorage.removeItem("token");
-      localStorage.removeItem("userRole");
-      return;
-    }
-
-    navigate(getDashboardPath(user.role), { replace: true });
+    storeAuthSession(token, user);
+    navigate(getDashboardPath(user?.role), { replace: true });
   };
 
   const handleSubmit = async (e) => {
@@ -79,9 +60,15 @@ export default function Login() {
     try {
       const response = await api.post("/auth/login", formData);
 
-      if (response.data.status) {
-        const { token, user } = response.data.data;
+      if (response.data?.status || response.data?.success) {
+        const { token, user } = extractAuthSession(response.data);
+        if (!token || !user?.role) {
+          setError("Login response was incomplete. Please try again.");
+          return;
+        }
         completeLogin(token, user);
+      } else {
+        setError(response.data?.message || "Login failed. Please try again.");
       }
     } catch (err) {
       if (err.response?.data?.message) {
@@ -104,9 +91,15 @@ export default function Login() {
           access_token: tokenResponse.access_token,
         });
 
-        if (response.data.status) {
-          const { token, user } = response.data.data;
+        if (response.data?.status || response.data?.success) {
+          const { token, user } = extractAuthSession(response.data);
+          if (!token || !user?.role) {
+            setError("Login response was incomplete. Please try again.");
+            return;
+          }
           completeLogin(token, user);
+        } else {
+          setError(response.data?.message || "Google login failed.");
         }
       } catch (err) {
         setError(err.response?.data?.message || "Google login failed.");

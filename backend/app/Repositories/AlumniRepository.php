@@ -14,7 +14,16 @@ class AlumniRepository
 {
     public function all(User $actor, array $filters = []): LengthAwarePaginator
     {
-        $query = AlumniProfile::with(['user', 'department', 'graduate'])
+        $query = AlumniProfile::query()
+            ->with([
+                'user' => function ($userQuery) {
+                    $userQuery
+                        ->select(['id', 'name', 'email', 'avatar', 'school_id', 'department_id', 'role', 'is_verified', 'status'])
+                        ->withExists('jobHistories');
+                },
+                'department:id,name',
+                'graduate:id,student_number,batch_year,block',
+            ])
             ->whereHas('user', function ($q) {
                 $q->where('is_verified', true);
             });
@@ -26,12 +35,19 @@ class AlumniRepository
         }
 
         if (!empty($filters['batch_year'])) {
-            $batchYear = $filters['batch_year'];
+            $batchYear = trim((string) $filters['batch_year']);
             $query->where(function ($q) use ($batchYear) {
-                $q->where('batch_year', $batchYear)
+                $q->whereRaw('LOWER(CAST(batch_year AS CHAR)) = ?', [mb_strtolower($batchYear)])
                     ->orWhereHas('graduate', function ($gradQuery) use ($batchYear) {
-                        $gradQuery->where('batch_year', $batchYear);
+                        $gradQuery->whereRaw('LOWER(CAST(batch_year AS CHAR)) = ?', [mb_strtolower($batchYear)]);
                     });
+            });
+        }
+
+        if (!empty($filters['block'])) {
+            $block = trim((string) $filters['block']);
+            $query->whereHas('graduate', function ($gradQuery) use ($block) {
+                $gradQuery->whereRaw('LOWER(CAST(block AS CHAR)) = ?', [mb_strtolower($block)]);
             });
         }
 

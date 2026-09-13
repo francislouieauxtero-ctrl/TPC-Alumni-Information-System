@@ -77,6 +77,7 @@ services:
     image: mysql:8.0
     container_name: capstone_mysql
     restart: unless-stopped
+    command: --skip-name-resolve
     ports:
       - "127.0.0.1:3306:3306"
     environment:

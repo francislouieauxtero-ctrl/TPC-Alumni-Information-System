@@ -24,7 +24,13 @@ class DepartmentController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'Success',
-                'data' => DepartmentResource::collection($departments),
+                'data' => $departments
+                    ->map(fn (\App\Models\Department $department) => [
+                        'id' => $department->id,
+                        'name' => $department->name,
+                    ])
+                    ->values()
+                    ->all(),
             ]);
         } catch (\Throwable $e) {
             report($e);

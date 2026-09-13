@@ -490,7 +490,6 @@ export default function AlumniList() {
   const [batchFilter, setBatchFilter] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [jobSummaries, setJobSummaries] = useState({});
   const [selectedAlumni, setSelectedAlumni] = useState(null);
   const [jobHistory, setJobHistory] = useState([]);
   const [jobHistoryLoading, setJobHistoryLoading] = useState(false);
@@ -502,61 +501,12 @@ export default function AlumniList() {
       const params = { page, per_page: 12 };
       if (searchQuery.trim()) params.search = searchQuery.trim();
       if (employmentFilter) params.employment_status = employmentFilter;
+      if (batchFilter) params.batch_year = batchFilter;
 
       const result = await alumniService.getAll(params);
       const list = result.data ?? [];
       setAlumni(list);
       setTotalPages(result.meta?.last_page ?? 1);
-
-      const userIds = [
-        ...new Set(
-          list
-            .map((item) => item.user?.id ?? item.user_id ?? item.userId)
-            .filter(Boolean),
-        ),
-      ];
-
-      if (userIds.length) {
-        const settled = await Promise.all(
-          userIds.map((id) =>
-            api
-              .get(`/admin/students/${id}/employment`)
-              .then((res) => ({ id, jobs: res.data?.data ?? [] }))
-              .catch(() => ({ id, jobs: [] })),
-          ),
-        );
-
-        const map = {};
-        settled.forEach(({ id, jobs }) => {
-          map[String(id)] = jobs;
-        });
-        setJobSummaries((prev) => ({ ...prev, ...map }));
-
-        // ✅ FIX: Only use job history to populate display fields (current_job, company).
-        // Do NOT re-derive or override employment_status — trust what the backend returned.
-        // Overriding it here was causing the filter to break (e.g. filtering by "unemployed"
-        // would still show employed users because job history re-classified them client-side).
-        setAlumni((prev) =>
-          prev.map((item) => {
-            const userId = item.user?.id ?? item.user_id ?? item.userId;
-            const jobs = map[String(userId)] ?? [];
-            const currentJob = jobs.find((j) => j.is_current);
-
-            return {
-              ...item,
-              current_job:
-                item.current_job ??
-                currentJob?.position ??
-                item.alumniProfile?.current_job,
-              company:
-                item.company ??
-                currentJob?.company ??
-                item.alumniProfile?.company,
-              // employment_status intentionally left as-is from the API response
-            };
-          }),
-        );
-      }
     } catch (err) {
       toast.error(err.message || "Failed to load alumni");
       setError("Failed to load alumni.");
@@ -567,7 +517,7 @@ export default function AlumniList() {
 
   useEffect(() => {
     fetchAlumni();
-  }, [page, searchQuery, employmentFilter]);
+  }, [page, searchQuery, employmentFilter, batchFilter]);
 
   useEffect(() => {
     if (!selectedAlumni) {
@@ -607,19 +557,7 @@ export default function AlumniList() {
     [alumni],
   );
 
-  const visibleAlumni = useMemo(
-    () =>
-      alumni.filter((item) => {
-        if (!batchFilter) return true;
-        const value =
-          item.batch_year ??
-          item.alumniProfile?.batch_year ??
-          item.graduate?.batch_year ??
-          item.user?.alumniProfile?.batch_year;
-        return String(value) === String(batchFilter);
-      }),
-    [alumni, batchFilter],
-  );
+  const visibleAlumni = useMemo(() => alumni, [alumni]);
 
   const handleSearch = (e) => {
     if (e.key === "Enter") {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../../services/api";
 import {
@@ -22,9 +22,14 @@ export default function DepartmentHeadManagement({ embedded = false }) {
   const [departmentHeads, setDepartmentHeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [filterVerified, setFilterVerified] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalHeads, setTotalHeads] = useState(0);
   const [actionLoading, setActionLoading] = useState(null);
+  const latestRequestRef = useRef(0);
 
   // Departments state
   const [departments, setDepartments] = useState([]);
@@ -44,30 +49,54 @@ export default function DepartmentHeadManagement({ embedded = false }) {
   const [editErrors, setEditErrors] = useState({});
 
   useEffect(() => {
-    fetchStaff();
     fetchDepartments();
-  }, [search, filterVerified, filterStatus]);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(searchInput.trim());
+      setCurrentPage(1);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  useEffect(() => {
+    fetchStaff(currentPage, search, filterVerified, filterStatus);
+  }, [currentPage, search, filterVerified, filterStatus]);
 
   // ── Department heads ──────────────────────────────────────────
-  const fetchStaff = async () => {
+  const fetchStaff = async (page = 1, term = search, verified = filterVerified, status = filterStatus) => {
     try {
+      const requestId = ++latestRequestRef.current;
       setLoading(true);
-      const params = {};
-      if (search) params.search = search;
-      if (filterVerified) params.verified = filterVerified;
-      if (filterStatus) params.status = filterStatus;
+      const params = { page, per_page: 15 };
+      if (term) params.search = term;
+      if (verified) params.verified = verified;
+      if (status) params.status = status;
 
       const response = await api.get("/super-admin/department-admins", {
         params,
       });
 
+      if (requestId !== latestRequestRef.current) {
+        return;
+      }
+
       if (response.data.status) {
-        setDepartmentHeads(response.data.data || []);
+        const payload = response.data.data || [];
+        const meta = response.data.meta || {};
+        setDepartmentHeads(Array.isArray(payload) ? payload : []);
+        setTotalPages(meta.last_page || 1);
+        setTotalHeads(meta.total || payload.length || 0);
       }
     } catch {
       toast.error("Failed to load department heads.");
     } finally {
-      setLoading(false);
+      const requestId = latestRequestRef.current;
+      if (requestId === latestRequestRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -146,17 +175,25 @@ export default function DepartmentHeadManagement({ embedded = false }) {
     }
   };
 
+  const activeDepartmentHeadByDepartment = useMemo(() => {
+    const map = {};
+
+    departmentHeads.forEach((member) => {
+      if (member.status === "active" && member.department?.id) {
+        map[member.department.id] = member.id;
+      }
+    });
+
+    return map;
+  }, [departmentHeads]);
+
   const hasActiveDepartmentHead = (departmentId, memberId = null) => {
     if (!departmentId) {
       return false;
     }
 
-    return departmentHeads.some(
-      (member) =>
-        member.department?.id === departmentId &&
-        member.status === "active" &&
-        member.id !== memberId,
-    );
+    const activeMemberId = activeDepartmentHeadByDepartment[departmentId];
+    return activeMemberId != null && activeMemberId !== memberId;
   };
 
   const getActivationButtonLabel = (member) => {
@@ -418,14 +455,17 @@ export default function DepartmentHeadManagement({ embedded = false }) {
             <input
               type="text"
               placeholder="Search by name or email…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className={`w-full pl-9 ${inputClass}`}
             />
           </div>
           <select
             value={filterVerified}
-            onChange={(e) => setFilterVerified(e.target.value)}
+            onChange={(e) => {
+              setFilterVerified(e.target.value);
+              setCurrentPage(1);
+            }}
             className={inputClass}
           >
             <option value="">All Verification</option>
@@ -434,7 +474,10 @@ export default function DepartmentHeadManagement({ embedded = false }) {
           </select>
           <select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
+            onChange={(e) => {
+              setFilterStatus(e.target.value);
+              setCurrentPage(1);
+            }}
             className={inputClass}
           >
             <option value="">All Status</option>
@@ -593,6 +636,35 @@ export default function DepartmentHeadManagement({ embedded = false }) {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+            <span>
+              Showing {departmentHeads.length} of {totalHeads} head{totalHeads === 1 ? "" : "s"}
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                disabled={currentPage === 1 || loading}
+                className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Prev
+              </button>
+              <span className="text-xs font-medium text-gray-700">
+                Page {currentPage} / {totalPages}
+              </span>
+              <button
+                type="button"
+                onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                disabled={currentPage >= totalPages || loading}
+                className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
           </div>
         )}
       </div>

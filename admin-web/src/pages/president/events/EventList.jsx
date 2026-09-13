@@ -126,7 +126,7 @@ export default function EventList() {
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
                   {event.title}
                 </h3>
-                <p className="max-h-32 overflow-y-auto pr-1 text-sm text-gray-600 whitespace-pre-line">
+                <p className="text-sm text-gray-600 whitespace-pre-line line-clamp-4">
                   {renderTextWithLinks(event.description || "")}
                 </p>
               </div>
@@ -202,7 +202,7 @@ export default function EventList() {
               {getAttachmentUrls(event).length > 0 && (
                 <div className="mt-2">
                   <div className="grid grid-cols-2 gap-2">
-                    {getAttachmentUrls(event).map((image, idx) => {
+                    {getAttachmentUrls(event).slice(0, 2).map((image, idx) => {
                       const isImage = /\.(jpg|jpeg|png|webp|gif)$/i.test(image);
                       const isVideo = /\.(mp4|webm|mov|avi)$/i.test(image);
 
@@ -217,6 +217,7 @@ export default function EventList() {
                             <img
                               src={image}
                               alt={`Event ${idx + 1}`}
+                              loading="lazy"
                               className="w-full h-24 object-cover rounded-lg border border-gray-200 cursor-zoom-in"
                             />
                           </button>

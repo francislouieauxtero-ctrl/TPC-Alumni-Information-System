@@ -437,7 +437,6 @@ export default function StudentManagement() {
   const [selectedAlumni, setSelectedAlumni] = useState(null);
   const [jobHistory, setJobHistory] = useState([]);
   const [jobHistoryLoading, setJobHistoryLoading] = useState(false);
-  const [jobSummaries, setJobSummaries] = useState({});
 
   const fetchAlumni = useCallback(async () => {
     setLoading(true);
@@ -451,56 +450,7 @@ export default function StudentManagement() {
       if (batchFilter) filters.batch_year = batchFilter;
 
       const result = await alumniService.getAll(filters);
-      const list = result.data ?? [];
-      setAlumni(list);
-
-      // Fetch job-history summaries for the loaded alumni to keep list badges accurate
-      const userIds = list
-        .map((a) => a.user?.id ?? a.user_id ?? null)
-        .filter(Boolean);
-
-      if (userIds.length) {
-        const jobsPromises = userIds.map((id) =>
-          api
-            .get(`/admin/students/${id}/employment`)
-            .then((r) => ({ id, jobs: r.data?.data ?? [] }))
-            .catch(() => ({ id, jobs: [] })),
-        );
-
-        const settled = await Promise.all(jobsPromises);
-
-        // build lookup map and update alumni entries
-        const map = {};
-        settled.forEach((s) => {
-          map[String(s.id)] = s.jobs;
-        });
-        setJobSummaries((prev) => ({ ...prev, ...map }));
-
-        setAlumni((prev) =>
-          prev.map((a) => {
-            const aUserId = a.user?.id ?? a.user_id ?? a.userId;
-            const found = settled.find((s) => String(s.id) === String(aUserId));
-            if (!found) return a;
-            const current = found.jobs.find((j) => j.is_current);
-            const derivedStatus =
-              a.employment_status ??
-              a.alumniProfile?.employment_status ??
-              a.user?.alumniProfile?.employment_status ??
-              (current
-                ? "employed"
-                : found.jobs.length > 0
-                  ? "self_employed"
-                  : "not_specified");
-            return {
-              ...a,
-              has_job_history: found.jobs.length > 0,
-              employment_status: derivedStatus,
-              current_job: a.current_job ?? (current ? current.position : null),
-              company: a.company ?? (current ? current.company : null),
-            };
-          }),
-        );
-      }
+      setAlumni(result.data ?? []);
       setTotalPages(result.meta?.last_page ?? 1);
     } catch {
       setError("Failed to load alumni.");
@@ -792,28 +742,17 @@ export default function StudentManagement() {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {visibleAlumni.map((alum) => {
             const user = alum.user ?? {};
-            const userId = user.id ?? alum.user_id ?? alum.userId;
-            const summary = userId ? jobSummaries[String(userId)] : null;
-
-            // Prefer jobSummaries if available (authoritative for the page)
             const currentJob =
-              summary && summary.find((j) => j.is_current)
-                ? summary.find((j) => j.is_current).position || null
-                : (alum.current_job ??
-                  alum.alumniProfile?.current_job ??
-                  alum.user?.alumniProfile?.current_job);
+              alum.current_job ??
+              alum.alumniProfile?.current_job ??
+              alum.user?.alumniProfile?.current_job;
 
             const savedEmploymentStatus =
               alum.employment_status ??
               alum.alumniProfile?.employment_status ??
-              alum.user?.alumniProfile?.employment_status;
-            const inferredEmploymentStatus =
-              savedEmploymentStatus ??
-              (summary && summary.length > 0
-                ? summary.find((j) => j.is_current)
-                  ? "employed"
-                  : "self_employed"
-                : "not_specified");
+              alum.user?.alumniProfile?.employment_status ??
+              "not_specified";
+            const inferredEmploymentStatus = savedEmploymentStatus;
 
             const company =
               alum.company ??

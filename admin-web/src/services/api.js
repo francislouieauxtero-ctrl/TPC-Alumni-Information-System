@@ -39,7 +39,7 @@ api.interceptors.response.use(
 
       if (!isAuthEndpoint) {
         localStorage.clear();
-        window.location.href = "/welcome";
+        window.location.href = "/home";
       }
     }
     return Promise.reject(error);

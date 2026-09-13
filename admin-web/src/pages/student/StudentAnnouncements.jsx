@@ -136,7 +136,7 @@ export default function StudentAnnouncements() {
                   </div>
 
                   <div className="border-t border-gray-200 pt-4">
-                    <p className="text-sm leading-7 text-gray-700 whitespace-pre-line break-words">
+                    <p className="text-sm leading-7 text-gray-700 whitespace-pre-line break-words line-clamp-4">
                       {renderTextWithLinks(announcement.content || "")}
                     </p>
                   </div>
@@ -151,6 +151,7 @@ export default function StudentAnnouncements() {
                     <img
                       src={previewImage}
                       alt={announcement.title || "Announcement"}
+                      loading="lazy"
                       className="w-full h-32 object-cover rounded-lg border border-gray-200 cursor-zoom-in"
                     />
                   </button>

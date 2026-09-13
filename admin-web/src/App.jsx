@@ -52,6 +52,10 @@ import DepartmentHeadLayout from "./layouts/DepartmentHead";
 import StudentLayout from "./layouts/StudentLayout";
 import api from "./services/api";
 import { getDashboardPath } from "./utils/roleRedirect";
+import {
+  extractAuthSession,
+  storeAuthSession,
+} from "./utils/authSession";
 import TermsAndPrivacy from "./pages/landingpage/Termsandprivacy";
 
 const queryClient = new QueryClient();
@@ -98,20 +102,13 @@ const AuthProvider = ({ children }) => {
         const token = localStorage.getItem("token");
         if (token) {
           const response = await api.get("/auth/user");
-          if (response.data.status) {
-            setUser(response.data.data);
-            localStorage.setItem("userRole", response.data.data.role);
-            localStorage.setItem("userAvatar", response.data.data.avatar || "");
-            // store department id and name for frontend scoping
-            localStorage.setItem(
-              "userDepartment",
-              response.data.data.department?.id || "",
-            );
-            localStorage.setItem(
-              "userDepartmentName",
-              response.data.data.department?.name || "",
-            );
-            localStorage.setItem("userName", response.data.data.name || "");
+          if (response.data?.status || response.data?.success) {
+            const { user: sessionUser } = extractAuthSession(response.data);
+            if (!sessionUser?.role) {
+              throw new Error("Authenticated session is missing a role");
+            }
+            setUser(sessionUser);
+            storeAuthSession(token, sessionUser);
           }
         }
       } catch (error) {

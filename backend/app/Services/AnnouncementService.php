@@ -8,6 +8,7 @@ use App\Repositories\AnnouncementRepository;
 use App\Mail\AnnouncementNotificationMail;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use App\Models\AccountActivityLog;
@@ -21,7 +22,7 @@ class AnnouncementService
         $this->announcementRepository = $announcementRepository;
     }
 
-    public function getVisibleAnnouncements(User $actor, array $filters = []): LengthAwarePaginator
+    public function getVisibleAnnouncements(User $actor, array $filters = []): LengthAwarePaginator|\Illuminate\Support\Collection
     {
         return $this->announcementRepository->allVisible($actor, $filters);
     }
@@ -33,7 +34,7 @@ class AnnouncementService
 
     public function create(User $creator, array $data): Announcement
     {
-        return DB::transaction(function () use ($creator, $data) {
+        $announcement = DB::transaction(function () use ($creator, $data) {
             $data['created_by'] = $creator->id;
 
             if ($creator->isAdmin()) {
@@ -56,11 +57,15 @@ class AnnouncementService
                 ],
             ]);
 
-            // Queue notification emails to recipients
-            $this->queueAnnouncementNotifications($announcement);
+            // Dispatch notifications strictly after transaction has successfully committed
+            DB::afterCommit(function () use ($announcement) {
+                $this->queueAnnouncementNotifications($announcement);
+            });
 
             return $announcement;
         });
+
+        return $announcement;
     }
 
     public function update(Announcement $announcement, User $actor, array $data): Announcement
@@ -136,21 +141,37 @@ class AnnouncementService
      */
     protected function queueAnnouncementNotifications(Announcement $announcement): void
     {
-        // Load creator to get name
-        $announcement->load('creator');
-        $creatorName = $announcement->creator->name;
+        try {
+            // Load creator to get name
+            $announcement->load('creator');
+            $creatorName = $announcement->creator?->name ?? 'Administrator';
 
-        $recipients = $announcement->scope === Announcement::SCOPE_DEPARTMENT_SPECIFIC
-            ? User::where('department_id', $announcement->department_id)
-                ->where('role', User::ROLE_USER)
-                ->where('status', User::STATUS_ACTIVE)
-                ->get()
-            : User::where('role', User::ROLE_USER)
-                ->where('status', User::STATUS_ACTIVE)
-                ->get();
+            $recipients = $announcement->scope === Announcement::SCOPE_DEPARTMENT_SPECIFIC
+                ? User::where('department_id', $announcement->department_id)
+                    ->where('role', User::ROLE_USER)
+                    ->where('status', User::STATUS_ACTIVE)
+                    ->get()
+                : User::where('role', User::ROLE_USER)
+                    ->where('status', User::STATUS_ACTIVE)
+                    ->get();
 
-        foreach ($recipients as $recipient) {
-            Mail::to($recipient->email)->queue(new AnnouncementNotificationMail($announcement, $recipient, $creatorName));
+            foreach ($recipients as $recipient) {
+                try {
+                    Mail::to($recipient->email)->queue(new AnnouncementNotificationMail($announcement, $recipient, $creatorName));
+                } catch (\Throwable $e) {
+                    Log::error("Failed to queue announcement notification email for recipient [{$recipient->id}] ({$recipient->email}): " . $e->getMessage(), [
+                        'announcement_id' => $announcement->id,
+                        'recipient_id' => $recipient->id,
+                        'recipient_email' => $recipient->email,
+                        'exception' => $e,
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::error("Failed to dispatch announcement notification emails: " . $e->getMessage(), [
+                'announcement_id' => $announcement->id,
+                'exception' => $e,
+            ]);
         }
     }
 }

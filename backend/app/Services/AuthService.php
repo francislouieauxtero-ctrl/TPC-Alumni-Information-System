@@ -105,30 +105,11 @@ class AuthService
     {
         $login = trim($login);
 
-        $aliases = [
-            'flor@gmail.com' => 'ieesha@gmail.com',
-            'flordelis@gmail.com' => 'ieesha@gmail.com',
-            'kean@gmail.com' => 'keanlester@gmail.com',
-            'polestico@gmail.com' => 'peterpaul@gmail.com',
-        ];
-
-        if (isset($aliases[strtolower($login)])) {
-            $login = $aliases[strtolower($login)];
-        }
-
         $user = $this->users->findByEmail($login)
-            ?? User::where('name', $login)->first()
-            ?? User::where('school_id', $login)->first();
+            ?? User::whereRaw('LOWER(name) = ?', [mb_strtolower($login)])->first()
+            ?? User::whereRaw('LOWER(CAST(school_id AS CHAR)) = ?', [mb_strtolower((string) $login)])->first();
 
-        if (! $user || ! $user->password) {
-            throw new InvalidCredentialsException();
-        }
-
-        $passwordValid = Hash::check($password, $user->password)
-            || ($password === 'password' && Hash::check('12345678', $user->password))
-            || ($password === '12345678' && Hash::check('password', $user->password));
-
-        if (! $passwordValid) {
+        if (! $user || ! $user->password || ! Hash::check($password, $user->password)) {
             throw new InvalidCredentialsException();
         }
 

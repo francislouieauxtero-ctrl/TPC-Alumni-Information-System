@@ -9,6 +9,7 @@ use App\Repositories\EventRepository;
 use App\Mail\EventNotificationMail;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
@@ -24,7 +25,7 @@ class EventService
     /**
      * Get all visible events for user
      */
-    public function getVisibleEvents(User $actor, array $filters = []): LengthAwarePaginator
+    public function getVisibleEvents(User $actor, array $filters = []): LengthAwarePaginator|\Illuminate\Support\Collection
     {
         return $this->eventRepository->allVisible($actor, $filters);
     }
@@ -50,7 +51,7 @@ class EventService
      */
     public function create(User $creator, array $data): Event
     {
-        return DB::transaction(function () use ($creator, $data) {
+        $event = DB::transaction(function () use ($creator, $data) {
             $data['created_by'] = $creator->id;
 
             if ($creator->isAdmin()) {
@@ -88,11 +89,15 @@ class EventService
                 ],
             ]);
 
-            // Queue notification emails to recipients
-            $this->queueEventNotifications($event);
+            // Dispatch notifications strictly after transaction has successfully committed
+            DB::afterCommit(function () use ($event) {
+                $this->queueEventNotifications($event);
+            });
 
             return $event;
         });
+
+        return $event;
     }
 
     /**
@@ -192,21 +197,37 @@ class EventService
      */
     protected function queueEventNotifications(Event $event): void
     {
-        // Load creator to get name
-        $event->load('creator');
-        $creatorName = $event->creator->name;
+        try {
+            // Load creator to get name
+            $event->load('creator');
+            $creatorName = $event->creator?->name ?? 'Administrator';
 
-        $recipients = $event->scope === Event::SCOPE_DEPARTMENT_SPECIFIC
-            ? User::where('department_id', $event->department_id)
-                ->where('role', User::ROLE_USER)
-                ->where('status', User::STATUS_ACTIVE)
-                ->get()
-            : User::where('role', User::ROLE_USER)
-                ->where('status', User::STATUS_ACTIVE)
-                ->get();
+            $recipients = $event->scope === Event::SCOPE_DEPARTMENT_SPECIFIC
+                ? User::where('department_id', $event->department_id)
+                    ->where('role', User::ROLE_USER)
+                    ->where('status', User::STATUS_ACTIVE)
+                    ->get()
+                : User::where('role', User::ROLE_USER)
+                    ->where('status', User::STATUS_ACTIVE)
+                    ->get();
 
-        foreach ($recipients as $recipient) {
-            Mail::to($recipient->email)->queue(new EventNotificationMail($event, $recipient, $creatorName));
+            foreach ($recipients as $recipient) {
+                try {
+                    Mail::to($recipient->email)->queue(new EventNotificationMail($event, $recipient, $creatorName));
+                } catch (\Throwable $e) {
+                    Log::error("Failed to queue event notification email for recipient [{$recipient->id}] ({$recipient->email}): " . $e->getMessage(), [
+                        'event_id' => $event->id,
+                        'recipient_id' => $recipient->id,
+                        'recipient_email' => $recipient->email,
+                        'exception' => $e,
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::error("Failed to dispatch event notification emails: " . $e->getMessage(), [
+                'event_id' => $event->id,
+                'exception' => $e,
+            ]);
         }
     }
 }

@@ -159,7 +159,7 @@ class User extends Authenticatable
         if ($actor->isAdmin()) {
             return $query
                 ->students()
-                ->where('department_id', $actor->department_id);
+                ->where('users.department_id', $actor->department_id);
         }
 
         return $query->whereKey($actor->id);

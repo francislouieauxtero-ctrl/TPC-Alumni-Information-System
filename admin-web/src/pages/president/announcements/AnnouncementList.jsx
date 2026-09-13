@@ -110,7 +110,7 @@ export default function AnnouncementList({
                   <h3 className="mb-2 break-words text-lg font-semibold text-gray-800">
                     {announcement.title}
                   </h3>
-                  <p className="max-h-32 overflow-y-auto pr-1 text-sm text-gray-600 whitespace-pre-line">
+                  <p className="text-sm text-gray-600 whitespace-pre-line line-clamp-4">
                     {renderTextWithLinks(announcement.content || "")}
                   </p>
                 </div>
@@ -166,6 +166,7 @@ export default function AnnouncementList({
                     <img
                       src={previewImage}
                       alt={announcement.title}
+                      loading="lazy"
                       className="w-full h-32 object-cover rounded-lg border border-gray-200 cursor-zoom-in"
                     />
                   </button>

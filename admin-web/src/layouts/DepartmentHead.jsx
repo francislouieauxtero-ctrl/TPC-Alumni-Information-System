@@ -32,24 +32,13 @@ export default function DepartmentHeadLayout({ children }) {
     localStorage.getItem("userAvatar") || "",
   );
   useEffect(() => {
-    const syncUser = async () => {
-      try {
-        const response = await api.get("/auth/user");
-        if (response.data.status) {
-          const user = response.data.data;
-          setDepartmentHeadName(user.name || "Department Head");
-          setDepartmentHeadEmail(user.email || "");
-          setDepartmentHeadAvatar(user.avatar || "");
-          localStorage.setItem("userName", user.name || "");
-          localStorage.setItem("userEmail", user.email || "");
-          localStorage.setItem("userAvatar", user.avatar || "");
-        }
-      } catch (err) {
-        console.error("Failed to sync user:", err);
-      }
-    };
+    const storedName = localStorage.getItem("userName");
+    const storedEmail = localStorage.getItem("userEmail");
+    const storedAvatar = localStorage.getItem("userAvatar");
 
-    syncUser();
+    if (storedName) setDepartmentHeadName(storedName);
+    if (storedEmail) setDepartmentHeadEmail(storedEmail);
+    if (storedAvatar) setDepartmentHeadAvatar(storedAvatar);
   }, []);
 
   const handleLogout = async () => {

@@ -8,9 +8,12 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class AnnouncementRepository
 {
-    public function allVisible(User $actor, array $filters = []): LengthAwarePaginator
+    public function allVisible(User $actor, array $filters = []): LengthAwarePaginator|\Illuminate\Support\Collection
     {
-        $query = Announcement::with('creator', 'department');
+        $query = Announcement::query()->with([
+            'creator:id,name,avatar',
+            'department:id,name',
+        ]);
 
         if (!$actor->isSuperAdmin()) {
             $query->where(function ($q) use ($actor) {
@@ -33,12 +36,21 @@ class AnnouncementRepository
             });
         }
 
+        if (isset($filters['limit']) && is_numeric($filters['limit']) && (int) $filters['limit'] > 0) {
+            return $query->orderBy('created_at', 'desc')
+                ->limit((int) $filters['limit'])
+                ->get();
+        }
+
         return $query->orderBy('created_at', 'desc')->paginate(15);
     }
 
     public function find(int $id): ?Announcement
     {
-        return Announcement::with('creator', 'department')->find($id);
+        return Announcement::with([
+            'creator:id,name,avatar',
+            'department:id,name',
+        ])->find($id);
     }
 
     public function create(array $data): Announcement

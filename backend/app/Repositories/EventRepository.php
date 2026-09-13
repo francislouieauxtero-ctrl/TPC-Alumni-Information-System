@@ -11,13 +11,14 @@ class EventRepository
     /**
      * Get all events visible to user
      */
-    public function allVisible(User $actor, array $filters = []): LengthAwarePaginator
+    public function allVisible(User $actor, array $filters = []): LengthAwarePaginator|\Illuminate\Support\Collection
     {
-        $query = Event::with('creator', 'department');
+        $query = Event::query()->with([
+            'creator:id,name,avatar',
+            'department:id,name',
+        ]);
 
-        // Super admin sees all
         if (!$actor->isSuperAdmin()) {
-            // Admin and users see school_wide + their department events
             if ($actor->isAdmin() || $actor->isStudent()) {
                 $query->where(function ($q) use ($actor) {
                     $q->where('scope', Event::SCOPE_SCHOOL_WIDE);
@@ -32,29 +33,31 @@ class EventRepository
             }
         }
 
-        // Filter by scope
         if (isset($filters['scope'])) {
             $query->where('scope', $filters['scope']);
         }
 
-        // Filter by department
         if (isset($filters['department_id']) && $actor->isSuperAdmin()) {
             $query->where('department_id', $filters['department_id']);
         }
 
-        // Include past events
         $includePast = $filters['include_past'] ?? false;
         if (!$includePast) {
             $query->where('event_date', '>=', now());
         }
 
-        // Search
         if (isset($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%");
             });
+        }
+
+        if (isset($filters['limit']) && is_numeric($filters['limit']) && (int) $filters['limit'] > 0) {
+            return $query->orderBy('created_at', 'desc')
+                ->limit((int) $filters['limit'])
+                ->get();
         }
 
         return $query->orderBy('created_at', 'desc')->paginate(15);
@@ -65,7 +68,10 @@ class EventRepository
      */
     public function all(array $filters = []): LengthAwarePaginator
     {
-        $query = Event::with('creator', 'department');
+        $query = Event::with([
+            'creator:id,name,avatar',
+            'department:id,name',
+        ]);
 
         if (isset($filters['department_id'])) {
             $query->where('department_id', $filters['department_id']);
@@ -87,7 +93,10 @@ class EventRepository
      */
     public function find(int $id): ?Event
     {
-        return Event::with('creator', 'department')->find($id);
+        return Event::with([
+            'creator:id,name,avatar',
+            'department:id,name',
+        ])->find($id);
     }
 
     /**

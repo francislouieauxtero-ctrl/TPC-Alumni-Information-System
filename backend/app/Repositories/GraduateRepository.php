@@ -3,7 +3,9 @@
 namespace App\Repositories;
 
 use App\Models\Graduate;
+use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class GraduateRepository
 {
@@ -12,33 +14,42 @@ class GraduateRepository
      */
     public function all(array $filters = []): LengthAwarePaginator
     {
-        $query = Graduate::query();
+        $query = Graduate::query()
+            ->select([
+                'graduates.id',
+                'graduates.department_id',
+                'graduates.student_number',
+                'graduates.name',
+                'graduates.batch_year',
+                'graduates.block',
+                'graduates.created_at',
+                'graduates.updated_at',
+            ])
+            ->addSelect([
+                DB::raw("CASE WHEN EXISTS (SELECT 1 FROM alumni_profiles WHERE alumni_profiles.graduate_id = graduates.id) OR EXISTS (SELECT 1 FROM users WHERE users.school_id = graduates.student_number AND users.role = 'user') THEN 1 ELSE 0 END AS is_registered"),
+            ]); 
 
-        // Filter by department
         if (!empty($filters['department_id'])) {
-            $query->where('department_id', $filters['department_id']);
+            $query->where('graduates.department_id', $filters['department_id']);
         }
 
-        // Filter by batch year
         if (!empty($filters['batch_year'])) {
-            $query->where('batch_year', $filters['batch_year']);
+            $query->whereRaw('LOWER(CAST(graduates.batch_year AS CHAR)) = ?', [mb_strtolower(trim((string) $filters['batch_year']))]);
         }
 
-        // Filter by block
         if (!empty($filters['block'])) {
-            $query->where('block', 'like', "%{$filters['block']}%");
+            $query->whereRaw('LOWER(CAST(graduates.block AS CHAR)) = ?', [mb_strtolower(trim((string) $filters['block']))]);
         }
 
-        // Search by name or student number
         if (!empty($filters['search'])) {
-            $search = $filters['search'];
+            $search = trim((string) $filters['search']);
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('student_number', 'like', "%{$search}%");
+                $q->where('graduates.name', 'like', "%{$search}%")
+                    ->orWhere('graduates.student_number', 'like', "%{$search}%");
             });
         }
 
-        return $query->with('department')->orderBy('created_at', 'desc')->paginate(20);
+        return $query->with(['department:id,name'])->orderBy('graduates.created_at', 'desc')->paginate(20);
     }
 
     /**

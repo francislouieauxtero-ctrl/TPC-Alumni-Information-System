@@ -4,7 +4,6 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Models\JobHistory;
 
 class AlumniProfileResource extends JsonResource
 {
@@ -22,6 +21,24 @@ class AlumniProfileResource extends JsonResource
             $photo = '/storage/' . $clean;
         }
 
+        $currentJob = $this->current_job;
+        $company = $this->company;
+        $jobHistories = $this->relationLoaded('user') && $this->user && $this->user->relationLoaded('jobHistories')
+            ? $this->user->jobHistories
+            : collect();
+
+        if (empty($currentJob) || empty($company)) {
+            $currentEntry = $jobHistories->first(fn ($job) => (bool) $job->is_current) ?? $jobHistories->first();
+            if (!empty($currentEntry)) {
+                $currentJob = $currentJob ?: $currentEntry->position;
+                $company = $company ?: $currentEntry->company;
+            }
+        }
+
+        $hasJobHistory = $this->relationLoaded('user') && $this->user
+            ? ($this->user->job_histories_exists ?? $jobHistories->isNotEmpty())
+            : false;
+
         return [
             'id'                  => $this->id,
             'user_id'             => $this->user_id,
@@ -35,11 +52,11 @@ class AlumniProfileResource extends JsonResource
             'contact_number'      => $this->contact_number,
             'location'            => $this->location,
             'profile_photo_url'   => $photo ?: null,
-            'current_job'         => $this->current_job ?: ($this->employment_status === \App\Models\AlumniProfile::STATUS_NOT_SPECIFIED ? 'Not Specified' : null),
-            'company'             => $this->company,
+            'current_job'         => $currentJob ?: ($this->employment_status === \App\Models\AlumniProfile::STATUS_NOT_SPECIFIED ? 'Not Specified' : null),
+            'company'             => $company,
             'batch_year'          => $this->batch_year,
             'employment_status'   => $this->employment_status ?: \App\Models\AlumniProfile::STATUS_NOT_SPECIFIED,
-            'has_job_history'     => (bool) JobHistory::where('user_id', $this->user_id)->exists(),
+            'has_job_history'     => $hasJobHistory,
 
             // ─── Work Alignment ───────────────────────────────────────────────
             // null  = alumni has not answered the question yet

@@ -10,6 +10,7 @@ use App\Http\Requests\GoogleRegisterRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Requests\RegisterStudentRequest;
+use App\Http\Resources\AuthSessionResource;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Notifications\ResetPasswordNotification;
@@ -49,7 +50,13 @@ class AuthController extends Controller
 
     public function user(): JsonResponse
     {
-        return $this->success('Success', new UserResource(auth()->user()->load('department')));
+        $user = auth()->user();
+
+        if (! $user) {
+            return $this->error('Unauthorized', 401);
+        }
+
+        return $this->success('Success', new AuthSessionResource($user));
     }
 
     public function logout(): JsonResponse
@@ -129,7 +136,7 @@ class AuthController extends Controller
     {
         return $this->success($message, [
             'token' => $this->authService->issueToken($user),
-            'user' => new UserResource($user->load('department')),
+            'user' => new AuthSessionResource($user),
         ]);
     }
 }

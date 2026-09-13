@@ -264,8 +264,10 @@ class AuthFlowTest extends TestCase
                     'token',
                     'user' => [
                         'id',
-                        'email',
+                        'name',
                         'role',
+                        'departmentId',
+                        'schoolId',
                     ],
                 ],
             ]);
@@ -279,7 +281,8 @@ class AuthFlowTest extends TestCase
             ->assertJson([
                 'status' => true,
                 'data' => [
-                    'email' => 'student@example.com',
+                    'id' => $student->id,
+                    'name' => $student->name,
                     'role' => User::ROLE_USER,
                     'departmentId' => $department->id,
                     'schoolId' => 'STU20240002',

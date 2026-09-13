@@ -176,7 +176,7 @@ export default function StudentEvents() {
                 </div>
 
                 <div className="border-t border-gray-200 pt-4">
-                  <p className="text-sm leading-7 text-gray-700 whitespace-pre-line break-words">
+                  <p className="text-sm leading-7 text-gray-700 whitespace-pre-line break-words line-clamp-4">
                     {renderTextWithLinks(
                       event.description || "No description available.",
                     )}
@@ -186,7 +186,7 @@ export default function StudentEvents() {
 
               {getAttachmentUrls(event).length > 0 && (
                 <div className="grid gap-3 px-5 pb-5 sm:grid-cols-2 sm:px-6 sm:pb-6 lg:grid-cols-3">
-                  {getAttachmentUrls(event).map((image, index) => {
+                  {getAttachmentUrls(event).slice(0, 2).map((image, index) => {
                     const isImage = /\.(jpg|jpeg|png|webp|gif)$/i.test(image);
                     const isVideo = /\.(mp4|webm|mov|avi)$/i.test(image);
 
@@ -201,6 +201,7 @@ export default function StudentEvents() {
                           <img
                             src={image}
                             alt={`${event.title || "Event"} ${index + 1}`}
+                            loading="lazy"
                             className="h-40 w-full rounded-xl object-cover border border-gray-200 hover:shadow-lg transition cursor-zoom-in"
                           />
                         </button>

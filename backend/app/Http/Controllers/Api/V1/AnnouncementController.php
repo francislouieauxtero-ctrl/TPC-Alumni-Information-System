@@ -22,7 +22,7 @@ class AnnouncementController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $filters = request()->only(['search', 'page']);
+            $filters = request()->only(['search', 'page', 'limit']);
             $announcements = $this->announcementService->getVisibleAnnouncements(auth()->user(), $filters);
 
             return $this->successResponse(

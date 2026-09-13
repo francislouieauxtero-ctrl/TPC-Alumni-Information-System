@@ -24,6 +24,7 @@ class Graduate extends Model
     {
         return [
             'batch_year' => 'string',
+            'is_registered' => 'boolean',
         ];
     }
 
@@ -47,6 +48,10 @@ class Graduate extends Model
      */
     public function isRegistered(): bool
     {
+        if (array_key_exists('is_registered', $this->attributes)) {
+            return (bool) $this->attributes['is_registered'];
+        }
+
         return $this->alumniProfile()->exists()
             || User::where('school_id', $this->student_number)->where('role', User::ROLE_USER)->exists();
     }
@@ -56,6 +61,10 @@ class Graduate extends Model
      */
     public function getRegistrationStatusAttribute(): string
     {
+        if (array_key_exists('is_registered', $this->attributes)) {
+            return (bool) $this->attributes['is_registered'] ? 'registered' : 'not_registered';
+        }
+
         return $this->isRegistered() ? 'registered' : 'not_registered';
     }
 }
