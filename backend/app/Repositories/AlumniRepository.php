@@ -22,7 +22,10 @@ class AlumniRepository
                         ->withExists('jobHistories');
                 },
                 'department:id,name',
-                'graduate:id,student_number,batch_year,block',
+                'graduate' => function ($query) {
+                    $query->select('id', 'student_number', 'batch_year', 'block')
+                        ->selectRaw('EXISTS(SELECT 1 FROM alumni_profiles WHERE alumni_profiles.graduate_id = graduates.id) as is_registered');
+                },
             ])
             ->whereHas('user', function ($q) {
                 $q->where('is_verified', true);
@@ -204,13 +207,18 @@ class AlumniRepository
             ->where('department_id', $departmentId)
             ->employed()
             ->with([
-                'user:id,name,email',
+                'user:id,name,email,school_id',
                 'department:id,name',
+                'graduate' => function ($query) {
+                    $query->select('id', 'student_number')
+                        ->selectRaw('EXISTS(SELECT 1 FROM alumni_profiles WHERE alumni_profiles.graduate_id = graduates.id) as is_registered');
+                },
             ])
             ->select([
                 'id',
                 'user_id',
                 'department_id',
+                'graduate_id',
                 'current_job',
                 'company',
                 'employment_status',

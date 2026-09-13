@@ -373,7 +373,7 @@ public function deactivateDepartmentHead(Request $request, int $id): JsonRespons
         try {
             $query = $this->users->students()
                 ->visibleTo($request->user())
-                ->with(['department', 'alumniProfile']);
+                ->with(['department:id,name', 'alumniProfile.graduate:id,student_number']);
 
             if ($request->has('verified')) {
                 $query->where('is_verified', $request->boolean('verified'));

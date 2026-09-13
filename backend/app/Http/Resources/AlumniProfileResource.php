@@ -39,6 +39,9 @@ class AlumniProfileResource extends JsonResource
             ? ($this->user->job_histories_exists ?? $jobHistories->isNotEmpty())
             : false;
 
+        $graduate = $this->relationLoaded('graduate') ? $this->graduate : null;
+        $user = $this->relationLoaded('user') ? $this->user : null;
+
         return [
             'id'                  => $this->id,
             'user_id'             => $this->user_id,
@@ -47,8 +50,8 @@ class AlumniProfileResource extends JsonResource
             'department'          => new DepartmentResource($this->whenLoaded('department')),
             'graduate_id'         => $this->graduate_id,
             'graduate'            => new GraduateResource($this->whenLoaded('graduate')),
-            'student_number'      => $this->graduate?->student_number ?? $this->user?->school_id,
-            'school_id'           => $this->user?->school_id ?? $this->graduate?->student_number,
+            'student_number'      => $graduate?->student_number ?? $user?->school_id,
+            'school_id'           => $user?->school_id ?? $graduate?->student_number,
             'contact_number'      => $this->contact_number,
             'location'            => $this->location,
             'profile_photo_url'   => $photo ?: null,
