@@ -609,10 +609,10 @@ export default function StudentManagement() {
   };
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="mb-2 text-4xl font-bold text-gray-900">Alumni</h1>
-        <p className="text-gray-500">
+    <div className="space-y-6">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="mb-1 text-2xl sm:text-3xl font-bold text-gray-900">Alumni</h1>
+        <p className="text-sm sm:text-base text-gray-500">
           Browse and manage all approved alumni records
         </p>
       </div>

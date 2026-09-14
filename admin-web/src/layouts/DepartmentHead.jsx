@@ -114,18 +114,20 @@ export default function DepartmentHeadLayout({ children }) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 flex flex-col gap-1 py-5">
+        <nav className="flex-1 flex flex-col gap-1 py-5 overflow-y-auto">
           <NavLink
             to="/department-head/dashboard"
             icon={<Home className="w-5 h-5" />}
             label="Dashboard"
             sidebarOpen={sidebarOpen}
+            onNavigate={() => setMobileMenuOpen(false)}
           />
           <NavLink
             to="/department-head/graduates"
             icon={<GraduationCap className="w-5 h-5" />}
             label="Graduates"
             sidebarOpen={sidebarOpen}
+            onNavigate={() => setMobileMenuOpen(false)}
           />
 
           <NavLink
@@ -133,30 +135,35 @@ export default function DepartmentHeadLayout({ children }) {
             icon={<UserCheck className="w-5 h-5" />}
             label="Alumni"
             sidebarOpen={sidebarOpen}
+            onNavigate={() => setMobileMenuOpen(false)}
           />
           <NavLink
             to="/department-head/events"
             icon={<CalendarDays className="w-5 h-5" />}
             label="Events"
             sidebarOpen={sidebarOpen}
+            onNavigate={() => setMobileMenuOpen(false)}
           />
           <NavLink
             to="/department-head/announcements"
             icon={<Megaphone className="w-5 h-5" />}
             label="Announcements"
             sidebarOpen={sidebarOpen}
+            onNavigate={() => setMobileMenuOpen(false)}
           />
           <NavLink
             to="/department-head/analytics"
             icon={<BarChart3 className="w-5 h-5" />}
             label="Analytics"
             sidebarOpen={sidebarOpen}
+            onNavigate={() => setMobileMenuOpen(false)}
           />
           <NavLink
             to="/department-head/profile"
             icon={<User className="w-5 h-5" />}
             label="My Profile"
             sidebarOpen={sidebarOpen}
+            onNavigate={() => setMobileMenuOpen(false)}
           />
         </nav>
 
@@ -222,42 +229,45 @@ export default function DepartmentHeadLayout({ children }) {
       {/* Main Content */}
       <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <div className="bg-white border-b border-gray-200 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="min-[850px]:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            className="min-[850px]:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors shrink-0"
             aria-label="Open menu"
           >
             <Menu className="w-6 h-6" />
           </button>
-          <div className="flex items-center gap-4 ml-auto">
-            <span className="text-gray-500 text-sm font-medium">
+          <div className="flex items-center gap-3 sm:gap-4 ml-auto min-w-0">
+            <span className="text-gray-500 text-xs sm:text-sm font-medium truncate max-w-[150px] sm:max-w-none">
               Welcome, {departmentHeadName}!
             </span>
             <UserAvatar
               name={departmentHeadName}
               avatar={departmentHeadAvatar}
               size="sm"
-              className="bg-tpc-greenDeep"
+              className="bg-tpc-greenDeep shrink-0"
             />
           </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-auto bg-white p-6">{children}</div>
+        <div className="flex-1 overflow-auto bg-white p-3 sm:p-4 md:p-6 min-w-0">{children}</div>
       </div>
     </div>
   );
 }
 
-function NavLink({ to, icon, label, sidebarOpen }) {
+function NavLink({ to, icon, label, sidebarOpen, onNavigate }) {
   const navigate = useNavigate();
   const location = useLocation();
   const isActive = location.pathname === to;
 
   return (
     <button
-      onClick={() => navigate(to)}
+      onClick={() => {
+        navigate(to);
+        if (onNavigate) onNavigate();
+      }}
       className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
         isActive
           ? "bg-white/20 text-white"

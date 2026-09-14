@@ -108,8 +108,8 @@ export default function GraduateEdit() {
         </button>
       </div>
 
-      <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Edit Graduate</h1>
+      <div className="bg-white p-4 sm:p-6 md:p-8 rounded-xl shadow-sm border border-gray-200">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6">Edit Graduate</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Department */}
