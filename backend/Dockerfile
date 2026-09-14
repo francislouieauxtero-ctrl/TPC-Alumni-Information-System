@@ -30,6 +30,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Download Let's Encrypt ISRG Root X1 CA certificate for TiDB Cloud Serverless TLS
+RUN curl -fsSL https://letsencrypt.org/certs/isrgrootx1.pem -o /etc/ssl/certs/tidb-ca.pem \
+    && chmod 644 /etc/ssl/certs/tidb-ca.pem
+
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 

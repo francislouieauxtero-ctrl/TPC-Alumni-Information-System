@@ -1,6 +1,6 @@
 # TPC Alumni Information System - Deployment Guide (Railway + TiDB Cloud)
 
-This guide walks you step-by-step through deploying the **TPC Alumni Information and Career Management System** to **Railway** using a free MySQL-compatible database on **TiDB Cloud**.
+This guide walks you step-by-step through deploying the **TPC Alumni Information and Career Management System** to **Railway** using the MySQL-compatible Serverless database on **TiDB Cloud**.
 
 ---
 
@@ -8,29 +8,25 @@ This guide walks you step-by-step through deploying the **TPC Alumni Information
 
 - **Backend API Service**: Laravel 12 (`/backend`) running in a production Docker container (PHP 8.3 + Nginx).
 - **Frontend SPA Service**: Vite + React 19 (`/admin-web`) served with lightweight Nginx.
-- **Database**: TiDB Cloud Serverless (MySQL 8.0 compatible with TLS/SSL encryption).
+- **Database**: TiDB Cloud Serverless (MySQL 8.0 compatible with TLS/SSL encryption via bundled Let's Encrypt ISRG Root X1 CA).
 - **Source Repository**: Connected to GitHub repository `francislouieauxtero-ctrl/TPC-Alumni-Information-System`.
 
 ---
 
-## Step 1: Set Up Database on TiDB Cloud
+## Step 1: TiDB Cloud Database Connection Details
 
-1. Go to [https://tidbcloud.com](https://tidbcloud.com) and log in or create a free account.
-2. Click **Create Cluster** and select **Serverless** (Free tier).
-3. Choose your preferred cloud provider and region (e.g. AWS / Singapore `ap-southeast-1` or closest to you).
-4. Set a strong password for the `root` user and click **Create**.
-5. Once your cluster is ready, click **Connect**:
-   - Note down the connection parameters:
-     - **Host**: e.g., `gateway01.ap-southeast-1.prod.aws.tidbcloud.com`
-     - **Port**: `4000`
-     - **User**: e.g., `xxxxxxxx.root`
-     - **Password**: `your_tidb_password`
-     - **Database**: `tpc_alumni_db` (or create this database in TiDB Cloud SQL editor)
+Your TiDB Cloud connection details:
+- **Host**: `gateway01.ap-southeast-1.prod.aws.tidbcloud.com`
+- **Port**: `4000`
+- **Database**: `tpc_alumni`
+- **Username**: `3AmsX7WPRGu2Rdb.root`
+- **Password**: *(Enter manually in Railway Dashboard — never commit to code)*
+- **SSL Certificate Path**: `/etc/ssl/certs/tidb-ca.pem` *(automatically bundled into the Docker image)*
 
 ### (Optional) Manual Schema Import
 If you wish to import the clean schema directly from the TiDB Cloud web console SQL editor:
-- Open `database-backup/clean_schema.sql` in VS Code.
-- Copy the entire SQL content and paste it into the TiDB Cloud SQL Editor, then execute it.
+1. Open `database-backup/clean_schema.sql` in VS Code.
+2. Copy the entire SQL content and paste it into the TiDB Cloud SQL Editor, then execute it.
 *(Alternatively, the Laravel backend container will automatically run `php artisan migrate` on startup!)*
 
 ---
@@ -40,26 +36,26 @@ If you wish to import the clean schema directly from the TiDB Cloud web console 
 1. Go to [https://railway.com](https://railway.com) and sign in with GitHub.
 2. Click **New Project** > **Deploy from GitHub repo**.
 3. Select `francislouieauxtero-ctrl/TPC-Alumni-Information-System`.
-4. After creating the project, click on the newly created service and go to **Settings**:
+4. Click on the created service and go to **Settings**:
    - **Service Name**: Change to `tpc-backend`
    - **Root Directory**: Set to `/backend`
    - **Build**: Ensure Builder is set to **Dockerfile** (uses `/backend/Dockerfile`)
-5. Go to the **Variables** tab and add the following environment variables:
+5. Go to the **Variables** tab and configure:
 
 | Variable Name | Value | Description |
 |---|---|---|
 | `APP_NAME` | `TPC Alumni System` | Application Name |
 | `APP_ENV` | `production` | Production environment |
-| `APP_KEY` | *(Generate a 32-character key or copy from your `.env`)* | Laravel encryption key |
+| `APP_KEY` | *(Generate a 32-char key or copy from local `.env`)* | Laravel encryption key |
 | `APP_DEBUG` | `false` | Disable debug mode in production |
 | `APP_URL` | `https://${{RAILWAY_PUBLIC_DOMAIN}}` | Backend public URL |
 | `DB_CONNECTION` | `mysql` | MySQL connection driver |
-| `DB_HOST` | `<your-tidb-cluster-host>` | e.g. `gateway01.ap-southeast-1.prod.aws.tidbcloud.com` |
-| `DB_PORT` | `4000` | TiDB port |
-| `DB_DATABASE` | `tpc_alumni_db` | Database name |
-| `DB_USERNAME` | `<your-tidb-username>` | TiDB user |
-| `DB_PASSWORD` | `<your-tidb-password>` | TiDB password |
-| `MYSQL_ATTR_SSL_CA` | `/etc/ssl/certs/ca-certificates.crt` | System CA cert for TiDB SSL |
+| `DB_HOST` | `gateway01.ap-southeast-1.prod.aws.tidbcloud.com` | TiDB Cloud endpoint |
+| `DB_PORT` | `4000` | TiDB Cloud port |
+| `DB_DATABASE` | `tpc_alumni` | TiDB database name |
+| `DB_USERNAME` | `3AmsX7WPRGu2Rdb.root` | TiDB username |
+| `DB_PASSWORD` | `<your-tidb-password>` | Set directly as Railway secret |
+| `MYSQL_ATTR_SSL_CA` | `/etc/ssl/certs/tidb-ca.pem` | Bundled ISRG Root X1 CA cert |
 | `SESSION_DRIVER` | `database` | Store sessions in DB |
 | `CACHE_STORE` | `database` | Store cache in DB |
 | `QUEUE_CONNECTION` | `database` | Process queue jobs in DB |
@@ -67,7 +63,7 @@ If you wish to import the clean schema directly from the TiDB Cloud web console 
 | `SUPER_ADMIN_EMAIL` | `<your-email-address>` | Email for default Super Admin |
 | `SUPER_ADMIN_PASSWORD` | `<your-secure-admin-password>` | Password for default Super Admin |
 | `RUN_MIGRATIONS` | `true` | Runs migrations on deploy |
-| `RUN_SEEDER` | `true` | Seeds Super Admin using env variables above |
+| `RUN_SEEDER` | `true` | Seeds Super Admin using env variables |
 | `FRONTEND_URL` | *(Will be updated after Step 3 with frontend domain)* | Frontend URL |
 | `CORS_ALLOWED_ORIGINS` | *(Will be updated after Step 3 with frontend domain)* | Allowed origins |
 | `SANCTUM_STATEFUL_DOMAINS` | *(Will be updated after Step 3 with frontend domain)* | Sanctum domains |

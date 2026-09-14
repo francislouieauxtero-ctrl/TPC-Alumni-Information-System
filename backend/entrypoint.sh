@@ -31,6 +31,19 @@ php artisan config:clear || true
 php artisan route:clear || true
 php artisan view:clear || true
 
+# Verify TiDB TLS/SSL CA certificate if MYSQL_ATTR_SSL_CA is configured
+if [ -n "$MYSQL_ATTR_SSL_CA" ]; then
+    if [ ! -f "$MYSQL_ATTR_SSL_CA" ]; then
+        echo "================================================================================" >&2
+        echo "ERROR: TiDB Cloud SSL CA certificate not found at '$MYSQL_ATTR_SSL_CA'!" >&2
+        echo "Please ensure the certificate is bundled at /etc/ssl/certs/tidb-ca.pem" >&2
+        echo "or set MYSQL_ATTR_SSL_CA to a valid certificate path." >&2
+        echo "================================================================================" >&2
+        exit 1
+    fi
+    echo "==> Verified TiDB TLS/SSL CA certificate at: $MYSQL_ATTR_SSL_CA"
+fi
+
 # Check if migrations should run (defaults to true if DB_HOST is set, can be disabled with RUN_MIGRATIONS=false)
 RUN_MIGRATIONS=${RUN_MIGRATIONS:-true}
 if [ "$RUN_MIGRATIONS" = "true" ] && [ -n "$DB_HOST" ] && [ "$DB_HOST" != "127.0.0.1" ]; then
