@@ -98,6 +98,11 @@ class JobHistoryController extends Controller
     public function forUser(User $user): JsonResponse
     {
         try {
+            $actor = auth()->user();
+            if ($actor->isAdmin() && !$actor->isSuperAdmin() && (int) $actor->department_id !== (int) $user->department_id) {
+                return $this->errorResponse('Unauthorized to view employment history for this student', 403);
+            }
+
             $jobHistories = $this->jobHistoryService->getForUser($user);
 
             return $this->successResponse(

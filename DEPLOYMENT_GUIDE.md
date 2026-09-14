@@ -16,10 +16,10 @@ This guide walks you step-by-step through deploying the **TPC Alumni Information
 ## Step 1: TiDB Cloud Database Connection Details
 
 Your TiDB Cloud connection details:
-- **Host**: `gateway01.ap-southeast-1.prod.aws.tidbcloud.com`
+- **Host**: `<your-tidb-host>.prod.aws.tidbcloud.com`
 - **Port**: `4000`
 - **Database**: `tpc_alumni`
-- **Username**: `3AmsX7WPRGu2Rdb.root`
+- **Username**: `<your-tidb-username>`
 - **Password**: *(Enter manually in Railway Dashboard — never commit to code)*
 - **SSL Certificate Path**: `/etc/ssl/certs/tidb-ca.pem` *(automatically bundled into the Docker image)*
 
@@ -50,10 +50,10 @@ If you wish to import the clean schema directly from the TiDB Cloud web console 
 | `APP_DEBUG` | `false` | Disable debug mode in production |
 | `APP_URL` | `https://${{RAILWAY_PUBLIC_DOMAIN}}` | Backend public URL |
 | `DB_CONNECTION` | `mysql` | MySQL connection driver |
-| `DB_HOST` | `gateway01.ap-southeast-1.prod.aws.tidbcloud.com` | TiDB Cloud endpoint |
+| `DB_HOST` | `<your-tidb-endpoint>` | TiDB Cloud endpoint |
 | `DB_PORT` | `4000` | TiDB Cloud port |
 | `DB_DATABASE` | `tpc_alumni` | TiDB database name |
-| `DB_USERNAME` | `3AmsX7WPRGu2Rdb.root` | TiDB username |
+| `DB_USERNAME` | `<your-tidb-username>` | TiDB username |
 | `DB_PASSWORD` | `<your-tidb-password>` | Set directly as Railway secret |
 | `MYSQL_ATTR_SSL_CA` | `/etc/ssl/certs/tidb-ca.pem` | Bundled ISRG Root X1 CA cert |
 | `SESSION_DRIVER` | `database` | Store sessions in DB |

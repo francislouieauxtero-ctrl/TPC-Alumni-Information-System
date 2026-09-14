@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Repositories\UserRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Mail;
 
@@ -56,105 +57,104 @@ class AdminController extends Controller
                 ->when($requestedDept, fn ($query) => $query->where('department_id', $requestedDept))
                 ->when($requestedBatch, fn ($query) => $query->where('batch_year', $requestedBatch));
 
-            $userStats = (clone $studentsQuery)
-                ->selectRaw(
-                    'COUNT(*) as total_students, ' .
-                    'SUM(CASE WHEN is_verified = 1 THEN 1 ELSE 0 END) as verified_students, ' .
-                    'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as active_students, ' .
-                    'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as inactive_students',
-                    [User::STATUS_ACTIVE, User::STATUS_INACTIVE]
-                )
-                ->first();
+            $cacheKey = 'dash_stats_' . $actor->id . '_' . ($requestedDept ?? 'all') . '_' . ($requestedBatch ?? 'all');
+            $stats = Cache::remember($cacheKey, 30, function () use ($studentsQuery, $alumniQuery, $graduatesQuery, $departmentHeads, $requestedDept) {
+                $userStats = (clone $studentsQuery)
+                    ->selectRaw(
+                        'COUNT(*) as total_students, ' .
+                        'SUM(CASE WHEN is_verified = 1 THEN 1 ELSE 0 END) as verified_students, ' .
+                        'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as active_students, ' .
+                        'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as inactive_students',
+                        [User::STATUS_ACTIVE, User::STATUS_INACTIVE]
+                    )
+                    ->first();
 
-            $employmentStats = (clone $alumniQuery)
-                ->selectRaw(
-                    'SUM(CASE WHEN employment_status = ? THEN 1 ELSE 0 END) as employed_alumni, ' .
-                    'SUM(CASE WHEN employment_status = ? THEN 1 ELSE 0 END) as self_employed_alumni, ' .
-                    'SUM(CASE WHEN employment_status = ? THEN 1 ELSE 0 END) as unemployed_alumni, ' .
-                    'SUM(CASE WHEN employment_status = ? THEN 1 ELSE 0 END) as not_specified_alumni',
-                    [
-                        AlumniProfile::STATUS_EMPLOYED,
-                        AlumniProfile::STATUS_SELF_EMPLOYED,
-                        AlumniProfile::STATUS_UNEMPLOYED,
-                        AlumniProfile::STATUS_NOT_SPECIFIED,
-                    ]
-                )
-                ->first();
+                $employmentStats = (clone $alumniQuery)
+                    ->selectRaw(
+                        'SUM(CASE WHEN employment_status = ? THEN 1 ELSE 0 END) as employed_alumni, ' .
+                        'SUM(CASE WHEN employment_status = ? THEN 1 ELSE 0 END) as self_employed_alumni, ' .
+                        'SUM(CASE WHEN employment_status = ? THEN 1 ELSE 0 END) as unemployed_alumni, ' .
+                        'SUM(CASE WHEN employment_status = ? THEN 1 ELSE 0 END) as not_specified_alumni',
+                        [
+                            AlumniProfile::STATUS_EMPLOYED,
+                            AlumniProfile::STATUS_SELF_EMPLOYED,
+                            AlumniProfile::STATUS_UNEMPLOYED,
+                            AlumniProfile::STATUS_NOT_SPECIFIED,
+                        ]
+                    )
+                    ->first();
 
-            $graduatesQuery = Graduate::query()
-                ->when($requestedDept, fn ($query) => $query->where('graduates.department_id', $requestedDept))
-                ->when($requestedBatch, fn ($query) => $query->where('graduates.batch_year', $requestedBatch));
+                $graduatesStats = (clone $graduatesQuery)
+                    ->leftJoin('alumni_profiles', 'alumni_profiles.graduate_id', '=', 'graduates.id')
+                    ->selectRaw(
+                        'COUNT(*) as total_graduates, ' .
+                        'SUM(CASE WHEN alumni_profiles.id IS NULL THEN 1 ELSE 0 END) as not_registered_graduates'
+                    )
+                    ->first();
 
-            $graduatesStats = (clone $graduatesQuery)
-                ->leftJoin('alumni_profiles', 'alumni_profiles.graduate_id', '=', 'graduates.id')
-                ->selectRaw(
-                    'COUNT(*) as total_graduates, ' .
-                    'SUM(CASE WHEN alumni_profiles.id IS NULL THEN 1 ELSE 0 END) as not_registered_graduates'
-                )
-                ->first();
+                $graduatesByYear = (clone $graduatesQuery)
+                    ->selectRaw('batch_year, COUNT(*) as cnt')
+                    ->groupBy('batch_year')
+                    ->pluck('cnt', 'batch_year')
+                    ->toArray();
 
-            $graduatesByYear = (clone $graduatesQuery)
-                ->selectRaw('batch_year, COUNT(*) as cnt')
-                ->groupBy('batch_year')
-                ->pluck('cnt', 'batch_year')
-                ->toArray();
+                $departmentCounts = (clone $studentsQuery)
+                    ->leftJoin('alumni_profiles', 'alumni_profiles.user_id', '=', 'users.id')
+                    ->leftJoin('departments as user_departments', 'user_departments.id', '=', 'users.department_id')
+                    ->leftJoin('departments as alumni_department_names', 'alumni_department_names.id', '=', 'alumni_profiles.department_id')
+                    ->selectRaw('COALESCE(user_departments.name, alumni_department_names.name) as department_name, COUNT(*) as total')
+                    ->groupBy('department_name')
+                    ->pluck('total', 'department_name')
+                    ->toArray();
 
-            $departmentCounts = (clone $studentsQuery)
-                ->leftJoin('alumni_profiles', 'alumni_profiles.user_id', '=', 'users.id')
-                ->leftJoin('departments as user_departments', 'user_departments.id', '=', 'users.department_id')
-                ->leftJoin('departments as alumni_department_names', 'alumni_department_names.id', '=', 'alumni_profiles.department_id')
-                ->selectRaw('COALESCE(user_departments.name, alumni_department_names.name) as department_name, COUNT(*) as total')
-                ->groupBy('department_name')
-                ->pluck('total', 'department_name')
-                ->toArray();
+                $allDepartments = Department::query()
+                    ->when($requestedDept, fn ($query) => $query->whereKey($requestedDept))
+                    ->pluck('name')
+                    ->all();
 
-            $allDepartments = Department::query()
-                ->when($requestedDept, fn ($query) => $query->whereKey($requestedDept))
-                ->pluck('name')
-                ->all();
+                $byDepartment = [];
+                foreach ($allDepartments as $departmentName) {
+                    $byDepartment[$departmentName] = (int) ($departmentCounts[$departmentName] ?? 0);
+                }
 
-            $byDepartment = [];
-            foreach ($allDepartments as $departmentName) {
-                $byDepartment[$departmentName] = (int) ($departmentCounts[$departmentName] ?? 0);
-            }
+                if (empty($byDepartment) && ! empty($departmentCounts)) {
+                    $byDepartment = array_map('intval', $departmentCounts);
+                }
 
-            if (empty($byDepartment) && ! empty($departmentCounts)) {
-                $byDepartment = array_map('intval', $departmentCounts);
-            }
+                $departmentHeadStats = (clone $departmentHeads)
+                    ->selectRaw(
+                        'COUNT(*) as total_department_heads, ' .
+                        'SUM(CASE WHEN is_verified = 1 THEN 1 ELSE 0 END) as verified_department_heads, ' .
+                        'SUM(CASE WHEN is_verified = 0 THEN 1 ELSE 0 END) as unverified_department_heads, ' .
+                        'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as active_department_heads, ' .
+                        'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as inactive_department_heads',
+                        [User::STATUS_ACTIVE, User::STATUS_INACTIVE]
+                    )
+                    ->first();
 
-            $departmentHeadStats = (clone $departmentHeads)
-                ->selectRaw(
-                    'COUNT(*) as total_department_heads, ' .
-                    'SUM(CASE WHEN is_verified = 1 THEN 1 ELSE 0 END) as verified_department_heads, ' .
-                    'SUM(CASE WHEN is_verified = 0 THEN 1 ELSE 0 END) as unverified_department_heads, ' .
-                    'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as active_department_heads, ' .
-                    'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as inactive_department_heads',
-                    [User::STATUS_ACTIVE, User::STATUS_INACTIVE]
-                )
-                ->first();
-
-            $stats = [
-                'total_students' => (int) ($userStats->total_students ?? 0),
-                'verified_students' => (int) ($userStats->verified_students ?? 0),
-                'unverified_students' => 0,
-                'active_students' => (int) ($userStats->active_students ?? 0),
-                'inactive_students' => (int) ($userStats->inactive_students ?? 0),
-                'registered_alumni' => (int) (($graduatesStats->total_graduates ?? 0) - ($graduatesStats->not_registered_graduates ?? 0)),
-                'not_registered_graduates' => (int) ($graduatesStats->not_registered_graduates ?? 0),
-                'employed_alumni' => (int) ($employmentStats->employed_alumni ?? 0),
-                'self_employed_alumni' => (int) ($employmentStats->self_employed_alumni ?? 0),
-                'unemployed_alumni' => (int) ($employmentStats->unemployed_alumni ?? 0),
-                'not_specified_alumni' => (int) ($employmentStats->not_specified_alumni ?? 0),
-                'total_department_heads' => (int) ($departmentHeadStats->total_department_heads ?? 0),
-                'verified_department_heads' => (int) ($departmentHeadStats->verified_department_heads ?? 0),
-                'unverified_department_heads' => (int) ($departmentHeadStats->unverified_department_heads ?? 0),
-                'active_department_heads' => (int) ($departmentHeadStats->active_department_heads ?? 0),
-                'inactive_department_heads' => (int) ($departmentHeadStats->inactive_department_heads ?? 0),
-                'graduates_by_year' => $graduatesByYear,
-                'by_department' => $byDepartment,
-                'total_graduates' => (int) ($graduatesStats->total_graduates ?? 0),
-                'total_departments' => count($allDepartments),
-            ];
+                return [
+                    'total_students' => (int) ($userStats->total_students ?? 0),
+                    'verified_students' => (int) ($userStats->verified_students ?? 0),
+                    'unverified_students' => 0,
+                    'active_students' => (int) ($userStats->active_students ?? 0),
+                    'inactive_students' => (int) ($userStats->inactive_students ?? 0),
+                    'registered_alumni' => (int) (($graduatesStats->total_graduates ?? 0) - ($graduatesStats->not_registered_graduates ?? 0)),
+                    'not_registered_graduates' => (int) ($graduatesStats->not_registered_graduates ?? 0),
+                    'employed_alumni' => (int) ($employmentStats->employed_alumni ?? 0),
+                    'self_employed_alumni' => (int) ($employmentStats->self_employed_alumni ?? 0),
+                    'unemployed_alumni' => (int) ($employmentStats->unemployed_alumni ?? 0),
+                    'not_specified_alumni' => (int) ($employmentStats->not_specified_alumni ?? 0),
+                    'total_department_heads' => (int) ($departmentHeadStats->total_department_heads ?? 0),
+                    'verified_department_heads' => (int) ($departmentHeadStats->verified_department_heads ?? 0),
+                    'unverified_department_heads' => (int) ($departmentHeadStats->unverified_department_heads ?? 0),
+                    'active_department_heads' => (int) ($departmentHeadStats->active_department_heads ?? 0),
+                    'inactive_department_heads' => (int) ($departmentHeadStats->inactive_department_heads ?? 0),
+                    'graduates_by_year' => $graduatesByYear,
+                    'by_department' => $byDepartment,
+                    'total_graduates' => (int) ($graduatesStats->total_graduates ?? 0),
+                    'total_departments' => count($allDepartments),
+                ];
+            });
 
             return response()->json([
                 'status' => true,

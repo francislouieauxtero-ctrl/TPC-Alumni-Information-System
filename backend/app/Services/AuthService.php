@@ -70,12 +70,23 @@ class AuthService
     public function createStudentFromGoogle(array $profile, int $departmentId, ?string $schoolId = null): User
     {
         return DB::transaction(function () use ($profile, $departmentId, $schoolId) {
+            $graduate = null;
+            if ($schoolId) {
+                $graduate = \App\Models\Graduate::query()
+                    ->where('student_number', $schoolId)
+                    ->orWhere('student_number', ltrim((string) $schoolId, '0'))
+                    ->first();
+            }
+
+            $canonicalName = $graduate?->name ?? ($profile['name'] ?? $profile['email']);
+            $finalDeptId = $graduate?->department_id ?? $departmentId;
+
             $user = $this->users->create([
-                'name' => $profile['name'] ?? $profile['email'],
+                'name' => $canonicalName,
                 'email' => $profile['email'],
                 'google_id' => $profile['sub'],
                 'avatar' => $profile['picture'] ?? null,
-                'department_id' => $departmentId,
+                'department_id' => $finalDeptId,
                 'school_id' => $schoolId,
                 'role' => User::ROLE_USER,
                 'is_verified' => true,

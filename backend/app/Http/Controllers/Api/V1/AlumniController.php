@@ -109,6 +109,11 @@ class AlumniController extends Controller
     public function alignmentDetail(int $departmentId): JsonResponse
     {
         try {
+            $user = auth()->user();
+            if ($user->isAdmin() && !$user->isSuperAdmin() && (int) $user->department_id !== (int) $departmentId) {
+                return $this->errorResponse('Unauthorized to view alignment details for this department', 403);
+            }
+
             $detail = $this->alumniService->getAlignmentDetail($departmentId);
 
             return $this->successResponse(
