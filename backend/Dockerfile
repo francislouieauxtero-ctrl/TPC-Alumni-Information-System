@@ -60,4 +60,7 @@ COPY nginx.conf.template /etc/nginx/templates/nginx.conf.template
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+ENV PORT=80
+EXPOSE 80
+
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
