@@ -41,8 +41,8 @@ mkdir -p /var/www/backend/storage/app/public/avatars \
          /var/www/backend/storage/logs \
          /var/www/backend/bootstrap/cache
 
-# Set directory permissions
-chown -R www-data:www-data /var/www/backend/storage /var/www/backend/bootstrap/cache
+# Set directory permissions for web user
+chown -R www-data:www-data /var/www/backend
 chmod -R 775 /var/www/backend/storage /var/www/backend/bootstrap/cache
 
 # Create storage symlink
@@ -93,5 +93,5 @@ echo "==> Starting PHP-FPM daemon (listening on 127.0.0.1:9000)..."
 php-fpm -D
 
 # Start Nginx in foreground to serve requests on $PORT
-echo "==> Launching Nginx to accept public connections on port ${PORT}..."
+echo "==> Launching Nginx on port ${PORT}..."
 exec nginx -g "daemon off;"

@@ -6,6 +6,9 @@ server {
     root /var/www/backend/public;
     index index.php index.html;
 
+    access_log /dev/stdout;
+    error_log /dev/stderr info;
+
     # Security Headers
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header X-Content-Type-Options "nosniff" always;
@@ -26,6 +29,13 @@ server {
         application/json
         application/xml
         image/svg+xml;
+
+    # Immediate static healthcheck endpoint for Railway (bypasses PHP)
+    location = /healthz {
+        access_log off;
+        default_type text/plain;
+        return 200 "OK\n";
+    }
 
     # Block direct requests for any .php file from web clients except index.php
     if ($request_uri ~* "^/[^?]*\.php(\?.*)?$") {
