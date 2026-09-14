@@ -1,12 +1,15 @@
 #!/bin/sh
 set -e
 
-# Dynamically assign PORT from environment, defaulting to 80 if unset
+# Log the exact raw value injected by Railway before applying any default
+echo "================================================================================"
+echo "==> DEBUG: Railway injected PORT=[$PORT]"
+echo "================================================================================"
+
+# Apply fallback only if PORT is completely unset or empty
 export PORT="${PORT:-80}"
 
-echo "================================================================================"
-echo "==> Starting Laravel Backend Service on dynamic Railway port: ${PORT}"
-echo "================================================================================"
+echo "==> Starting Laravel Backend Service on port: ${PORT}"
 
 # Wipe any default Debian site configs or conflicting conf.d files
 rm -rf /etc/nginx/sites-enabled /etc/nginx/sites-available /etc/nginx/conf.d/* 2>/dev/null || true
@@ -14,22 +17,22 @@ mkdir -p /etc/nginx/conf.d
 
 # Generate Nginx configuration dynamically using envsubst
 if [ -f /etc/nginx/templates/nginx.conf.template ]; then
-    echo "==> Rendering Nginx configuration for port ${PORT} from template..."
+    echo "==> Rendering Nginx configuration from template for port ${PORT}..."
     envsubst '${PORT}' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/conf.d/default.conf
 elif [ -f /var/www/backend/nginx.conf.template ]; then
-    echo "==> Rendering Nginx configuration for port ${PORT} from backend template..."
+    echo "==> Rendering Nginx configuration from backend template for port ${PORT}..."
     envsubst '${PORT}' < /var/www/backend/nginx.conf.template > /etc/nginx/conf.d/default.conf
 else
     echo "==> Updating /etc/nginx/conf.d/default.conf for port ${PORT}..."
     sed -i "s/\${PORT}/${PORT}/g" /etc/nginx/conf.d/default.conf
 fi
 
-# Print full merged Nginx configuration for diagnosis
-echo "================================================================================"
-echo "==> NGINX FULL CONFIGURATION DUMP (nginx -T):"
-echo "================================================================================"
-nginx -T
-echo "================================================================================"
+echo "==> Rendered listen directives in /etc/nginx/conf.d/default.conf:"
+grep -i "listen" /etc/nginx/conf.d/default.conf || true
+
+# Validate Nginx configuration syntax
+echo "==> Validating Nginx configuration syntax..."
+nginx -t
 
 # Ensure required storage and cache directories exist
 mkdir -p /var/www/backend/storage/app/public/avatars \
@@ -93,5 +96,5 @@ echo "==> Starting PHP-FPM daemon (listening on 127.0.0.1:9000)..."
 php-fpm -D
 
 # Start Nginx in foreground to serve requests on $PORT
-echo "==> Launching Nginx on port ${PORT}..."
+echo "==> Launching Nginx on dynamic port ${PORT}..."
 exec nginx -g "daemon off;"
