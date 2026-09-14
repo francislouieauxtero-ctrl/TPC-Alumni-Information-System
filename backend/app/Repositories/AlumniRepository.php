@@ -24,7 +24,7 @@ class AlumniRepository
                 'department:id,name',
                 'graduate' => function ($query) {
                     $query->select('id', 'student_number', 'batch_year', 'block')
-                        ->selectRaw('EXISTS(SELECT 1 FROM alumni_profiles WHERE alumni_profiles.graduate_id = graduates.id) as is_registered');
+                        ->selectRaw('1 as is_registered');
                 },
             ])
             ->whereHas('user', function ($q) {
@@ -40,9 +40,9 @@ class AlumniRepository
         if (!empty($filters['batch_year'])) {
             $batchYear = trim((string) $filters['batch_year']);
             $query->where(function ($q) use ($batchYear) {
-                $q->whereRaw('LOWER(CAST(batch_year AS CHAR)) = ?', [mb_strtolower($batchYear)])
+                $q->where('batch_year', $batchYear)
                     ->orWhereHas('graduate', function ($gradQuery) use ($batchYear) {
-                        $gradQuery->whereRaw('LOWER(CAST(batch_year AS CHAR)) = ?', [mb_strtolower($batchYear)]);
+                        $gradQuery->where('batch_year', $batchYear);
                     });
             });
         }
@@ -50,7 +50,7 @@ class AlumniRepository
         if (!empty($filters['block'])) {
             $block = trim((string) $filters['block']);
             $query->whereHas('graduate', function ($gradQuery) use ($block) {
-                $gradQuery->whereRaw('LOWER(CAST(block AS CHAR)) = ?', [mb_strtolower($block)]);
+                $gradQuery->where('block', $block);
             });
         }
 
@@ -75,7 +75,7 @@ class AlumniRepository
             ? (int) $filters['per_page']
             : 15;
 
-        return $query->orderBy('created_at', 'desc')->paginate($perPage);
+        return $query->orderBy('alumni_profiles.id', 'desc')->paginate($perPage);
     }
 
     public function find(int $id): ?AlumniProfile

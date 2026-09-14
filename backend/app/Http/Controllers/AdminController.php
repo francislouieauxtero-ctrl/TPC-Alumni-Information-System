@@ -57,8 +57,12 @@ class AdminController extends Controller
                 ->when($requestedDept, fn ($query) => $query->where('department_id', $requestedDept))
                 ->when($requestedBatch, fn ($query) => $query->where('batch_year', $requestedBatch));
 
+            $graduatesQuery = Graduate::query()
+                ->when($requestedDept, fn ($query) => $query->where('graduates.department_id', $requestedDept))
+                ->when($requestedBatch, fn ($query) => $query->where('graduates.batch_year', $requestedBatch));
+
             $cacheKey = 'dash_stats_' . $actor->id . '_' . ($requestedDept ?? 'all') . '_' . ($requestedBatch ?? 'all');
-            $stats = Cache::remember($cacheKey, 30, function () use ($studentsQuery, $alumniQuery, $graduatesQuery, $departmentHeads, $requestedDept) {
+            $stats = Cache::remember($cacheKey, 300, function () use ($studentsQuery, $alumniQuery, $graduatesQuery, $departmentHeads, $requestedDept) {
                 $userStats = (clone $studentsQuery)
                     ->selectRaw(
                         'COUNT(*) as total_students, ' .

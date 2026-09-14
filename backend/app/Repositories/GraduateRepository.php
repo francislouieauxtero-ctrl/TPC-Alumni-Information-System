@@ -32,11 +32,11 @@ class GraduateRepository
         }
 
         if (!empty($filters['batch_year'])) {
-            $query->whereRaw('LOWER(CAST(graduates.batch_year AS CHAR)) = ?', [mb_strtolower(trim((string) $filters['batch_year']))]);
+            $query->where('graduates.batch_year', trim((string) $filters['batch_year']));
         }
 
         if (!empty($filters['block'])) {
-            $query->whereRaw('LOWER(CAST(graduates.block AS CHAR)) = ?', [mb_strtolower(trim((string) $filters['block']))]);
+            $query->where('graduates.block', trim((string) $filters['block']));
         }
 
         if (!empty($filters['search'])) {
