@@ -1,13 +1,31 @@
 #!/bin/sh
 set -e
 
-# Default PORT to 80 if not set by Railway
-export PORT=${PORT:-80}
+# Dynamically assign PORT from environment, defaulting to 80 if unset
+export PORT="${PORT:-80}"
 
-echo "==> Starting Laravel backend on port ${PORT}..."
+echo "================================================================================"
+echo "==> Starting Laravel Backend Service on dynamic Railway port: ${PORT}"
+echo "================================================================================"
 
-# Substitute PORT into Nginx config
-sed -i "s/\${PORT}/${PORT}/g" /etc/nginx/conf.d/default.conf
+# Generate Nginx configuration dynamically using envsubst
+if [ -f /etc/nginx/templates/nginx.conf.template ]; then
+    echo "==> Rendering Nginx configuration for port ${PORT} from template..."
+    envsubst '${PORT}' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/conf.d/default.conf
+elif [ -f /var/www/backend/nginx.conf.template ]; then
+    echo "==> Rendering Nginx configuration for port ${PORT} from backend template..."
+    envsubst '${PORT}' < /var/www/backend/nginx.conf.template > /etc/nginx/conf.d/default.conf
+else
+    echo "==> Updating /etc/nginx/conf.d/default.conf for port ${PORT}..."
+    sed -i "s/\${PORT}/${PORT}/g" /etc/nginx/conf.d/default.conf
+fi
+
+# Ensure default Debian sites are removed so only default.conf listens on $PORT
+rm -f /etc/nginx/sites-enabled/* /etc/nginx/sites-available/* 2>/dev/null || true
+
+# Validate Nginx configuration syntax
+echo "==> Validating Nginx configuration syntax..."
+nginx -t
 
 # Ensure required storage and cache directories exist
 mkdir -p /var/www/backend/storage/app/public/avatars \
@@ -26,7 +44,7 @@ chmod -R 775 /var/www/backend/storage /var/www/backend/bootstrap/cache
 # Create storage symlink
 php artisan storage:link --force || true
 
-# Clear cached config & routes before migration
+# Clear cached config & routes before boot
 php artisan config:clear || true
 php artisan route:clear || true
 php artisan view:clear || true
@@ -44,7 +62,7 @@ if [ -n "$MYSQL_ATTR_SSL_CA" ]; then
     echo "==> Verified TiDB TLS/SSL CA certificate at: $MYSQL_ATTR_SSL_CA"
 fi
 
-# Check if migrations should run (defaults to true if DB_HOST is set, can be disabled with RUN_MIGRATIONS=false)
+# Check if migrations should run (defaults to true if DB_HOST is set)
 RUN_MIGRATIONS=${RUN_MIGRATIONS:-true}
 if [ "$RUN_MIGRATIONS" = "true" ] && [ -n "$DB_HOST" ] && [ "$DB_HOST" != "127.0.0.1" ]; then
     echo "==> Running database migrations on TiDB Cloud..."
@@ -66,8 +84,10 @@ if [ "$APP_ENV" = "production" ]; then
     php artisan view:cache || true
 fi
 
-echo "==> Starting PHP-FPM..."
+# Start PHP-FPM FastCGI daemon
+echo "==> Starting PHP-FPM daemon (listening on 127.0.0.1:9000)..."
 php-fpm -D
 
-echo "==> Starting Nginx..."
+# Start Nginx in foreground to serve requests on $PORT
+echo "==> Launching Nginx to accept public connections on port ${PORT}..."
 exec nginx -g "daemon off;"

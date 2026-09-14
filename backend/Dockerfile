@@ -1,6 +1,6 @@
 FROM php:8.3-fpm
 
-# Install system dependencies, Nginx, and CA certificates
+# Install system dependencies, Nginx, CA certificates, and gettext-base (for envsubst)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     curl \
@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     default-mysql-client \
     ca-certificates \
     nginx \
+    gettext-base \
+    procps \
     && docker-php-ext-install -j$(nproc) \
     pdo \
     pdo_mysql \
@@ -49,9 +51,10 @@ COPY . .
 # Generate optimized autoload files
 RUN composer dump-autoload --optimize --no-dev
 
-# Configure Nginx
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-RUN rm -f /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default 2>/dev/null || true
+# Prepare Nginx configuration template directory
+RUN mkdir -p /etc/nginx/templates /etc/nginx/conf.d \
+    && rm -f /etc/nginx/sites-enabled/* /etc/nginx/sites-available/* 2>/dev/null || true
+COPY nginx.conf.template /etc/nginx/templates/nginx.conf.template
 
 # Copy and set entrypoint
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
