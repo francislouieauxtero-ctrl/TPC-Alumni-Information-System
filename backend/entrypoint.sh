@@ -7,7 +7,7 @@ echo "==> DEBUG: Railway injected PORT=[$PORT]"
 echo "================================================================================"
 
 # Apply fallback only if PORT is completely unset or empty
-export PORT="${PORT:-80}"
+export PORT="${PORT:-8080}"
 
 echo "==> Starting Laravel Backend Service on port: ${PORT}"
 
