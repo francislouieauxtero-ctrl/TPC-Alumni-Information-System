@@ -1,6 +1,5 @@
 server {
-    listen ${PORT} default_server;
-    listen [::]:${PORT} default_server;
+    listen 0.0.0.0:${PORT} default_server;
     server_name _;
     client_max_body_size 100M;
 
@@ -47,7 +46,7 @@ server {
         }
     }
 
-    # Primary Laravel application routing
+    # Primary Laravel application routing & health checks (/up, /api/*, /)
     location / {
         try_files $uri $uri/ /index.php?$query_string;
     }

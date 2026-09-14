@@ -51,15 +51,13 @@ COPY . .
 # Generate optimized autoload files
 RUN composer dump-autoload --optimize --no-dev
 
-# Prepare Nginx configuration template directory
+# Prepare Nginx configuration template directory and clean default sites
 RUN mkdir -p /etc/nginx/templates /etc/nginx/conf.d \
-    && rm -f /etc/nginx/sites-enabled/* /etc/nginx/sites-available/* 2>/dev/null || true
+    && rm -rf /etc/nginx/sites-enabled /etc/nginx/sites-available /etc/nginx/conf.d/* 2>/dev/null || true
 COPY nginx.conf.template /etc/nginx/templates/nginx.conf.template
 
 # Copy and set entrypoint
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
-
-EXPOSE 80
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
