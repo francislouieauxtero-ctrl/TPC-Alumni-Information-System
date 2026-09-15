@@ -54,88 +54,80 @@ export default function PresidentDasboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <header className="rounded-2xl bg-gradient-to-r from-tpc-greenDeep via-tpc-green to-emerald-700 p-6 text-white shadow-lg shadow-emerald-900/10">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100">
-                President overview
-              </p>
-              <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
-                President Dashboard
-              </h1>
-            </div>
+    <div className="space-y-6 max-w-7xl mx-auto">
+      <header className="rounded-2xl bg-gradient-to-r from-tpc-greenDeep via-tpc-green to-emerald-700 p-4 sm:p-6 text-white shadow-md">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100">
+              President overview
+            </p>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
+              President Dashboard
+            </h1>
           </div>
-        </header>
+        </div>
+      </header>
 
-        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <StatCard
-            title=" Total Graduates"
-            value={stats?.total_graduates || 0}
-            icon={<GraduationCap className="h-5 w-5" />}
-            color="bg-violet-500"
-            detail="Academic completion"
-          />
-          <StatCard
-            title="Total Registered Alumni"
-            value={stats?.registered_alumni ?? stats?.total_students ?? 0}
-            icon={<Users className="h-5 w-5" />}
-            color="bg-tpc-greenDeep"
-            detail="All tracked alumni"
-          />
-          {/* <StatCard
-            title="Employed"
-            value={stats?.employed_alumni || 0}
-            icon={<Briefcase className="h-5 w-5" />}
-            color="bg-emerald-600"
-            detail="Currently employed"
-          /> */}
-          <StatCard
-            title="Verified"
-            value={stats?.verified_students || 0}
-            icon={<CheckCircle className="h-5 w-5" />}
-            color="bg-green-500"
-            detail="Approved records"
-          />
-          <StatCard
-            title="Active"
-            value={stats?.active_students || 0}
-            icon={<ToggleRight className="h-5 w-5" />}
-            color="bg-tpc-navy"
-            detail="Currently active"
-          />
-          <StatCard
-            title="Inactive"
-            value={stats?.inactive_students || 0}
-            icon={<Users className="h-5 w-5" />}
-            color="bg-red-500"
-            detail="Not currently active"
-          />
-          <StatCard
-            title="Not Registered Graduates"
-            value={stats?.not_registered_graduates || 0}
-            icon={<GraduationCap className="h-5 w-5" />}
-            color="bg-amber-500"
-            detail="Graduates without an alumni account"
-          />
-        </section>
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <StatCard
+          title="Total Graduates"
+          value={stats?.total_graduates || 0}
+          icon={<GraduationCap className="h-5 w-5" />}
+          color="bg-violet-500"
+          detail="Academic completion"
+        />
+        <StatCard
+          title="Total Registered Alumni"
+          value={stats?.registered_alumni ?? stats?.total_students ?? 0}
+          icon={<Users className="h-5 w-5" />}
+          color="bg-tpc-greenDeep"
+          detail="All tracked alumni"
+        />
+        <StatCard
+          title="Verified"
+          value={stats?.verified_students || 0}
+          icon={<CheckCircle className="h-5 w-5" />}
+          color="bg-green-500"
+          detail="Approved records"
+        />
+        <StatCard
+          title="Active"
+          value={stats?.active_students || 0}
+          icon={<ToggleRight className="h-5 w-5" />}
+          color="bg-tpc-navy"
+          detail="Currently active"
+        />
+        <StatCard
+          title="Inactive"
+          value={stats?.inactive_students || 0}
+          icon={<Users className="h-5 w-5" />}
+          color="bg-red-500"
+          detail="Not currently active"
+        />
+        <StatCard
+          title="Not Registered Graduates"
+          value={stats?.not_registered_graduates || 0}
+          icon={<GraduationCap className="h-5 w-5" />}
+          color="bg-amber-500"
+          detail="Graduates without an alumni account"
+        />
+      </section>
 
-        <section className="grid grid-cols-1 gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-            <div className="mb-5 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-800">
-                Alumini overview
-              </h3>
-              <a
-                href="/president/students"
-                className="text-sm font-semibold text-tpc-greenDeep hover:text-tpc-green"
-              >
-                View Registered Alumi →
-              </a>
-            </div>
+      <section className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
+          <div className="mb-4 sm:mb-5 flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800">
+              Alumni overview
+            </h3>
+            <a
+              href="/president/students"
+              className="text-xs sm:text-sm font-semibold text-tpc-greenDeep hover:text-tpc-green transition-colors"
+            >
+              View Registered Alumni →
+            </a>
+          </div>
 
-            <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
               <OverviewRow
                 label="Verified & active"
                 count={stats?.verified_students || 0}
@@ -167,26 +159,25 @@ export default function PresidentDasboard() {
             </div>
           </div>
         </section>
-      </div>
     </div>
   );
 }
 
 function StatCard({ title, value, icon, color, detail }) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+    <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-sm font-medium text-gray-500">{title}</p>
-          <p className="mt-3 text-3xl font-bold text-gray-900">{value}</p>
+        <div className="min-w-0 flex-1">
+          <p className="text-xs sm:text-sm font-medium text-gray-500 truncate">{title}</p>
+          <p className="mt-1.5 sm:mt-2 text-2xl sm:text-3xl font-bold text-gray-900">{value}</p>
         </div>
         <div
-          className={`${color} flex h-12 w-12 items-center justify-center rounded-xl text-white shadow-sm`}
+          className={`${color} flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl text-white shadow-sm`}
         >
           {icon}
         </div>
       </div>
-      <p className="mt-3 text-xs text-gray-400">{detail}</p>
+      <p className="mt-2 sm:mt-3 text-xs text-gray-400 line-clamp-1">{detail}</p>
     </div>
   );
 }

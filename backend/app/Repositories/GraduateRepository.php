@@ -25,20 +25,18 @@ class GraduateRepository
                 'graduates.created_at',
                 'graduates.updated_at',
             ])
-            ->addSelect([
-                DB::raw("CASE WHEN EXISTS (SELECT 1 FROM alumni_profiles WHERE alumni_profiles.graduate_id = graduates.id) OR EXISTS (SELECT 1 FROM users WHERE users.school_id = graduates.student_number AND users.role = 'user') THEN 1 ELSE 0 END AS is_registered"),
-            ]); 
+            ->selectRaw('EXISTS(SELECT 1 FROM alumni_profiles WHERE alumni_profiles.graduate_id = graduates.id) as is_registered');
 
         if (!empty($filters['department_id'])) {
             $query->where('graduates.department_id', $filters['department_id']);
         }
 
         if (!empty($filters['batch_year'])) {
-            $query->whereRaw('LOWER(CAST(graduates.batch_year AS CHAR)) = ?', [mb_strtolower(trim((string) $filters['batch_year']))]);
+            $query->where('graduates.batch_year', trim((string) $filters['batch_year']));
         }
 
         if (!empty($filters['block'])) {
-            $query->whereRaw('LOWER(CAST(graduates.block AS CHAR)) = ?', [mb_strtolower(trim((string) $filters['block']))]);
+            $query->where('graduates.block', trim((string) $filters['block']));
         }
 
         if (!empty($filters['search'])) {
@@ -49,7 +47,7 @@ class GraduateRepository
             });
         }
 
-        return $query->with(['department:id,name'])->orderBy('graduates.created_at', 'desc')->paginate(20);
+        return $query->with(['department:id,name'])->orderBy('graduates.id', 'desc')->paginate(20);
     }
 
     /**

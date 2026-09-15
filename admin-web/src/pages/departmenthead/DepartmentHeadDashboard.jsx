@@ -105,28 +105,27 @@ export default function DepartmentHeadDashboard() {
         : 0;
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <header className="rounded-3xl bg-gradient-to-r from-tpc-greenDeep via-tpc-green to-emerald-700 p-6 text-white shadow-lg shadow-emerald-900/10">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-100">
-                Department dashboard
-              </p>
-              <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
-                {departmentName}
-              </h1>
-            </div>
-            <div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm">
-              <p className="text-xs uppercase tracking-[0.22em] text-emerald-100">
-                Employment rate
-              </p>
-              <p className="mt-1 text-2xl font-bold">{employmentRate}%</p>
-            </div>
+    <div className="space-y-6 max-w-7xl mx-auto">
+      <header className="rounded-2xl bg-gradient-to-r from-tpc-greenDeep via-tpc-green to-emerald-700 p-4 sm:p-6 text-white shadow-md">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-100">
+              Department dashboard
+            </p>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
+              {departmentName}
+            </h1>
           </div>
-        </header>
+          <div className="self-start sm:self-auto rounded-xl border border-white/15 bg-white/10 px-3.5 py-2 sm:px-4 sm:py-3 backdrop-blur-sm">
+            <p className="text-xs uppercase tracking-[0.22em] text-emerald-100">
+              Employment rate
+            </p>
+            <p className="mt-0.5 sm:mt-1 text-xl sm:text-2xl font-bold">{employmentRate}%</p>
+          </div>
+        </div>
+      </header>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
           <StatCard
             title="Total Graduates"
             value={stats?.total_graduates ?? stats?.total_graduate_count ?? 0}
@@ -348,26 +347,25 @@ export default function DepartmentHeadDashboard() {
             )}
           </section>
         </div>
-      </div>
     </div>
   );
 }
 
 function StatCard({ title, value, icon, color, detail }) {
   return (
-    <div className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="text-sm text-gray-500">{title}</p>
-          <p className="mt-3 text-3xl font-bold text-gray-900">{value ?? 0}</p>
+    <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs sm:text-sm font-medium text-gray-500 truncate">{title}</p>
+          <p className="mt-1.5 sm:mt-2 text-2xl sm:text-3xl font-bold text-gray-900">{value ?? 0}</p>
         </div>
         <div
-          className={`${color} flex h-12 w-12 items-center justify-center rounded-2xl text-white`}
+          className={`${color} flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl text-white shadow-sm`}
         >
           {icon}
         </div>
       </div>
-      <p className="mt-3 text-xs text-gray-400">{detail}</p>
+      <p className="mt-2 sm:mt-3 text-xs text-gray-400 line-clamp-1">{detail}</p>
     </div>
   );
 }

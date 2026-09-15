@@ -13,7 +13,7 @@ use App\Http\Controllers\Api\V1\EventController;
 use App\Http\Controllers\Api\V1\AnnouncementController;
 use App\Http\Controllers\Api\V1\JobHistoryController;
 
-Route::prefix('auth')->controller(AuthController::class)->group(function () {
+Route::prefix('auth')->middleware('throttle:10,1')->controller(AuthController::class)->group(function () {
     Route::post('register', 'register');
     Route::post('login', 'login');
     Route::post('google-register', 'googleRegister');
@@ -48,8 +48,6 @@ Route::prefix('admin')->name('admin.')->middleware('role:super_admin,admin')->gr
         Route::get('dashboard', 'dashboard');
         Route::get('stats', 'stats');
         Route::get('students', 'listStudents');
-        Route::post('profile', 'updateProfile');
-        Route::put('profile', 'updateProfile');
         Route::post('students/{id}/deactivate', 'deactivateStudent');
         Route::post('students/{id}/activate', 'activateStudent');
         Route::delete('students/{id}', 'deleteStudent');

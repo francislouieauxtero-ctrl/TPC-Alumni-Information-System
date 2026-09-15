@@ -147,10 +147,10 @@ export default function EventCreate() {
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 md:p-8">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Create Event</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Create Event</h1>
           <p className="text-gray-600 mt-2">
             Create and publish events for your school or department
           </p>

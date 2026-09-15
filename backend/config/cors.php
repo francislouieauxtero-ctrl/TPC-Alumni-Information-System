@@ -33,9 +33,9 @@ return [
 
     'allowed_origins_patterns' => array_values(array_filter(array_merge(
         [
-            '#http://10\.0\.2\.2.*#',
-            '#http://localhost.*#',
-            '#http://127\.0\.0\.1.*#',
+            '#^http://10\.0\.2\.2(:\d+)?$#',
+            '#^http://localhost(:\d+)?$#',
+            '#^http://127\.0\.0\.1(:\d+)?$#',
         ],
         explode(',', env('CORS_ALLOWED_ORIGINS_PATTERNS', ''))
     ))),
@@ -44,7 +44,7 @@ return [
 
     'exposed_headers' => ['Content-Type', 'Authorization'],
 
-    'max_age' => 0,
+    'max_age' => 86400,
 
     'supports_credentials' => true,
 ];

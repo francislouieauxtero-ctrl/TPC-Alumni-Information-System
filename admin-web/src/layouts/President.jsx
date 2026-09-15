@@ -21,7 +21,9 @@ import UserAvatar from "../components/shared/UserAvatar";
 
 export default function PresidentLayout({ children }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [userName, setUserName] = useState(
     localStorage.getItem("userName") || "User",
@@ -32,6 +34,10 @@ export default function PresidentLayout({ children }) {
   const [userAvatar, setUserAvatar] = useState(
     localStorage.getItem("userAvatar") || "",
   );
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     const syncUser = () => {
@@ -83,33 +89,52 @@ export default function PresidentLayout({ children }) {
 
   return (
     <div className="flex h-screen bg-white text-gray-900 font-sans">
+      {/* Mobile Backdrop */}
+      {mobileMenuOpen && (
+        <div
+          onClick={() => setMobileMenuOpen(false)}
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm min-[850px]:hidden transition-opacity"
+        />
+      )}
+
       {/* Sidebar */}
-      <div
-        className={`${sidebarOpen ? "w-70" : "w-20"
-          } flex flex-col bg-tpc-greenDeep border-r border-white/10 px-3 py-6 transition-all duration-300`}
+      <aside
+        className={`${
+          sidebarOpen ? "min-[850px]:w-72" : "min-[850px]:w-20"
+        } fixed inset-y-0 left-0 z-50 flex w-72 ${
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        } flex-col bg-tpc-greenDeep border-r border-white/10 px-3 py-6 transition-all duration-300 min-[850px]:static min-[850px]:translate-x-0`}
       >
         {/* Logo */}
         <div className="px-3 pb-5 border-b border-white/20">
           <div
-            className={`flex items-center gap-2.5 ${!sidebarOpen && "justify-center"}`}
+            className={`flex items-center justify-between gap-2.5 ${!sidebarOpen && "justify-center"}`}
           >
-            {/* Circular logo */}
-            <img
-              src={logo}
-              alt="Talibon Polytechnic College seal"
-              className="h-12 w-12 rounded-full border-2 border-tpc-gold object-cover shadow-md md:h-12 md:w-12"
-            />
-            {sidebarOpen && (
-              <span className="text-white text-xl font-bold tracking-tight">
-                {roleLabel}
-              </span>
-            )}
+            <div className="flex items-center gap-2.5 min-w-0">
+              {/* Circular logo */}
+              <img
+                src={logo}
+                alt="Talibon Polytechnic College seal"
+                className="h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-tpc-gold object-cover shadow-md shrink-0"
+              />
+              {(sidebarOpen || mobileMenuOpen) && (
+                <span className="text-white text-lg sm:text-xl font-bold tracking-tight truncate">
+                  {roleLabel}
+                </span>
+              )}
+            </div>
+            {/* Mobile close button */}
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="min-[850px]:hidden p-1.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
         </div>
 
         {/* Navigation */}
-        {/* Navigation */}
-        <nav className="flex-1 flex flex-col gap-1 py-5">
+        <nav className="flex-1 flex flex-col gap-1 py-5 overflow-y-auto">
           {userRole === "super_admin" && (
             <NavLink
               to="/president/dashboard"
@@ -208,10 +233,10 @@ export default function PresidentLayout({ children }) {
           </button>
         </div>
 
-        {/* Toggle Sidebar */}
+        {/* Toggle Sidebar (Desktop) */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="hidden md:flex items-center justify-center h-12 mt-4 border-t border-white/20 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+          className="hidden min-[850px]:flex items-center justify-center h-12 mt-4 border-t border-white/20 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
         >
           {sidebarOpen ? (
             <X className="w-5 h-5" />
@@ -219,33 +244,34 @@ export default function PresidentLayout({ children }) {
             <Menu className="w-5 h-5" />
           )}
         </button>
-      </div>
+      </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Top Bar */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <div className="bg-white border-b border-gray-200 px-3 py-2.5 sm:px-6 sm:py-4 flex items-center justify-between">
           <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            onClick={() => setMobileMenuOpen(true)}
+            className="min-[850px]:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            aria-label="Open mobile menu"
           >
             <Menu className="w-6 h-6" />
           </button>
-          <div className="flex items-center gap-4 ml-auto">
-            <span className="text-gray-500 text-sm font-medium">
+          <div className="flex items-center gap-3 sm:gap-4 ml-auto min-w-0">
+            <span className="text-gray-600 text-xs sm:text-sm font-medium truncate max-w-[140px] sm:max-w-none">
               Welcome back, {userName}!
             </span>
             <UserAvatar
               name={displayName}
               avatar={userAvatar}
               size="sm"
-              className="bg-tpc-greenDeep"
+              className="bg-tpc-greenDeep shrink-0"
             />
           </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-auto bg-white p-6">{children}</div>
+        <div className="flex-1 overflow-auto bg-slate-50 p-3 sm:p-4 md:p-6 lg:p-8">{children}</div>
       </div>
     </div>
   );

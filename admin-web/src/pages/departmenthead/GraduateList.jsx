@@ -80,15 +80,15 @@ export default function GraduateList() {
         </button>
       </div>
 
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-200">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           <input
             type="text"
             name="search"
             placeholder="Search by name or student number..."
             value={filters.search}
             onChange={handleFilterChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-tpc-green"
+            className="w-full px-3.5 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-tpc-green"
           />
           <input
             type="text"
@@ -96,7 +96,7 @@ export default function GraduateList() {
             placeholder="Batch year"
             value={filters.batch_year}
             onChange={handleFilterChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-tpc-green"
+            className="w-full px-3.5 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-tpc-green"
           />
           <input
             type="text"
@@ -104,18 +104,19 @@ export default function GraduateList() {
             placeholder="Block"
             value={filters.block}
             onChange={handleFilterChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-tpc-green"
+            className="w-full px-3.5 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-tpc-green"
           />
         </div>
       </div>
 
       {graduates.data && graduates.data.length > 0 ? (
         <div
-          className={`bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden transition-opacity ${
+          className={`bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-opacity ${
             loading ? "opacity-50" : "opacity-100"
           }`}
         >
-          <table className="w-full">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px]">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">
@@ -193,6 +194,7 @@ export default function GraduateList() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       ) : (
         !loading && (

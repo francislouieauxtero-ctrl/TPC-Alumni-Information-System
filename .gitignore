@@ -49,6 +49,8 @@ pnpm-debug.log*
 *.sqlite-journal
 mysql_data/
 cloudflared.deb
+database-backup/*.sql
+!database-backup/clean_schema.sql
 
 # IDE & OS files
 .DS_Store

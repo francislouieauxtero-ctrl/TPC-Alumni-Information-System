@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Graduate;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\DB;
 
 class GoogleRegisterRequest extends FormRequest
 {
@@ -50,11 +51,14 @@ class GoogleRegisterRequest extends FormRequest
         }
 
         if (is_numeric($schoolId)) {
-            $unpadded = ltrim($schoolId, '0');
-            $all = Graduate::query()->get();
-            foreach ($all as $g) {
-                if (is_numeric($g->student_number) && ltrim((string) $g->student_number, '0') === $unpadded) {
-                    return $g;
+            $intVal = (int) $schoolId;
+            if ($intVal > 0) {
+                $castType = DB::connection()->getDriverName() === 'mysql' ? 'UNSIGNED' : 'INTEGER';
+                $grad = Graduate::query()
+                    ->whereRaw("CAST(student_number AS {$castType}) = ?", [$intVal])
+                    ->first();
+                if ($grad) {
+                    return $grad;
                 }
             }
         }

@@ -225,14 +225,14 @@ export default function DepartmentHeadProfile() {
   ];
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-8">
+    <div className="flex flex-col items-center justify-center py-4 sm:py-6 w-full">
       {/* Page header */}
-      <div className="mb-7 text-center">
+      <div className="mb-5 sm:mb-7 text-center">
         <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-tpc-greenDeep">
           Account
         </p>
-        <h1 className="text-3xl font-semibold text-gray-900">Your profile</h1>
-        <p className="mt-1 text-sm text-gray-400">
+        <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900">Your profile</h1>
+        <p className="mt-1 text-xs sm:text-sm text-gray-400">
           Review your department head account details here.
         </p>
       </div>
@@ -257,9 +257,9 @@ export default function DepartmentHeadProfile() {
 
       {/* Profile card */}
       <div className="w-full max-w-5xl overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="grid grid-cols-[300px_1fr]">
+        <div className="grid grid-cols-1 md:grid-cols-[300px_1fr]">
           {/* ── Left pane: identity + photo actions ── */}
-          <div className="flex flex-col items-center border-r border-gray-100 bg-gray-50 px-8 py-10">
+          <div className="flex flex-col items-center border-b md:border-b-0 md:border-r border-gray-100 bg-gray-50 px-6 sm:px-8 py-6 sm:py-10">
             {/* Avatar */}
             <div
               onDragOver={(e) => {

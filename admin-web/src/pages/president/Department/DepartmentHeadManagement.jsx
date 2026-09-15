@@ -318,11 +318,11 @@ export default function DepartmentHeadManagement({ embedded = false }) {
     }`;
 
   return (
-    <div className={embedded ? "mt-8" : "p-8"}>
+    <div className={embedded ? "mt-4 sm:mt-8" : "space-y-6"}>
       {!embedded && (
-        <div className="flex items-start justify-between mb-8 gap-4 flex-wrap">
+        <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
               Department Head Management
             </h1>
             <p className="text-gray-500 text-sm">
@@ -331,17 +331,17 @@ export default function DepartmentHeadManagement({ embedded = false }) {
           </div>
 
           {currentRole === "super_admin" && (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
               <button
                 onClick={() => navigate("/president/departments/create")}
-                className="flex items-center gap-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm"
+                className="flex items-center gap-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm"
               >
                 <Building2 className="w-4 h-4 text-tpc-greenDeep" />
                 New Department
               </button>
               <button
                 onClick={() => navigate("/president/department-heads/create")}
-                className="flex items-center gap-2 bg-tpc-greenDeep hover:bg-tpc-green text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm"
+                className="flex items-center gap-2 bg-tpc-greenDeep hover:bg-tpc-green text-white px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm"
               >
                 <UserCog className="w-4 h-4" />
                 New Department Head
@@ -501,7 +501,7 @@ export default function DepartmentHeadManagement({ embedded = false }) {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[640px] text-sm">
               <thead className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                 <tr>
                   <th className="px-6 py-3 text-left">Name</th>
