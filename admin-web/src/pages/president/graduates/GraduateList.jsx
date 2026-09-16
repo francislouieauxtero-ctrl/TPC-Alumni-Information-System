@@ -77,12 +77,12 @@ export default function GraduateList() {
         <h1 className="text-3xl font-bold text-gray-800">
           Graduate Management
         </h1>
-        <button
+        {/* <button
           onClick={() => navigate("create")}
           className="px-6 py-2 bg-tpc-greenDeep hover:bg-tpc-green text-white rounded-full transition"
         >
           + Add Graduate
-        </button>
+        </button> */}
       </div>
 
       {/* Filters */}
