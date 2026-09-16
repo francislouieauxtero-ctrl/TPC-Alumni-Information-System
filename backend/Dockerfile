@@ -60,7 +60,4 @@ COPY nginx.conf.template /etc/nginx/templates/nginx.conf.template
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Expose Nginx HTTP port for Railway port detection
-EXPOSE 8080
-
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
