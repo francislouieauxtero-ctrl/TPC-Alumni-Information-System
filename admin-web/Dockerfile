@@ -18,4 +18,4 @@ FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-CMD ["/bin/sh", "-c", "sed -i \"s/listen 80;/listen ${PORT:-80};/g\" /etc/nginx/conf.d/default.conf && sed -i \"s|__BACKEND_URL__|${BACKEND_URL:-http://nginx}|g\" /etc/nginx/conf.d/default.conf && nginx -g \"daemon off;\""]
+CMD ["/bin/sh", "-c", "sed -i \"s/80;/${PORT:-80};/g\" /etc/nginx/conf.d/default.conf && sed -i \"s|__BACKEND_URL__|${BACKEND_URL:-http://nginx}|g\" /etc/nginx/conf.d/default.conf && nginx -g \"daemon off;\""]
