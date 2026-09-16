@@ -209,18 +209,7 @@ export default function DepartmentHeadDashboard() {
             </div>
 
             <div className="space-y-4">
-              <InsightRow
-                label="Verified alumni"
-                value={stats?.verified_students ?? 0}
-                color="bg-green-500"
-                percent={
-                  totalAlumni > 0
-                    ? Math.round(
-                        ((stats?.verified_students ?? 0) / totalAlumni) * 100,
-                      )
-                    : 0
-                }
-              />
+
               <InsightRow
                 label="Active alumni"
                 value={stats?.active_students ?? 0}
@@ -271,7 +260,7 @@ export default function DepartmentHeadDashboard() {
             </div>
             {events.length > 0 ? (
               <div className="space-y-4">
-                {events.slice(0, 2).map((event) => (
+                {events.slice(0, 3).map((event) => (
                   <div
                     key={event.id}
                     className="rounded-2xl border border-gray-100 bg-gray-50 p-4"
@@ -321,7 +310,7 @@ export default function DepartmentHeadDashboard() {
             </div>
             {announcements.length > 0 ? (
               <div className="space-y-4">
-                {announcements.slice(0, 2).map((announcement) => (
+                {announcements.slice(0, 3).map((announcement) => (
                   <div
                     key={announcement.id}
                     className="rounded-2xl border border-gray-100 bg-gray-50 p-4"

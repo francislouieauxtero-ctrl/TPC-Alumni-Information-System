@@ -32,6 +32,12 @@ class AuthController extends Controller
     {
         $user = $this->authService->createStudent($request->validated());
 
+        try {
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\WelcomeAlumniMail($user));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to send welcome email: ' . $e->getMessage());
+        }
+
         return $this->success(
             'Registration successful! You can now log in.',
             new UserResource($user->load('department')),
