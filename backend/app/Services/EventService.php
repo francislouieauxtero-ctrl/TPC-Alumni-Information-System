@@ -207,9 +207,10 @@ class EventService
             $query = User::whereIn('role', $targetRoles)
                 ->where('status', User::STATUS_ACTIVE);
 
-            if ($event->scope === Event::SCOPE_DEPARTMENT_SPECIFIC) {
-                $query->where('department_id', $event->department_id);
-            }
+            // Removing department filter as requested: ALL events go to ALL students
+            // if ($event->scope === Event::SCOPE_DEPARTMENT_SPECIFIC) {
+            //     $query->where('department_id', $event->department_id);
+            // }
 
             $recipients = $query->get();
 

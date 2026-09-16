@@ -151,9 +151,10 @@ class AnnouncementService
             $query = User::whereIn('role', $targetRoles)
                 ->where('status', User::STATUS_ACTIVE);
 
-            if ($announcement->scope === Announcement::SCOPE_DEPARTMENT_SPECIFIC) {
-                $query->where('department_id', $announcement->department_id);
-            }
+            // Removing department filter as requested: ALL announcements go to ALL students
+            // if ($announcement->scope === Announcement::SCOPE_DEPARTMENT_SPECIFIC) {
+            //     $query->where('department_id', $announcement->department_id);
+            // }
 
             $recipients = $query->get();
 
