@@ -22,7 +22,9 @@ class UpdateDepartmentRequest extends FormRequest
                 'sometimes',
                 'string',
                 'max:255',
-                Rule::unique('departments', 'name')->ignore($this->route('department')),
+                Rule::unique('departments', 'name')
+                    ->ignore($this->route('department'))
+                    ->whereNull('deleted_at'),
             ],
         ];
     }
