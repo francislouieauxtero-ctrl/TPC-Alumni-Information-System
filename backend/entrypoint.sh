@@ -97,6 +97,10 @@ fi
 echo "==> Starting PHP-FPM daemon (listening on 127.0.0.1:9000)..."
 php-fpm -D
 
+# Start Queue Worker for processing background emails
+echo "==> Starting Laravel Queue Worker..."
+php artisan queue:work --daemon --sleep=3 --tries=3 &
+
 # Start Nginx in foreground to serve requests on $PORT
 echo "==> Launching Nginx on dynamic port ${PORT}..."
 exec nginx -g "daemon off;"
