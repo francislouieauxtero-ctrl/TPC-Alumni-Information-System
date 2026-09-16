@@ -27,13 +27,8 @@ else
     sed -i "s/\${PORT}/${PORT}/g" /etc/nginx/conf.d/default.conf
 fi
 
-# Ensure Nginx listens on both IPv4 and IPv6, and covers both 8080 and 80
-if [ "${PORT}" != "80" ]; then
-    sed -i "/listen ${PORT} default_server;/a \    listen [::]:${PORT} default_server;\n    listen 80;\n    listen [::]:80;" /etc/nginx/conf.d/default.conf 2>/dev/null || true
-else
-    sed -i "/listen ${PORT} default_server;/a \    listen [::]:${PORT} default_server;" /etc/nginx/conf.d/default.conf 2>/dev/null || true
-fi
-
+# Ensure Nginx listens on the PORT injected by Railway
+# (envsubst already replaces ${PORT} in default.conf, so no extra sed is needed)
 echo "==> Rendered listen directives in /etc/nginx/conf.d/default.conf:"
 grep -i "listen" /etc/nginx/conf.d/default.conf || true
 
