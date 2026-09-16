@@ -202,7 +202,7 @@ class EventService
             $event->load('creator');
             $creatorName = $event->creator?->name ?? 'Administrator';
 
-            $targetRoles = [User::ROLE_USER, User::ROLE_ADMIN];
+            $targetRoles = [User::ROLE_USER, User::ROLE_ADMIN, User::ROLE_SUPER_ADMIN];
 
             $query = User::whereIn('role', $targetRoles)
                 ->where('status', User::STATUS_ACTIVE);
