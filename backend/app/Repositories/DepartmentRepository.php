@@ -16,6 +16,15 @@ class DepartmentRepository
 
     public function create(array $data): Department
     {
+        $department = Department::withTrashed()->where('name', $data['name'])->first();
+        
+        if ($department) {
+            if ($department->trashed()) {
+                $department->restore();
+            }
+            return $department;
+        }
+
         return Department::create($data);
     }
 
