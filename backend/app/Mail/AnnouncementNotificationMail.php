@@ -17,7 +17,6 @@ class AnnouncementNotificationMail extends Mailable implements ShouldQueue
 
     public function __construct(
         protected Announcement $announcement,
-        protected User $recipient,
         protected string $creatorName
     ) {
     }
@@ -34,7 +33,7 @@ class AnnouncementNotificationMail extends Mailable implements ShouldQueue
         return new Content(
             markdown: 'mail.announcement-notification',
             with: [
-                'name' => $this->recipient->name,
+                'name' => 'Alumni',
                 'title' => $this->announcement->title,
                 'content' => $this->announcement->content,
                 'creatorName' => $this->creatorName,

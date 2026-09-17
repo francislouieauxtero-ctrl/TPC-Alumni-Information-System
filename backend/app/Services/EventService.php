@@ -212,16 +212,15 @@ class EventService
             //     $query->where('department_id', $event->department_id);
             // }
 
-            $recipients = $query->get();
+            $recipients = $query->pluck('email')->toArray();
 
-            foreach ($recipients as $recipient) {
+            if (!empty($recipients)) {
                 try {
-                    Mail::to($recipient->email)->queue(new EventNotificationMail($event, $recipient, $creatorName));
+                    // Send one mass email using BCC to avoid timeouts and SMTP limits
+                    Mail::bcc($recipients)->send(new EventNotificationMail($event, $creatorName));
                 } catch (\Throwable $e) {
-                    Log::error("Failed to queue event notification email for recipient [{$recipient->id}] ({$recipient->email}): " . $e->getMessage(), [
+                    Log::error("Failed to send mass event notification email: " . $e->getMessage(), [
                         'event_id' => $event->id,
-                        'recipient_id' => $recipient->id,
-                        'recipient_email' => $recipient->email,
                         'exception' => $e,
                     ]);
                 }

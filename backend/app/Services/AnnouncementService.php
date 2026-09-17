@@ -156,16 +156,15 @@ class AnnouncementService
             //     $query->where('department_id', $announcement->department_id);
             // }
 
-            $recipients = $query->get();
+            $recipients = $query->pluck('email')->toArray();
 
-            foreach ($recipients as $recipient) {
+            if (!empty($recipients)) {
                 try {
-                    Mail::to($recipient->email)->queue(new AnnouncementNotificationMail($announcement, $recipient, $creatorName));
+                    // Send one mass email using BCC to avoid timeouts and SMTP limits
+                    Mail::bcc($recipients)->send(new AnnouncementNotificationMail($announcement, $creatorName));
                 } catch (\Throwable $e) {
-                    Log::error("Failed to queue announcement notification email for recipient [{$recipient->id}] ({$recipient->email}): " . $e->getMessage(), [
+                    Log::error("Failed to send mass announcement notification email: " . $e->getMessage(), [
                         'announcement_id' => $announcement->id,
-                        'recipient_id' => $recipient->id,
-                        'recipient_email' => $recipient->email,
                         'exception' => $e,
                     ]);
                 }

@@ -17,7 +17,6 @@ class EventNotificationMail extends Mailable implements ShouldQueue
 
     public function __construct(
         protected Event $event,
-        protected User $recipient,
         protected string $creatorName
     ) {
     }
@@ -34,7 +33,7 @@ class EventNotificationMail extends Mailable implements ShouldQueue
         return new Content(
             markdown: 'mail.event-notification',
             with: [
-                'name' => $this->recipient->name,
+                'name' => 'Alumni',
                 'title' => $this->event->title,
                 'description' => $this->event->description,
                 'startDate' => $this->event->start_date,
