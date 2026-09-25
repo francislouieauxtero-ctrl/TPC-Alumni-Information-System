@@ -25,9 +25,9 @@ const GREEN_DEEP = "#02451C";
 
 export default function PrintableReport({
   stats,
-  filters,
-  departmentOptions,
-  alignmentRows,
+  filters = {},
+  departmentOptions = [],
+  alignmentRows = [],
   onClose,
   preparedByName,
 }) {
@@ -41,8 +41,8 @@ export default function PrintableReport({
     const fetchData = async () => {
       try {
         const params = {};
-        if (filters.department) params.department_id = filters.department;
-        if (filters.batch) params.batch = filters.batch;
+        if (filters?.department) params.department_id = filters.department;
+        if (filters?.batch) params.batch = filters.batch;
 
         const dashboardEndpoint =
           localStorage.getItem("userRole") === "admin"
@@ -78,12 +78,12 @@ export default function PrintableReport({
   const overview = computeReportOverview(statsToUse, alignmentToUse);
   const breakdown = buildReportBreakdown(statsToUse, alignmentToUse);
 
-  const deptLabel = filters.department
-    ? (departmentOptions.find(
+  const deptLabel = filters?.department
+    ? (departmentOptions?.find(
         (d) => String(d.id ?? d.name) === String(filters.department),
       )?.name ?? filters.department)
     : "All Departments";
-  const batchLabel = filters.batch ? `Batch ${filters.batch}` : "All Batches";
+  const batchLabel = filters?.batch ? `Batch ${filters.batch}` : "All Batches";
   const generatedAt = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -469,7 +469,11 @@ const reportPrintStyles = `
     background: #f3f4f6;
     min-height: 100vh;
     padding-bottom: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+  }
+  .report-page, .report-page * {
+    font-family: Arial, Helvetica, sans-serif;
   }
   .report-sheet {
     max-width: 100%;
@@ -479,6 +483,8 @@ const reportPrintStyles = `
     padding: 0;
     box-shadow: none;
     border-radius: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
   }
   .report-section { margin-bottom: 14px; }
   .report-header {
@@ -499,41 +505,121 @@ const reportPrintStyles = `
     height: auto;
     object-fit: cover;
   }
-  .report-header h1 { font-size: 16px; font-weight: 700; color: #02451C; margin: 0 0 2px; }
-  .report-subtitle { font-size: 12px; color: #6b7280; margin: 0; }
-  .report-batch-subtitle { font-size: 12px; font-weight: 700; color: #02451C; margin: 3px 0 0; }
+  .report-header h1 {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16pt;
+    font-weight: 700;
+    color: #02451C;
+    margin: 0 0 2px;
+  }
+  .report-subtitle {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+    font-weight: normal;
+    color: #6b7280;
+    margin: 0;
+  }
+  .report-batch-subtitle {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+    font-weight: normal;
+    color: #02451C;
+    margin: 3px 0 0;
+  }
   .report-section-title {
-    font-size: 12px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.03em; color: #02451C;
-    border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; margin: 0 0 8px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #02451C;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 4px;
+    margin: 0 0 8px;
   }
   .report-kv {
-    display: flex; justify-content: space-between; font-size: 12px;
-    padding: 2px 0; border-bottom: 1px dotted #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+    padding: 2px 0;
+    border-bottom: 1px dotted #e5e7eb;
   }
-  .report-kv span:first-child { color: #6b7280; }
+  .report-kv span {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+  }
+  .report-kv span:first-child { color: #6b7280; font-weight: normal; }
   .report-kv span:last-child { font-weight: 600; }
   .report-overview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .report-stat { display: flex; flex-direction: column; gap: 1px; }
-  .report-stat-label { font-size: 12px; color: #6b7280; }
-  .report-stat-value { font-size: 15px; font-weight: 700; color: #111827; }
+  .report-stat-label {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+    font-weight: normal;
+    color: #6b7280;
+  }
+  .report-stat-value {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14pt;
+    font-weight: 700;
+    color: #111827;
+  }
   .report-chart-row { display: flex; align-items: center; gap: 16px; }
-  .report-legend { list-style: none; margin: 0; padding: 0; font-size: 12px; color: #374151; }
-  .report-legend li { display: flex; align-items: center; gap: 4px; margin-bottom: 3px; }
+  .report-legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+    color: #374151;
+  }
+  .report-legend li {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 3px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+  }
   .report-legend-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-  .report-empty { font-size: 12px; color: #9ca3af; }
-  .report-footer { margin-top: 16px; padding-top: 8px; border-top: 1px solid #e5e7eb; font-size: 12px; }
-  .report-prepared-by { margin-top: 12px; font-weight: 600; }
+  .report-empty {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+    font-weight: normal;
+    color: #9ca3af;
+  }
+  .report-footer {
+    margin-top: 16px;
+    padding-top: 8px;
+    border-top: 1px solid #e5e7eb;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+  }
+  .report-footer p {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+    font-weight: normal;
+    margin: 0;
+  }
+  .report-prepared-by {
+    margin-top: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+    font-weight: normal;
+  }
   .report-avoid-break { break-inside: avoid; page-break-inside: avoid; }
   .report-align-table {
     width: 100%;
     table-layout: fixed;
     border-collapse: collapse;
-    font-size: 11.5px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
     line-height: 1.35;
   }
   .report-align-table th {
-    font-size: 11px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.03em;
@@ -548,6 +634,9 @@ const reportPrintStyles = `
     border-bottom: 1px solid #f3f4f6;
     color: #374151;
     vertical-align: middle;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+    font-weight: normal;
   }
   .report-align-table tr:last-child td { border-bottom: none; }
   .report-align-table .col-dept {
@@ -555,7 +644,9 @@ const reportPrintStyles = `
     text-align: left;
     white-space: normal;
     word-wrap: break-word;
-    font-weight: 500;
+  }
+  .report-align-table td.col-dept {
+    font-weight: normal;
   }
   .report-align-table .col-aligned {
     width: 13%;
@@ -572,9 +663,9 @@ const reportPrintStyles = `
   .report-align-table .col-rate {
     width: 15%;
     text-align: center;
-    font-weight: 600;
+    font-weight: 700;
   }
-  .report-align-not { color: #b91c1c; font-weight: 600; }
+  .report-align-not { color: #b91c1c; font-weight: 700; }
 
   @media print {
     * {
@@ -589,6 +680,8 @@ const reportPrintStyles = `
       background: #fff !important;
       width: 100% !important;
       height: 100% !important;
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 12pt !important;
     }
 
     body * { 
@@ -599,15 +692,24 @@ const reportPrintStyles = `
 
     .report-page, .report-page * {
       visibility: visible !important;
-      margin: 0 !important;
-      padding: 0 !important;
+      font-family: Arial, Helvetica, sans-serif !important;
     }
 
-    .no-print, .no-print * {
+    /* Explicitly hide screen UI, layout sidebars, topbars, and navigation in print */
+    aside,
+    nav,
+    header:not(.report-header),
+    .analytics-screen-ui,
+    .analytics-screen-ui *,
+    .no-print,
+    .no-print * {
       visibility: hidden !important;
       display: none !important;
       margin: 0 !important;
       padding: 0 !important;
+      height: 0 !important;
+      width: 0 !important;
+      overflow: hidden !important;
     }
 
     .report-page {
@@ -617,6 +719,8 @@ const reportPrintStyles = `
       width: 100% !important;
       background: #fff !important;
       overflow: visible !important;
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 12pt !important;
     }
 
     .report-sheet {
@@ -629,6 +733,103 @@ const reportPrintStyles = `
       border-radius: 0 !important;
       height: auto !important;
       page-break-after: avoid;
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 12pt !important;
+    }
+
+    .report-header h1 {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 16pt !important;
+      font-weight: 700 !important;
+      color: #02451C !important;
+    }
+
+    .report-subtitle,
+    .report-batch-subtitle {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 12pt !important;
+      font-weight: normal !important;
+    }
+
+    .report-section-title {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 13pt !important;
+      font-weight: 700 !important;
+      color: #02451C !important;
+    }
+
+    .report-kv {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 12pt !important;
+    }
+
+    .report-kv span {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 12pt !important;
+    }
+
+    .report-stat-label {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 12pt !important;
+      font-weight: normal !important;
+    }
+
+    .report-stat-value {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 14pt !important;
+      font-weight: 700 !important;
+    }
+
+    .report-legend {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 12pt !important;
+    }
+
+    .report-legend li {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 12pt !important;
+    }
+
+    .report-empty {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 12pt !important;
+      font-weight: normal !important;
+    }
+
+    .report-align-table {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 12pt !important;
+    }
+
+    .report-align-table th,
+    .report-align-table th.col-dept {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 12pt !important;
+      font-weight: 700 !important;
+    }
+
+    .report-align-table td,
+    .report-align-table td.col-dept {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 12pt !important;
+      font-weight: normal !important;
+    }
+
+    .report-align-table .col-rate {
+      font-weight: 700 !important;
+    }
+
+    .report-align-not {
+      color: #b91c1c !important;
+      font-weight: 700 !important;
+    }
+
+    .report-footer,
+    .report-footer p,
+    .report-prepared-by {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 12pt !important;
+      font-weight: normal !important;
     }
 
     @page {

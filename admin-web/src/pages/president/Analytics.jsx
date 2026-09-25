@@ -773,23 +773,6 @@ export default function Analytics({ onDrillDown }) {
   // Client-side filter overlay (graceful fallback if API ignores params)
   const filtered = applyFilters(stats, filters, departmentOptions);
 
-  // ── Printable report view ──
-  // Swaps the entire page into the print-friendly layout. Reuses the same
-  // `filtered` stats and `alignmentRows` already loaded above — no extra
-  // fetch, no route change.
-  if (showReport) {
-    return (
-      <PrintableReport
-        stats={filtered}
-        filters={filters}
-        departmentOptions={departmentOptions}
-        alignmentRows={alignmentRows}
-        preparedByName={localStorage.getItem("userName")}
-        onClose={() => setShowReport(false)}
-      />
-    );
-  }
-
   // Derived chart data
   const studentStatusData = [
     {
@@ -825,30 +808,35 @@ export default function Analytics({ onDrillDown }) {
   const isFiltered = filters.department !== "" || filters.batch !== "";
 
   return (
-    <div className="min-h-full bg-gray-50 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
-      <div className="mx-auto max-w-7xl space-y-5">
-        {/* ── Header ── */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="min-w-0">
-            <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-tpc-greenDeep">
-              Insights dashboard
-            </p>
-            <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-              Analytics
-            </h1>
-            <p className="text-sm text-gray-400">
-              Overview of alumni, employment, and student data
-            </p>
+    <>
+      <div
+        className={`min-h-full bg-gray-50 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 analytics-screen-ui ${
+          showReport ? "hidden" : "block"
+        } print:hidden`}
+      >
+        <div className="mx-auto max-w-7xl space-y-5">
+          {/* ── Header ── */}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="min-w-0">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-tpc-greenDeep">
+                Insights dashboard
+              </p>
+              <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
+                Analytics
+              </h1>
+              <p className="text-sm text-gray-400">
+                Overview of alumni, employment, and student data
+              </p>
+            </div>
+            <button
+              onClick={() => window.print()}
+              className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90 sm:w-auto"
+              style={{ background: GREEN_DEEP }}
+            >
+              <Printer size={14} />
+              Print / Save as PDF
+            </button>
           </div>
-          <button
-            onClick={() => setShowReport(true)}
-            className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90 sm:w-auto"
-            style={{ background: GREEN_DEEP }}
-          >
-            <Printer size={14} />
-            Print Report
-          </button>
-        </div>
 
         {/* ── Filter Bar ── */}
         <FilterBar
@@ -1061,8 +1049,25 @@ export default function Analytics({ onDrillDown }) {
           filters={filters}
           onRowsLoaded={setAlignmentRows}
         />
+        </div>
       </div>
-    </div>
+
+      {/* ── Dedicated Printable Report View (sole printable document) ── */}
+      <div
+        className={`analytics-printable-report ${
+          showReport ? "block" : "hidden"
+        } print:block`}
+      >
+        <PrintableReport
+          stats={filtered}
+          filters={filters}
+          departmentOptions={departmentOptions}
+          alignmentRows={alignmentRows}
+          preparedByName={localStorage.getItem("userName")}
+          onClose={() => setShowReport(false)}
+        />
+      </div>
+    </>
   );
 }
 
