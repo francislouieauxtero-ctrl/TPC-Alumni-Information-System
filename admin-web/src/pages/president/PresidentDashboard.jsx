@@ -7,7 +7,6 @@ import {
   Users,
   CheckCircle,
   AlertCircle,
-  ToggleRight,
   Briefcase,
   GraduationCap,
   Calendar,
@@ -129,52 +128,7 @@ export default function PresidentDasboard() {
         />
       </section>
 
-      <section className="grid grid-cols-1 gap-4 sm:gap-6">
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
-          <div className="mb-4 sm:mb-5 flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-800">
-              Alumni overview
-            </h3>
-            <a
-              href="/president/students"
-              className="text-xs sm:text-sm font-semibold text-tpc-greenDeep hover:text-tpc-green transition-colors"
-            >
-              View Registered Alumni &rarr;
-            </a>
-          </div>
 
-          <div className="space-y-3 sm:space-y-4">
-              <OverviewRow
-                label="Verified & active"
-                count={stats?.verified_students || 0}
-                percent={
-                  stats?.total_students > 0
-                    ? Math.round(
-                        ((stats?.verified_students || 0) /
-                          stats.total_students) *
-                          100,
-                      )
-                    : 0
-                }
-                color="bg-green-500"
-              />
-              <OverviewRow
-                label="Not registered graduates"
-                count={stats?.not_registered_graduates || 0}
-                percent={
-                  stats?.total_graduates > 0
-                    ? Math.round(
-                        ((stats?.not_registered_graduates || 0) /
-                          stats.total_graduates) *
-                          100,
-                      )
-                    : 0
-                }
-                color="bg-amber-500"
-              />
-            </div>
-          </div>
-      </section>
 
       {/* Events and Announcements Section */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
@@ -276,23 +230,4 @@ function StatCard({ title, value, icon, color, detail }) {
   );
 }
 
-function OverviewRow({ label, count, percent, color }) {
-  return (
-    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <span className={`h-3 w-3 rounded-full ${color}`} />
-          <span className="text-sm font-medium text-gray-700">{label}</span>
-        </div>
-        <span className="text-sm font-semibold text-gray-900">{count}</span>
-      </div>
-      <div className="h-2.5 rounded-full bg-gray-200">
-        <div
-          className={`${color} h-2.5 rounded-full`}
-          style={{ width: `${percent}%` }}
-        />
-      </div>
-      <div className="mt-2 text-right text-xs text-gray-500">{percent}%</div>
-    </div>
-  );
-}
+
