@@ -12,6 +12,7 @@ import {
   XCircle,
   Sparkles,
   ArrowRight,
+  GraduationCap,
 } from "lucide-react";
 
 export default function DepartmentHeadDashboard() {
@@ -125,118 +126,99 @@ export default function DepartmentHeadDashboard() {
         </div>
       </header>
 
+      {/* ROW 1 — ALUMNI STATISTICS */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
-          <StatCard
-            title="Total Graduates"
-            value={stats?.total_graduates ?? stats?.total_graduate_count ?? 0}
-            icon={<Users className="w-5 h-5" />}
-            color="bg-tpc-greenDeep"
-            detail="All recorded graduates"
-          />
-          <StatCard
-            title="Registered Alumni"
-            value={totalAlumni}
-            icon={<Sparkles className="w-5 h-5" />}
-            color="bg-violet-500"
-            detail="Verified and active alumni"
-          />
-          <StatCard
-            title="Employed Alumni"
-            value={totalEmployed}
-            icon={<Briefcase className="w-5 h-5" />}
-            color="bg-tpc-navy"
-            detail="Employed + self-employed"
-          />
+        <StatCard
+          title="Total Graduates"
+          value={stats?.total_graduates ?? stats?.total_graduate_count ?? 0}
+          icon={<GraduationCap className="w-5 h-5" />}
+          color="bg-violet-500"
+          detail="All recorded graduates"
+        />
+        <StatCard
+          title="Registered Alumni"
+          value={stats?.registered_alumni ?? stats?.total_students ?? totalAlumni}
+          icon={<Users className="w-5 h-5" />}
+          color="bg-tpc-greenDeep"
+          detail="Registered alumni accounts"
+        />
+        <StatCard
+          title="Not Registered Alumni"
+          value={stats?.not_registered_graduates || 0}
+          icon={<Users className="w-5 h-5" />}
+          color="bg-amber-500"
+          detail="Graduates without account"
+        />
+      </div>
+
+      {/* ROW 2 — EMPLOYMENT STATISTICS */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
+        <StatCard
+          title="Employed"
+          value={employedCount}
+          icon={<Briefcase className="w-5 h-5" />}
+          color="bg-emerald-600"
+          detail="Employed in workforce"
+        />
+        <StatCard
+          title="Self-Employed"
+          value={selfEmployedCount}
+          icon={<Sparkles className="w-5 h-5" />}
+          color="bg-blue-600"
+          detail="Self-employed / freelance"
+        />
+        <StatCard
+          title="Unemployed"
+          value={unemployedCount}
+          icon={<AlertCircle className="w-5 h-5" />}
+          color="bg-rose-500"
+          detail="Currently seeking employment"
+        />
+      </div>
+
+      {/* ROW 3 — QUICK INSIGHTS (FULL WIDTH) */}
+      <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="mb-5 flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Quick Insights
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Department alumni activity status
+            </p>
+          </div>
+          <BarChart3 className="h-5 w-5 text-gray-400" />
         </div>
 
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-          <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-            <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Employment Rate
-                </h2>
-                <p className="mt-1 text-sm text-gray-500">
-                  Percentage of alumni in this department currently employed.
-                </p>
-              </div>
-              <div className="rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700">
-                {totalEmployed} / {totalAlumni} employed
-              </div>
-            </div>
-
-            <div className="mb-3 flex items-center justify-between text-sm text-gray-500">
-              <span>Progress</span>
-              <span className="font-semibold text-gray-700">
-                {employmentRate}%
-              </span>
-            </div>
-            <div className="h-3 overflow-hidden rounded-full bg-gray-200">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-tpc-greenDeep to-emerald-500"
-                style={{
-                  width: `${Math.min(Math.max(employmentRate, 0), 100)}%`,
-                }}
-              />
-            </div>
-
-            <div className="mt-6 grid gap-3 sm:grid-cols-3">
-              <MiniStat label="Employed" value={employedCount} tone="emerald" />
-              <MiniStat
-                label="Self-employed"
-                value={selfEmployedCount}
-                tone="blue"
-              />
-              <MiniStat
-                label="Unemployed"
-                value={unemployedCount}
-                tone="amber"
-              />
-            </div>
-          </section>
-
-          <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-            <div className="mb-5 flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Quick insights
-                </h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Department snapshot
-                </p>
-              </div>
-              <BarChart3 className="h-5 w-5 text-gray-400" />
-            </div>
-
-            <div className="space-y-4">
-
-              <InsightRow
-                label="Active alumni"
-                value={stats?.active_students ?? 0}
-                color="bg-tpc-navy"
-                percent={
-                  totalAlumni > 0
-                    ? Math.round(
-                        ((stats?.active_students ?? 0) / totalAlumni) * 100,
-                      )
-                    : 0
-                }
-              />
-              <InsightRow
-                label="Inactive alumni"
-                value={stats?.inactive_students ?? 0}
-                color="bg-red-500"
-                percent={
-                  totalAlumni > 0
-                    ? Math.round(
-                        ((stats?.inactive_students ?? 0) / totalAlumni) * 100,
-                      )
-                    : 0
-                }
-              />
-            </div>
-          </section>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <InsightRow
+            label="Active Alumni"
+            value={stats?.active_students ?? 0}
+            color="bg-green-600"
+            percent={
+              totalAlumni > 0
+                ? Math.round(
+                    ((stats?.active_students ?? 0) / totalAlumni) * 100,
+                  )
+                : 0
+            }
+          />
+          <InsightRow
+            label="Inactive Alumni"
+            value={stats?.inactive_students ?? 0}
+            color="bg-rose-500"
+            percent={
+              totalAlumni > 0
+                ? Math.round(
+                    ((stats?.inactive_students ?? 0) / totalAlumni) * 100,
+                  )
+                : 0
+            }
+          />
         </div>
+      </section>
+
+      {/* ROW 4 — INFORMATION */}
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
           <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -359,24 +341,7 @@ function StatCard({ title, value, icon, color, detail }) {
   );
 }
 
-function MiniStat({ label, value, tone }) {
-  const tones = {
-    emerald: "bg-emerald-50 text-emerald-700",
-    blue: "bg-blue-50 text-blue-700",
-    amber: "bg-amber-50 text-amber-700",
-  };
 
-  return (
-    <div className="rounded-2xl border border-gray-200 bg-gray-50 p-3">
-      <div
-        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${tones[tone]}`}
-      >
-        {label}
-      </div>
-      <p className="mt-3 text-2xl font-bold text-gray-900">{value ?? 0}</p>
-    </div>
-  );
-}
 
 function InsightRow({ label, value, color, percent }) {
   return (
