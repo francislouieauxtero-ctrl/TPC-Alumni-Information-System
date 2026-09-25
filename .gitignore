@@ -66,3 +66,8 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Capstone & Research Documents
+Guidelines/
+Manuscript/
+Survey Results/

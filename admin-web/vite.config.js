@@ -3,8 +3,40 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 
+function devServiceWorkerKillerPlugin() {
+  const killerScript = `
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+      .then(() => self.registration.unregister())
+      .then(() => self.clients.claim())
+      .then(() => self.clients.matchAll({ type: 'window' }))
+      .then((clients) => clients.forEach((c) => c.navigate(c.url)))
+  );
+});
+`;
+  return {
+    name: "dev-sw-killer",
+    apply: "serve",
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const cleanUrl = (req.url || "").split("?")[0];
+        if (cleanUrl === "/sw.js" || cleanUrl === "/registerSW.js" || cleanUrl.endsWith("/sw.js")) {
+          res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+          res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+          res.end(killerScript);
+          return;
+        }
+        next();
+      });
+    },
+  };
+}
+
 export default defineConfig({
   plugins: [
+    devServiceWorkerKillerPlugin(),
     react(),
     tailwindcss(),
     VitePWA({
@@ -78,22 +110,25 @@ export default defineConfig({
   ],
   server: {
     host: "0.0.0.0",
-    port: 5173,
+    port: 3000,
     strictPort: true,
     allowedHosts: true,
+    headers: {
+      "Cache-Control": "no-store, no-cache, must-revalidate",
+    },
     watch: {
       usePolling: true,
-      interval: 1000,
-    },
-    hmr: {
-      host: "localhost",
-      clientPort: 3000,
-      port: 3000,
-      protocol: "ws",
+      interval: 300,
     },
     proxy: {
-      "/api": { target: "http://nginx", changeOrigin: true },
-      "/storage": { target: "http://nginx", changeOrigin: true },
+      "/api": {
+        target: process.env.VITE_BACKEND_PROXY_URL || "http://localhost:8070",
+        changeOrigin: true,
+      },
+      "/storage": {
+        target: process.env.VITE_BACKEND_PROXY_URL || "http://localhost:8070",
+        changeOrigin: true,
+      },
     },
   },
 });

@@ -24,19 +24,19 @@ class AdminSeeder extends Seeder
             return;
         }
 
-        User::updateOrCreate(
-            [
-                'email' => $email,
-            ],
-            [
-                'name' => $name,
-                'password' => Hash::make($password),
-                'department_id' => null,
-                'role' => User::ROLE_SUPER_ADMIN,
-                'is_verified' => true,
-                'status' => User::STATUS_ACTIVE,
-            ]
-        );
+        // Find existing super_admin or user by email to prevent duplicate accounts
+        $user = User::where('role', User::ROLE_SUPER_ADMIN)->first()
+            ?? User::where('email', $email)->first()
+            ?? new User();
+
+        $user->name = $name;
+        $user->email = $email;
+        $user->password = Hash::make($password);
+        $user->department_id = null;
+        $user->role = User::ROLE_SUPER_ADMIN;
+        $user->is_verified = true;
+        $user->status = User::STATUS_ACTIVE;
+        $user->save();
 
         $this->command?->info("AdminSeeder: Super Admin account initialized for [{$email}].");
     }

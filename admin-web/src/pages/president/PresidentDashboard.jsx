@@ -86,7 +86,7 @@ export default function PresidentDasboard() {
 
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         <StatCard
-          title="Number of departments in TPC"
+          title="Total Departments"
           value={stats?.total_departments || 0}
           icon={<Briefcase className="h-5 w-5" />}
           color="bg-emerald-600"

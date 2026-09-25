@@ -18,6 +18,7 @@ services:
       - ./backend:/var/www/backend
       - ./php/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini
       - ./php/www.conf:/usr/local/etc/php-fpm.d/www.conf
+    restart: unless-stopped
     depends_on:
       - mysql
       - redis
@@ -51,6 +52,7 @@ services:
   nginx:
     image: nginx:alpine
     container_name: capstone_nginx
+    restart: unless-stopped
     ports:
       - "8070:80"
     volumes:
@@ -67,6 +69,7 @@ services:
       context: ./admin-web
       dockerfile: Dockerfile
     container_name: capstone_admin
+    profiles: ["production"]
     restart: unless-stopped
     ports:
       - "3000:80"
