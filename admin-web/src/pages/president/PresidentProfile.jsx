@@ -228,17 +228,21 @@ export default function PresidentProfile() {
   ];
 
   return (
-    <div className="flex flex-col items-center justify-center py-4 sm:py-6 w-full">
-      {/* Page header */}
-      <div className="mb-5 sm:mb-7 w-full max-w-5xl text-center">
-        <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-tpc-greenDeep">
-          Account
-        </p>
-        <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900">Your profile</h1>
-        <p className="mt-1 text-xs sm:text-sm text-gray-400">
-          Review your president account details here.
-        </p>
-      </div>
+    <div className="flex flex-col items-center justify-center py-4 sm:py-6 w-full max-w-5xl mx-auto space-y-6">
+      {/* Header */}
+      <header className="w-full rounded-2xl bg-gradient-to-r from-[#006400] via-[#008000] to-[#00A000] p-4 sm:p-6 text-white shadow-sm">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-green-100">
+            ACCOUNT
+          </p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl text-white">
+            My Profile
+          </h1>
+          <p className="mt-1 text-sm text-green-50/90">
+            Manage your account information and credentials.
+          </p>
+        </div>
+      </header>
 
       {/* Action error banner */}
       {actionError && (
@@ -271,9 +275,8 @@ export default function PresidentProfile() {
               }}
               onDragLeave={() => setIsDragging(false)}
               onDrop={handleDrop}
-              className={`group relative mb-4 flex-shrink-0 overflow-hidden rounded-2xl ${
-                isDragging ? "ring-2 ring-tpc-greenDeep ring-offset-2" : ""
-              }`}
+              className={`group relative mb-4 flex-shrink-0 overflow-hidden rounded-2xl ${isDragging ? "ring-2 ring-tpc-greenDeep ring-offset-2" : ""
+                }`}
               style={{ width: 120, height: 120 }}
             >
               {profile?.avatar && !imageFailed ? (

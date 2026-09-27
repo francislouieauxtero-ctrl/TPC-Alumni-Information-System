@@ -79,16 +79,16 @@ export default function StudentDashboard() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-gray-50">
       {/* ── Header banner ── */}
-      <div className="bg-tpc-greenDeep px-4 sm:px-8 pt-8 pb-16">
-        <p className="text-tpc-green text-xs uppercase tracking-[0.2em] font-medium mb-1">
+      <div className="bg-gradient-to-r from-[#006400] via-[#008000] to-[#00A000] px-4 sm:px-8 pt-8 pb-16 text-white shadow-sm">
+        <p className="text-green-100 text-xs uppercase tracking-[0.2em] font-semibold mb-1">
           Alumni Portal
         </p>
-        <h1 className="text-2xl sm:text-3xl font-bold text-white leading-snug">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-snug">
           Welcome back,{" "}
-          <span className="text-green-300">{student?.name?.split(" ")[0]}</span>
+          <span className="text-green-200">{student?.name?.split(" ")[0]}</span>
           !
         </h1>
-        <p className="mt-1 text-green-200 text-sm">
+        <p className="mt-1 text-green-50/90 text-sm">
           {student?.department?.name || "Talibon Polytechnic College"}
         </p>
       </div>
@@ -325,11 +325,10 @@ function ScopeBadge({ scope, department }) {
   const isSchoolWide = scope === "school_wide";
   return (
     <span
-      className={`mt-0.5 max-w-[45%] shrink-0 truncate rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-        isSchoolWide
+      className={`mt-0.5 max-w-[45%] shrink-0 truncate rounded-full px-2 py-0.5 text-[10px] font-semibold ${isSchoolWide
           ? "bg-blue-100 text-blue-600"
           : "bg-purple-100 text-purple-600"
-      }`}
+        }`}
     >
       {isSchoolWide ? "School" : department || "Dept"}
     </span>

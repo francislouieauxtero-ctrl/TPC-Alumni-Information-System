@@ -15,6 +15,7 @@ import {
   Megaphone,
   UserCircle,
   XCircle,
+  ChevronRight,
 } from "lucide-react";
 import api from "../services/api";
 import UserAvatar from "../components/shared/UserAvatar";
@@ -101,12 +102,12 @@ export default function PresidentLayout({ children }) {
       <aside
         className={`${
           sidebarOpen ? "min-[850px]:w-72" : "min-[850px]:w-20"
-        } fixed inset-y-0 left-0 z-50 flex w-72 ${
+        } fixed inset-y-0 left-0 z-50 flex h-screen min-h-screen max-h-screen w-72 ${
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        } flex-col bg-tpc-greenDeep border-r border-white/10 px-3 py-6 transition-all duration-300 min-[850px]:static min-[850px]:translate-x-0`}
+        } flex-col bg-tpc-greenDeep border-r border-white/10 px-3 py-3 transition-all duration-300 min-[850px]:static min-[850px]:translate-x-0`}
       >
-        {/* Logo */}
-        <div className="px-3 pb-5 border-b border-white/20">
+        {/* Header / Logo */}
+        <div className="shrink-0 px-2 pb-3 border-b border-white/20">
           <div
             className={`flex items-center justify-between gap-2.5 ${!sidebarOpen && "justify-center"}`}
           >
@@ -115,10 +116,10 @@ export default function PresidentLayout({ children }) {
               <img
                 src={logo}
                 alt="Talibon Polytechnic College seal"
-                className="h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-tpc-gold object-cover shadow-md shrink-0"
+                className="h-10 w-10 rounded-full border-2 border-tpc-gold object-cover shadow-xs shrink-0"
               />
               {(sidebarOpen || mobileMenuOpen) && (
-                <span className="text-white text-lg sm:text-xl font-bold tracking-tight truncate">
+                <span className="text-white text-base font-bold tracking-tight truncate">
                   {roleLabel}
                 </span>
               )}
@@ -126,7 +127,8 @@ export default function PresidentLayout({ children }) {
             {/* Mobile close button */}
             <button
               onClick={() => setMobileMenuOpen(false)}
-              className="min-[850px]:hidden p-1.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white"
+              className="min-[850px]:hidden p-1.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors shrink-0"
+              aria-label="Close menu"
             >
               <X className="w-5 h-5" />
             </button>
@@ -134,11 +136,11 @@ export default function PresidentLayout({ children }) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 flex flex-col gap-1 py-5 overflow-y-auto">
+        <nav className="flex-1 min-h-0 flex flex-col gap-1 py-2 overflow-y-auto">
           {userRole === "super_admin" && (
             <NavLink
               to="/president/dashboard"
-              icon={<BarChart3 className="w-5 h-5" />}
+              icon={<BarChart3 className="w-5 h-5 shrink-0" />}
               label="Dashboard"
               sidebarOpen={sidebarOpen}
             />
@@ -146,7 +148,7 @@ export default function PresidentLayout({ children }) {
           {userRole === "super_admin" && (
             <NavLink
               to="/president/DepartmentHeadManagement"
-              icon={<Building2 className="w-5 h-5" />}
+              icon={<Building2 className="w-5 h-5 shrink-0" />}
               label="Manage Departments"
               sidebarOpen={sidebarOpen}
             />
@@ -154,7 +156,7 @@ export default function PresidentLayout({ children }) {
           {userRole === "super_admin" && (
             <NavLink
               to="/president/students"
-              icon={<Users className="w-5 h-5" />}
+              icon={<Users className="w-5 h-5 shrink-0" />}
               label="Registered Alumni"
               sidebarOpen={sidebarOpen}
             />
@@ -162,7 +164,7 @@ export default function PresidentLayout({ children }) {
           {userRole === "super_admin" && (
             <NavLink
               to="/president/graduates"
-              icon={<GraduationCap className="w-5 h-5" />}
+              icon={<GraduationCap className="w-5 h-5 shrink-0" />}
               label="View Graduates"
               sidebarOpen={sidebarOpen}
             />
@@ -170,7 +172,7 @@ export default function PresidentLayout({ children }) {
           {userRole === "super_admin" && (
             <NavLink
               to="/president/events"
-              icon={<Calendar className="w-5 h-5" />}
+              icon={<Calendar className="w-5 h-5 shrink-0" />}
               label="Events"
               sidebarOpen={sidebarOpen}
             />
@@ -178,7 +180,7 @@ export default function PresidentLayout({ children }) {
           {userRole === "super_admin" && (
             <NavLink
               to="/president/announcements"
-              icon={<Megaphone className="w-5 h-5" />}
+              icon={<Megaphone className="w-5 h-5 shrink-0" />}
               label="Announcements"
               sidebarOpen={sidebarOpen}
             />
@@ -186,7 +188,7 @@ export default function PresidentLayout({ children }) {
           {userRole === "super_admin" && (
             <NavLink
               to="/president/analytics"
-              icon={<LineChart className="w-5 h-5" />}
+              icon={<LineChart className="w-5 h-5 shrink-0" />}
               label="Analytics"
               sidebarOpen={sidebarOpen}
             />
@@ -194,17 +196,18 @@ export default function PresidentLayout({ children }) {
           {userRole === "super_admin" && (
             <NavLink
               to="/president/profile"
-              icon={<UserCircle className="w-5 h-5" />}
+              icon={<UserCircle className="w-5 h-5 shrink-0" />}
               label="My Profile"
               sidebarOpen={sidebarOpen}
             />
           )}
         </nav>
 
-        {/* User Profile */}
-        <div className="border-t border-white/20 pt-4">
+        {/* Footer: Profile + Logout + Toggle */}
+        <div className="shrink-0 mt-auto border-t border-white/20 pt-2 flex flex-col gap-1.5">
+          {/* User Profile */}
           <div
-            className={`flex items-center gap-3 ${!sidebarOpen && "justify-center"}`}
+            className={`flex items-center gap-2.5 px-1 py-1 ${!sidebarOpen && "justify-center"}`}
           >
             <UserAvatar name={displayName} avatar={userAvatar} size="sm" />
             {sidebarOpen && (
@@ -216,34 +219,36 @@ export default function PresidentLayout({ children }) {
               </div>
             )}
           </div>
-        </div>
 
-        {/* Logout Button */}
-        <div className="pt-4 mt-4 border-t border-white/20">
+          {/* Logout Button */}
           <button
             onClick={handleLogout}
             disabled={logoutLoading}
-            className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white/10 text-white text-sm font-medium hover:bg-white/20 disabled:opacity-50 transition-colors ${!sidebarOpen && "p-2"
-              }`}
+            title={!sidebarOpen ? "Logout" : undefined}
+            className={`w-full flex items-center justify-center gap-2 rounded-lg bg-white/10 text-white text-xs font-medium hover:bg-white/20 disabled:opacity-50 transition-colors ${
+              sidebarOpen ? "px-3 py-2" : "p-2"
+            }`}
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="w-4 h-4 shrink-0" />
             {sidebarOpen && (
               <span>{logoutLoading ? "Logging out..." : "Logout"}</span>
             )}
           </button>
-        </div>
 
-        {/* Toggle Sidebar (Desktop) */}
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="hidden min-[850px]:flex items-center justify-center h-12 mt-4 border-t border-white/20 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
-        >
-          {sidebarOpen ? (
-            <X className="w-5 h-5" />
-          ) : (
-            <Menu className="w-5 h-5" />
-          )}
-        </button>
+          {/* Toggle Sidebar (Desktop) */}
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+            className="hidden min-[850px]:flex items-center justify-center h-8 rounded-lg text-white/60 hover:bg-white/10 hover:text-white transition-colors w-full"
+            aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+          >
+            {sidebarOpen ? (
+              <X className="w-4 h-4" />
+            ) : (
+              <Menu className="w-4 h-4" />
+            )}
+          </button>
+        </div>
       </aside>
 
       {/* Main Content */}
@@ -280,18 +285,45 @@ export default function PresidentLayout({ children }) {
 function NavLink({ to, icon, label, sidebarOpen }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const isActive = location.pathname === to;
+  const isActive =
+    location.pathname === to ||
+    (to !== "/president/dashboard" && location.pathname.startsWith(to + "/"));
 
   return (
     <button
       onClick={() => navigate(to)}
-      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive
-          ? "bg-white/20 text-white"
-          : "text-white/70 hover:bg-white/10 hover:text-white"
-        }`}
+      title={!sidebarOpen ? label : undefined}
+      className={`group w-full flex items-center ${
+        sidebarOpen ? "gap-2.5 px-3 py-2.5" : "justify-center px-2 py-2.5"
+      } rounded-lg text-sm transition-colors duration-150 ${
+        isActive
+          ? "bg-[#006400] text-white font-semibold shadow-xs hover:bg-[#006400]"
+          : "text-white/80 hover:bg-[#00A000]/40 hover:text-white font-medium"
+      }`}
     >
-      {icon}
-      {sidebarOpen && <span>{label}</span>}
+      <span
+        className={`shrink-0 transition-colors duration-150 ${
+          isActive ? "text-white" : "text-white/70 group-hover:text-white"
+        }`}
+      >
+        {icon}
+      </span>
+      {sidebarOpen && (
+        <>
+          <span
+            className={`truncate flex-1 text-left transition-colors duration-150 ${
+              isActive ? "text-white" : "text-white/90 group-hover:text-white"
+            }`}
+          >
+            {label}
+          </span>
+          <ChevronRight
+            className={`w-4 h-4 shrink-0 transition-colors duration-150 ${
+              isActive ? "text-white" : "text-white/40 group-hover:text-white"
+            }`}
+          />
+        </>
+      )}
     </button>
   );
 }

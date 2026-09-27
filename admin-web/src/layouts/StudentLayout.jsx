@@ -10,6 +10,7 @@ import {
   CalendarDays,
   Bell,
   Briefcase,
+  ChevronRight,
 } from "lucide-react";
 import api from "../services/api";
 import UserAvatar from "../components/shared/UserAvatar";
@@ -77,12 +78,12 @@ export default function StudentLayout({ children }) {
     <div className="flex h-screen bg-white text-gray-900 font-sans">
       {/* ── Desktop sidebar ── */}
       <aside
-        className={`hidden min-[850px]:flex flex-col bg-tpc-greenDeep border-r border-white/10 px-3 py-6 transition-all duration-300 ${
+        className={`hidden min-[850px]:flex flex-col h-screen min-h-screen max-h-screen bg-tpc-greenDeep border-r border-white/10 px-3 py-3 transition-all duration-300 ${
           sidebarOpen ? "w-56" : "w-20"
         }`}
       >
         {/* Logo + wordmark */}
-        <div className="px-3 pb-5 border-b border-white/20">
+        <div className="shrink-0 px-2 pb-3 border-b border-white/20">
           <div
             className={`flex items-center gap-2.5 ${!sidebarOpen && "justify-center"}`}
           >
@@ -90,10 +91,10 @@ export default function StudentLayout({ children }) {
             <img
               src={logo}
               alt="Talibon Polytechnic College seal"
-              className="h-12 w-12 rounded-full border-2 border-tpc-gold object-cover shadow-md md:h-14 md:w-14 shrink-0"
+              className="h-10 w-10 rounded-full border-2 border-tpc-gold object-cover shadow-xs shrink-0"
             />
             {sidebarOpen && (
-              <span className="text-white text-xl font-bold tracking-tight truncate">
+              <span className="text-white text-base font-bold tracking-tight truncate">
                 Alumni
               </span>
             )}
@@ -101,7 +102,7 @@ export default function StudentLayout({ children }) {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 flex flex-col gap-1 py-5 overflow-y-auto">
+        <nav className="flex-1 min-h-0 flex flex-col gap-1 py-2 overflow-y-auto">
           {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
             <NavLink
               key={to}
@@ -113,10 +114,10 @@ export default function StudentLayout({ children }) {
           ))}
         </nav>
 
-        {/* User info */}
-        <div className="border-t border-white/20 pt-4">
+        {/* Footer: User info + Logout + Collapse toggle */}
+        <div className="shrink-0 mt-auto border-t border-white/20 pt-2 flex flex-col gap-1.5">
           <div
-            className={`flex items-center gap-3 ${!sidebarOpen && "justify-center"}`}
+            className={`flex items-center gap-2.5 px-1 py-1 ${!sidebarOpen && "justify-center"}`}
           >
             <UserAvatar name={studentName} avatar={studentAvatar} size="sm" />
             {sidebarOpen && (
@@ -128,35 +129,36 @@ export default function StudentLayout({ children }) {
               </div>
             )}
           </div>
-        </div>
 
-        {/* Logout */}
-        <div className="pt-4 mt-4 border-t border-white/20">
+          {/* Logout */}
           <button
             onClick={handleLogout}
             disabled={logoutLoading}
-            className={`w-full flex items-center justify-center gap-2 rounded-lg bg-white/10 text-white text-sm font-medium hover:bg-white/20 disabled:opacity-50 transition-colors ${
-              sidebarOpen ? "px-4 py-2" : "p-2"
+            title={!sidebarOpen ? "Logout" : undefined}
+            className={`w-full flex items-center justify-center gap-2 rounded-lg bg-white/10 text-white text-xs font-medium hover:bg-white/20 disabled:opacity-50 transition-colors ${
+              sidebarOpen ? "px-3 py-2" : "p-2"
             }`}
           >
-            <LogOut className="w-5 h-5 flex-shrink-0" />
+            <LogOut className="w-4 h-4 flex-shrink-0" />
             {sidebarOpen && (
               <span>{logoutLoading ? "Logging out…" : "Logout"}</span>
             )}
           </button>
-        </div>
 
-        {/* Collapse toggle */}
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="flex items-center justify-center h-10 mt-4 border-t border-white/20 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
-        >
-          {sidebarOpen ? (
-            <X className="w-5 h-5" />
-          ) : (
-            <Menu className="w-5 h-5" />
-          )}
-        </button>
+          {/* Collapse toggle */}
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+            className="flex items-center justify-center h-8 rounded-lg text-white/60 hover:bg-white/10 hover:text-white transition-colors w-full"
+            aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+          >
+            {sidebarOpen ? (
+              <X className="w-4 h-4" />
+            ) : (
+              <Menu className="w-4 h-4" />
+            )}
+          </button>
+        </div>
       </aside>
 
       {/* ── Mobile drawer overlay ── */}
@@ -169,19 +171,19 @@ export default function StudentLayout({ children }) {
 
       {/* ── Mobile drawer ── */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[80vw] max-w-48 flex-col bg-tpc-greenDeep px-4 py-6 transition-transform duration-300 min-[850px]:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 flex h-screen min-h-screen max-h-screen w-[80vw] max-w-56 flex-col bg-tpc-greenDeep px-3 py-3 transition-transform duration-300 min-[850px]:hidden ${
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Logo row */}
-        <div className="flex items-center justify-between pb-5 border-b border-white/20">
+        <div className="shrink-0 flex items-center justify-between px-1 pb-3 border-b border-white/20">
           <div className="flex items-center gap-2.5 min-w-0">
             <img
               src={logo}
               alt="Talibon Polytechnic College seal"
-              className="h-10 w-10 shrink-0 rounded-full border-2 border-tpc-gold object-cover shadow-sm"
+              className="h-10 w-10 shrink-0 rounded-full border-2 border-tpc-gold object-cover shadow-xs"
             />
-            <span className="text-white text-lg font-bold tracking-tight truncate">
+            <span className="text-white text-base font-bold tracking-tight truncate">
               Student
             </span>
           </div>
@@ -195,7 +197,7 @@ export default function StudentLayout({ children }) {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 flex flex-col gap-1 py-5 overflow-y-auto">
+        <nav className="flex-1 min-h-0 flex flex-col gap-1 py-2 overflow-y-auto">
           {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
             <NavLink
               key={to}
@@ -208,9 +210,9 @@ export default function StudentLayout({ children }) {
           ))}
         </nav>
 
-        {/* User info */}
-        <div className="border-t border-white/20 pt-4">
-          <div className="flex items-center gap-3">
+        {/* Footer: User info + Logout */}
+        <div className="shrink-0 mt-auto border-t border-white/20 pt-2 flex flex-col gap-1.5">
+          <div className="flex items-center gap-2.5 px-1 py-1">
             <UserAvatar name={studentName} avatar={studentAvatar} size="sm" />
             <div className="min-w-0">
               <p className="text-white text-sm font-semibold truncate">
@@ -219,16 +221,14 @@ export default function StudentLayout({ children }) {
               <p className="text-white/60 text-xs truncate">{studentEmail}</p>
             </div>
           </div>
-        </div>
 
-        {/* Logout */}
-        <div className="pt-4 mt-4 border-t border-white/20">
+          {/* Logout */}
           <button
             onClick={handleLogout}
             disabled={logoutLoading}
-            className="w-full flex items-center justify-center gap-2 rounded-lg bg-white/10 px-4 py-2.5 text-white text-sm font-medium hover:bg-white/20 disabled:opacity-50 transition-colors"
+            className="w-full flex items-center justify-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-white text-xs font-medium hover:bg-white/20 disabled:opacity-50 transition-colors"
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="w-4 h-4" />
             <span>{logoutLoading ? "Logging out…" : "Logout"}</span>
           </button>
         </div>
@@ -290,7 +290,9 @@ export default function StudentLayout({ children }) {
 function NavLink({ to, icon, label, sidebarOpen, onNavigate }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const isActive = location.pathname === to;
+  const isActive =
+    location.pathname === to ||
+    (to !== "/student/dashboard" && location.pathname.startsWith(to + "/"));
 
   return (
     <button
@@ -298,14 +300,38 @@ function NavLink({ to, icon, label, sidebarOpen, onNavigate }) {
         navigate(to);
         onNavigate?.();
       }}
-      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+      title={!sidebarOpen ? label : undefined}
+      className={`group w-full flex items-center ${
+        sidebarOpen ? "gap-2.5 px-3 py-2.5" : "justify-center px-2 py-2.5"
+      } rounded-lg text-sm transition-colors duration-150 ${
         isActive
-          ? "bg-white/20 text-white"
-          : "text-white/70 hover:bg-white/10 hover:text-white"
+          ? "bg-[#006400] text-white font-semibold shadow-xs hover:bg-[#006400]"
+          : "text-white/80 hover:bg-[#00A000]/40 hover:text-white font-medium"
       }`}
     >
-      {icon}
-      {sidebarOpen && <span className="truncate">{label}</span>}
+      <span
+        className={`shrink-0 transition-colors duration-150 ${
+          isActive ? "text-white" : "text-white/70 group-hover:text-white"
+        }`}
+      >
+        {icon}
+      </span>
+      {sidebarOpen && (
+        <>
+          <span
+            className={`truncate flex-1 text-left transition-colors duration-150 ${
+              isActive ? "text-white" : "text-white/90 group-hover:text-white"
+            }`}
+          >
+            {label}
+          </span>
+          <ChevronRight
+            className={`w-4 h-4 shrink-0 transition-colors duration-150 ${
+              isActive ? "text-white" : "text-white/40 group-hover:text-white"
+            }`}
+          />
+        </>
+      )}
     </button>
   );
 }
@@ -319,7 +345,7 @@ function MobileNavItem({ to, icon: Icon, label }) {
     <button
       onClick={() => navigate(to)}
       className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2 sm:py-2.5 text-[10px] sm:text-xs font-medium transition-colors min-w-0 ${
-        isActive ? "text-tpc-greenDeep" : "text-gray-400 hover:text-gray-600"
+        isActive ? "text-[#006400] font-semibold" : "text-gray-400 hover:text-gray-600"
       }`}
     >
       <Icon className={`w-5 h-5 ${isActive ? "stroke-[2.5]" : ""}`} />

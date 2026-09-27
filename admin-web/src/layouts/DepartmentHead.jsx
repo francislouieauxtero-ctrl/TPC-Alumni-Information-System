@@ -12,6 +12,7 @@ import {
   CalendarDays,
   BarChart3,
   Megaphone,
+  ChevronRight,
 } from "lucide-react";
 import api from "../services/api";
 import UserAvatar from "../components/shared/UserAvatar";
@@ -85,17 +86,17 @@ export default function DepartmentHeadLayout({ children }) {
   };
 
   return (
-    <div className="flex h-screen bg-white text-gray-900 font-sans">
+    <div className="flex h-screen bg-slate-50 text-gray-900 font-sans">
       {/* Sidebar */}
       <aside
         className={`${
           sidebarOpen ? "min-[850px]:w-[280px]" : "min-[850px]:w-20"
-        } fixed inset-y-0 left-0 z-50 flex w-[280px] ${
+        } fixed inset-y-0 left-0 z-50 flex h-screen min-h-screen max-h-screen w-[280px] ${
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        } flex-col bg-tpc-greenDeep border-r border-white/10 px-3 py-6 transition-all duration-300 min-[850px]:static min-[850px]:translate-x-0`}
+        } flex-col bg-white border-r border-slate-200/80 px-3 py-3 transition-all duration-300 min-[850px]:static min-[850px]:translate-x-0 shadow-sm`}
       >
-        {/* Logo */}
-        <div className="px-3 pb-5 border-b border-white/20">
+        {/* Header / Branding */}
+        <div className="shrink-0 px-2 pb-3 border-b border-slate-200/80">
           <div
             className={`flex items-center gap-2.5 ${!sidebarOpen && "justify-center"}`}
           >
@@ -103,74 +104,89 @@ export default function DepartmentHeadLayout({ children }) {
             <img
               src={logo}
               alt="Talibon Polytechnic College seal"
-              className="h-12 w-12 rounded-full border-2 border-tpc-gold object-cover shadow-md md:h-12 md:w-12"
+              className="h-10 w-10 rounded-full border-2 border-tpc-gold object-cover shadow-xs shrink-0 ring-2 ring-slate-100"
             />
             {sidebarOpen && (
-              <span className="text-white text-base font-bold tracking-tight whitespace-nowrap">
-                Department Head
-              </span>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-slate-900 text-sm font-bold tracking-tight uppercase truncate">
+                  TPC Alumni
+                </h1>
+                <p className="text-slate-500 text-xs font-medium truncate">
+                  Department Head
+                </p>
+              </div>
+            )}
+            {/* Mobile close button */}
+            {mobileMenuOpen && (
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="min-[850px]:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0"
+                aria-label="Close menu"
+              >
+                <X className="w-5 h-5" />
+              </button>
             )}
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 flex flex-col gap-1 py-5 overflow-y-auto">
+        <nav className="flex-1 min-h-0 flex flex-col gap-1 py-2 overflow-y-auto">
           <NavLink
             to="/department-head/dashboard"
-            icon={<Home className="w-5 h-5" />}
+            icon={<Home className="w-5 h-5 shrink-0" />}
             label="Dashboard"
             sidebarOpen={sidebarOpen}
             onNavigate={() => setMobileMenuOpen(false)}
           />
           <NavLink
             to="/department-head/graduates"
-            icon={<GraduationCap className="w-5 h-5" />}
+            icon={<GraduationCap className="w-5 h-5 shrink-0" />}
             label="Graduates"
             sidebarOpen={sidebarOpen}
             onNavigate={() => setMobileMenuOpen(false)}
           />
-
           <NavLink
             to="/department-head/alumni"
-            icon={<UserCheck className="w-5 h-5" />}
+            icon={<UserCheck className="w-5 h-5 shrink-0" />}
             label="Alumni"
             sidebarOpen={sidebarOpen}
             onNavigate={() => setMobileMenuOpen(false)}
           />
           <NavLink
             to="/department-head/events"
-            icon={<CalendarDays className="w-5 h-5" />}
+            icon={<CalendarDays className="w-5 h-5 shrink-0" />}
             label="Events"
             sidebarOpen={sidebarOpen}
             onNavigate={() => setMobileMenuOpen(false)}
           />
           <NavLink
             to="/department-head/announcements"
-            icon={<Megaphone className="w-5 h-5" />}
+            icon={<Megaphone className="w-5 h-5 shrink-0" />}
             label="Announcements"
             sidebarOpen={sidebarOpen}
             onNavigate={() => setMobileMenuOpen(false)}
           />
           <NavLink
             to="/department-head/analytics"
-            icon={<BarChart3 className="w-5 h-5" />}
+            icon={<BarChart3 className="w-5 h-5 shrink-0" />}
             label="Analytics"
             sidebarOpen={sidebarOpen}
             onNavigate={() => setMobileMenuOpen(false)}
           />
           <NavLink
             to="/department-head/profile"
-            icon={<User className="w-5 h-5" />}
+            icon={<User className="w-5 h-5 shrink-0" />}
             label="My Profile"
             sidebarOpen={sidebarOpen}
             onNavigate={() => setMobileMenuOpen(false)}
           />
         </nav>
 
-        {/* User Profile */}
-        <div className="border-t border-white/20 pt-4">
+        {/* Footer: Profile + Logout + Toggle */}
+        <div className="shrink-0 mt-auto border-t border-slate-200/80 pt-2 flex flex-col gap-1.5">
+          {/* User Profile */}
           <div
-            className={`flex items-center gap-3 ${!sidebarOpen && "justify-center"}`}
+            className={`flex items-center gap-2.5 px-2 py-1.5 rounded-lg ${!sidebarOpen && "justify-center"}`}
           >
             <UserAvatar
               name={departmentHeadName}
@@ -179,44 +195,41 @@ export default function DepartmentHeadLayout({ children }) {
             />
             {sidebarOpen && (
               <div className="flex-1 min-w-0">
-                <p className="text-white text-sm font-semibold truncate">
+                <p className="text-slate-900 text-sm font-semibold truncate">
                   {departmentHeadName}
                 </p>
-                <p className="text-white/60 text-xs truncate">
-                  {departmentHeadEmail}
+                <p className="text-slate-500 text-xs truncate">
+                  {departmentHeadDept || departmentHeadEmail || "Department Head"}
                 </p>
               </div>
             )}
           </div>
-        </div>
 
-        {/* Logout Button */}
-        <div className="pt-4 mt-4 border-t border-white/20">
+          {/* Logout Button */}
           <button
             onClick={handleLogout}
             disabled={logoutLoading}
-            className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white/10 text-white text-sm font-medium hover:bg-white/20 disabled:opacity-50 transition-colors ${
-              !sidebarOpen && "p-2"
+            title={!sidebarOpen ? "Logout" : undefined}
+            className={`group w-full flex items-center justify-center gap-2 rounded-lg bg-white border border-slate-200/90 text-slate-700 text-xs font-medium hover:bg-red-50 hover:text-red-600 hover:border-red-200 disabled:opacity-50 transition-all shadow-xs ${
+              sidebarOpen ? "px-3 py-2" : "p-2"
             }`}
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="w-4 h-4 text-slate-400 group-hover:text-red-600 transition-colors shrink-0" />
             {sidebarOpen && (
               <span>{logoutLoading ? "Logging out..." : "Logout"}</span>
             )}
           </button>
-        </div>
 
-        {/* Toggle Sidebar */}
-        <button
-          onClick={handleSidebarToggle}
-          className="flex min-[850px]:flex items-center justify-center h-12 mt-4 border-t border-white/20 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
-        >
-          {sidebarOpen || mobileMenuOpen ? (
-            <X className="w-5 h-5" />
-          ) : (
-            <Menu className="w-5 h-5" />
-          )}
-        </button>
+          {/* Toggle Sidebar Control (Three-line Hamburger Icon) */}
+          <button
+            onClick={handleSidebarToggle}
+            title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+            className="w-full flex items-center justify-center h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+          >
+            <Menu className="w-4 h-4" />
+          </button>
+        </div>
       </aside>
 
       {mobileMenuOpen && (
@@ -260,7 +273,9 @@ export default function DepartmentHeadLayout({ children }) {
 function NavLink({ to, icon, label, sidebarOpen, onNavigate }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const isActive = location.pathname === to;
+  const isActive =
+    location.pathname === to ||
+    (to !== "/department-head/dashboard" && location.pathname.startsWith(to + "/"));
 
   return (
     <button
@@ -268,14 +283,45 @@ function NavLink({ to, icon, label, sidebarOpen, onNavigate }) {
         navigate(to);
         if (onNavigate) onNavigate();
       }}
-      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+      title={!sidebarOpen ? label : undefined}
+      className={`group w-full flex items-center ${
+        sidebarOpen ? "gap-2.5 px-3 py-2.5" : "justify-center px-2 py-2.5"
+      } rounded-lg text-sm transition-colors duration-150 ${
         isActive
-          ? "bg-white/20 text-white"
-          : "text-white/70 hover:bg-white/10 hover:text-white"
+          ? "bg-[#006400] text-white font-semibold shadow-xs hover:bg-[#006400]"
+          : "bg-white text-slate-800 hover:bg-[#00A000] hover:text-white font-medium"
       }`}
     >
-      {icon}
-      {sidebarOpen && <span>{label}</span>}
+      <span
+        className={`shrink-0 transition-colors duration-150 ${
+          isActive
+            ? "text-white"
+            : "text-slate-600 group-hover:text-white"
+        }`}
+      >
+        {icon}
+      </span>
+
+      {sidebarOpen && (
+        <>
+          <span
+            className={`truncate flex-1 text-left transition-colors duration-150 ${
+              isActive
+                ? "text-white"
+                : "text-slate-800 group-hover:text-white"
+            }`}
+          >
+            {label}
+          </span>
+          <ChevronRight
+            className={`w-4 h-4 shrink-0 transition-colors duration-150 ${
+              isActive
+                ? "text-white"
+                : "text-slate-400 group-hover:text-white"
+            }`}
+          />
+        </>
+      )}
     </button>
   );
 }

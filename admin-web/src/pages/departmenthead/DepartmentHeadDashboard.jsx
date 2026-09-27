@@ -107,21 +107,21 @@ export default function DepartmentHeadDashboard() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      <header className="rounded-2xl bg-gradient-to-r from-tpc-greenDeep via-tpc-green to-emerald-700 p-4 sm:p-6 text-white shadow-md">
+      <header className="rounded-2xl bg-gradient-to-r from-[#006400] via-[#008000] to-[#00A000] p-4 sm:p-6 text-white shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-100">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-green-100">
               Department dashboard
             </p>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
+            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl text-white">
               {departmentName}
             </h1>
           </div>
-          <div className="self-start sm:self-auto rounded-xl border border-white/15 bg-white/10 px-3.5 py-2 sm:px-4 sm:py-3 backdrop-blur-sm">
-            <p className="text-xs uppercase tracking-[0.22em] text-emerald-100">
+          <div className="self-start sm:self-auto rounded-xl border border-white/20 bg-white/10 px-3.5 py-2 sm:px-4 sm:py-3 backdrop-blur-sm">
+            <p className="text-xs uppercase tracking-[0.22em] text-green-100">
               Employment rate
             </p>
-            <p className="mt-0.5 sm:mt-1 text-xl sm:text-2xl font-bold">{employmentRate}%</p>
+            <p className="mt-0.5 sm:mt-1 text-xl sm:text-2xl font-bold text-white">{employmentRate}%</p>
           </div>
         </div>
       </header>
@@ -198,8 +198,8 @@ export default function DepartmentHeadDashboard() {
             percent={
               totalAlumni > 0
                 ? Math.round(
-                    ((stats?.active_students ?? 0) / totalAlumni) * 100,
-                  )
+                  ((stats?.active_students ?? 0) / totalAlumni) * 100,
+                )
                 : 0
             }
           />
@@ -210,8 +210,8 @@ export default function DepartmentHeadDashboard() {
             percent={
               totalAlumni > 0
                 ? Math.round(
-                    ((stats?.inactive_students ?? 0) / totalAlumni) * 100,
-                  )
+                  ((stats?.inactive_students ?? 0) / totalAlumni) * 100,
+                )
                 : 0
             }
           />
@@ -220,104 +220,104 @@ export default function DepartmentHeadDashboard() {
 
       {/* ROW 4 — INFORMATION */}
 
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-          <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-            <div className="mb-5 flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Upcoming Events
-                </h3>
-                <p className="text-sm text-gray-500">
-                  Latest department activities
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => navigate("/department-head/events")}
-                className="inline-flex items-center gap-1 text-sm font-semibold text-tpc-greenDeep hover:text-tpc-green"
-              >
-                View all
-                <ArrowRight className="h-4 w-4" />
-              </button>
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Upcoming Events
+              </h3>
+              <p className="text-sm text-gray-500">
+                Latest department activities
+              </p>
             </div>
-            {events.length > 0 ? (
-              <div className="space-y-4">
-                {events.slice(0, 3).map((event) => (
-                  <div
-                    key={event.id}
-                    className="rounded-2xl border border-gray-100 bg-gray-50 p-4"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="font-semibold text-gray-900">
-                        {event.title || event.name}
-                      </p>
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-500">
-                        {event.scope || event.event_type || "Event"}
-                      </span>
-                    </div>
-                    <p className="mt-2 text-sm text-gray-600">
-                      {event.location || event.venue || "No location provided"}
-                    </p>
-                    <p className="mt-2 text-xs text-gray-500">
-                      {formatDateTime(
-                        event.date || event.event_date || event.starts_at,
-                      )}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
-                No upcoming events found.
-              </div>
-            )}
-          </section>
-
-          <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-            <div className="mb-5 flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Recent Announcements
-                </h3>
-                <p className="text-sm text-gray-500">Department updates</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => navigate("/department-head/announcements")}
-                className="inline-flex items-center gap-1 text-sm font-semibold text-tpc-greenDeep hover:text-tpc-green"
-              >
-                View all
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
-            {announcements.length > 0 ? (
-              <div className="space-y-4">
-                {announcements.slice(0, 3).map((announcement) => (
-                  <div
-                    key={announcement.id}
-                    className="rounded-2xl border border-gray-100 bg-gray-50 p-4"
-                  >
+            <button
+              type="button"
+              onClick={() => navigate("/department-head/events")}
+              className="inline-flex items-center gap-1 text-sm font-semibold text-tpc-greenDeep hover:text-tpc-green"
+            >
+              View all
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
+          {events.length > 0 ? (
+            <div className="space-y-4">
+              {events.slice(0, 3).map((event) => (
+                <div
+                  key={event.id}
+                  className="rounded-2xl border border-gray-100 bg-gray-50 p-4"
+                >
+                  <div className="flex items-center justify-between gap-3">
                     <p className="font-semibold text-gray-900">
-                      {announcement.title}
+                      {event.title || event.name}
                     </p>
-                    <p className="mt-2 text-sm text-gray-600">
-                      {announcement.body || announcement.content}
-                    </p>
-                    <p className="mt-3 text-xs text-gray-400">
-                      {formatDateTime(
-                        announcement.created_at || announcement.published_at,
-                      )}
-                    </p>
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-500">
+                      {event.scope || event.event_type || "Event"}
+                    </span>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
-                No announcements available.
-              </div>
-            )}
-          </section>
-        </div>
+                  <p className="mt-2 text-sm text-gray-600">
+                    {event.location || event.venue || "No location provided"}
+                  </p>
+                  <p className="mt-2 text-xs text-gray-500">
+                    {formatDateTime(
+                      event.date || event.event_date || event.starts_at,
+                    )}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
+              No upcoming events found.
+            </div>
+          )}
+        </section>
+
+        <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Recent Announcements
+              </h3>
+              <p className="text-sm text-gray-500">Department updates</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate("/department-head/announcements")}
+              className="inline-flex items-center gap-1 text-sm font-semibold text-tpc-greenDeep hover:text-tpc-green"
+            >
+              View all
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
+          {announcements.length > 0 ? (
+            <div className="space-y-4">
+              {announcements.slice(0, 3).map((announcement) => (
+                <div
+                  key={announcement.id}
+                  className="rounded-2xl border border-gray-100 bg-gray-50 p-4"
+                >
+                  <p className="font-semibold text-gray-900">
+                    {announcement.title}
+                  </p>
+                  <p className="mt-2 text-sm text-gray-600">
+                    {announcement.body || announcement.content}
+                  </p>
+                  <p className="mt-3 text-xs text-gray-400">
+                    {formatDateTime(
+                      announcement.created_at || announcement.published_at,
+                    )}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
+              No announcements available.
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }

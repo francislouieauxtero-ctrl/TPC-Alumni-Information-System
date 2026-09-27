@@ -190,9 +190,9 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
   const user = alumni.user ?? {};
   const batchYear = formatBatchYear(
     alumni.batch_year ??
-      alumni.alumniProfile?.batch_year ??
-      alumni.graduate?.batch_year ??
-      alumni.user?.alumniProfile?.batch_year,
+    alumni.alumniProfile?.batch_year ??
+    alumni.graduate?.batch_year ??
+    alumni.user?.alumniProfile?.batch_year,
   );
   const employmentStatus =
     alumni.employment_status ??
@@ -242,7 +242,7 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
   const jobFeedback =
     employmentStatus === "unemployed"
       ? (jobHistory?.find((job) => job.employment_type === "unemployed")
-          ?.industry ?? null)
+        ?.industry ?? null)
       : workAlignedReason;
   const sortedJobHistory = [...(jobHistory ?? [])].sort((first, second) => {
     if (first.is_current !== second.is_current) {
@@ -343,8 +343,8 @@ function ProfileModal({ alumni, onClose, jobHistory, loading }) {
                 </div>
                 <div className="text-sm font-medium text-gray-700 truncate">
                   {item.value === null ||
-                  item.value === undefined ||
-                  item.value === ""
+                    item.value === undefined ||
+                    item.value === ""
                     ? "Data missing"
                     : item.value}
                 </div>
@@ -579,14 +579,23 @@ export default function AlumniList() {
   };
 
   return (
-    <div className="space-y-5 p-4 sm:p-6">
-      {/* Page heading */}
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-800">Alumni</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Browse registered alumni for your department.
-        </p>
-      </div>
+    <div className="space-y-5">
+      {/* Header */}
+      <header className="rounded-2xl bg-gradient-to-r from-[#006400] via-[#008000] to-[#00A000] p-4 sm:p-6 text-white shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-green-100">
+              ALUMNI DIRECTORY
+            </p>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl text-white">
+              Alumni
+            </h1>
+            <p className="mt-1 text-sm text-green-50/90">
+              Browse and manage alumni records for your department.
+            </p>
+          </div>
+        </div>
+      </header>
 
       {/* Toolbar */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -666,9 +675,9 @@ export default function AlumniList() {
               const user = item.user ?? {};
               const batchYear = formatBatchYear(
                 item.batch_year ??
-                  item.alumniProfile?.batch_year ??
-                  item.graduate?.batch_year ??
-                  item.user?.alumniProfile?.batch_year,
+                item.alumniProfile?.batch_year ??
+                item.graduate?.batch_year ??
+                item.user?.alumniProfile?.batch_year,
               );
               const position =
                 item.current_job ?? item.alumniProfile?.current_job;
@@ -697,13 +706,13 @@ export default function AlumniList() {
                           user.school_id ||
                           item.student_number ||
                           item.graduate?.student_number) && (
-                          <p className="text-[11px] font-mono text-tpc-greenDeep font-medium mt-0.5">
-                            ID: {user.schoolId ||
-                              user.school_id ||
-                              item.student_number ||
-                              item.graduate?.student_number}
-                          </p>
-                        )}
+                            <p className="text-[11px] font-mono text-tpc-greenDeep font-medium mt-0.5">
+                              ID: {user.schoolId ||
+                                user.school_id ||
+                                item.student_number ||
+                                item.graduate?.student_number}
+                            </p>
+                          )}
                       </div>
                     </div>
                     <div className="flex-shrink-0">
@@ -780,9 +789,9 @@ export default function AlumniList() {
                   const user = item.user ?? {};
                   const batchYear = formatBatchYear(
                     item.batch_year ??
-                      item.alumniProfile?.batch_year ??
-                      item.graduate?.batch_year ??
-                      item.user?.alumniProfile?.batch_year,
+                    item.alumniProfile?.batch_year ??
+                    item.graduate?.batch_year ??
+                    item.user?.alumniProfile?.batch_year,
                   );
                   return (
                     <tr
@@ -807,13 +816,13 @@ export default function AlumniList() {
                               user.school_id ||
                               item.student_number ||
                               item.graduate?.student_number) && (
-                              <p className="text-[11px] font-mono text-tpc-greenDeep font-medium mt-0.5">
-                                ID: {user.schoolId ||
-                                  user.school_id ||
-                                  item.student_number ||
-                                  item.graduate?.student_number}
-                              </p>
-                            )}
+                                <p className="text-[11px] font-mono text-tpc-greenDeep font-medium mt-0.5">
+                                  ID: {user.schoolId ||
+                                    user.school_id ||
+                                    item.student_number ||
+                                    item.graduate?.student_number}
+                                </p>
+                              )}
                           </div>
                         </div>
                       </td>

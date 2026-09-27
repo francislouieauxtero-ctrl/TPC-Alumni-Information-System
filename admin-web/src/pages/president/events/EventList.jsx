@@ -79,15 +79,28 @@ export default function EventList() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-800">Events</h1>
-        <button
-          onClick={() => navigate("create")}
-          className="px-6 py-2 bg-tpc-greenDeep hover:bg-tpc-green text-white rounded-full transition"
-        >
-          + Create Event
-        </button>
-      </div>
+      <header className="rounded-2xl bg-gradient-to-r from-[#006400] via-[#008000] to-[#00A000] p-4 sm:p-6 text-white shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-green-100">
+              EVENT MANAGEMENT
+            </p>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl text-white">
+              Events
+            </h1>
+            <p className="mt-1 text-sm text-green-50/90">
+              Manage alumni events and campus activities.
+            </p>
+          </div>
+
+          <button
+            onClick={() => navigate("create")}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-green-50 text-[#006400] px-4 py-2.5 text-sm font-semibold transition shadow-sm self-start sm:self-auto shrink-0"
+          >
+            + Create Event
+          </button>
+        </div>
+      </header>
 
       {/* Filters */}
       <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 space-y-4">
@@ -173,11 +186,10 @@ export default function EventList() {
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Scope:</span>
                   <span
-                    className={`px-2 py-1 rounded text-xs font-semibold ${
-                      event.scope === "school_wide"
+                    className={`px-2 py-1 rounded text-xs font-semibold ${event.scope === "school_wide"
                         ? "bg-blue-100 text-blue-700"
                         : "bg-purple-100 text-purple-700"
-                    }`}
+                      }`}
                   >
                     {event.scope === "school_wide"
                       ? "School-wide"

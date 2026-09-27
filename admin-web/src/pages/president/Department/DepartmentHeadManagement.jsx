@@ -311,44 +311,48 @@ export default function DepartmentHeadManagement({ embedded = false }) {
     "px-4 py-2 border border-gray-200 bg-white rounded-lg text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-tpc-greenDeep/30 focus:border-tpc-greenDeep transition text-sm";
 
   const fieldClass = (field) =>
-    `w-full px-3 py-2 rounded-lg border text-sm text-gray-800 outline-none transition focus:ring-2 focus:ring-tpc-greenDeep/20 ${
-      editErrors[field]
-        ? "border-red-400 focus:border-red-400"
-        : "border-gray-200 focus:border-tpc-greenDeep"
+    `w-full px-3 py-2 rounded-lg border text-sm text-gray-800 outline-none transition focus:ring-2 focus:ring-tpc-greenDeep/20 ${editErrors[field]
+      ? "border-red-400 focus:border-red-400"
+      : "border-gray-200 focus:border-tpc-greenDeep"
     }`;
 
   return (
     <div className={embedded ? "mt-4 sm:mt-8" : "space-y-6"}>
       {!embedded && (
-        <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
-              Department Head Management
-            </h1>
-            <p className="text-gray-500 text-sm">
-              Manage departments and verify department heads
-            </p>
-          </div>
-
-          {currentRole === "super_admin" && (
-            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-              <button
-                onClick={() => navigate("/president/departments/create")}
-                className="flex items-center gap-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm"
-              >
-                <Building2 className="w-4 h-4 text-tpc-greenDeep" />
-                New Department
-              </button>
-              <button
-                onClick={() => navigate("/president/department-heads/create")}
-                className="flex items-center gap-2 bg-tpc-greenDeep hover:bg-tpc-green text-white px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm"
-              >
-                <UserCog className="w-4 h-4" />
-                New Department Head
-              </button>
+        <header className="rounded-2xl bg-gradient-to-r from-[#006400] via-[#008000] to-[#00A000] p-4 sm:p-6 text-white shadow-sm mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-green-100">
+                DEPARTMENT MANAGEMENT
+              </p>
+              <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl text-white">
+                Departments & Heads
+              </h1>
+              <p className="mt-1 text-sm text-green-50/90">
+                Manage academic departments and department heads.
+              </p>
             </div>
-          )}
-        </div>
+
+            {currentRole === "super_admin" && (
+              <div className="flex items-center gap-2 sm:gap-3 flex-wrap self-start sm:self-auto shrink-0">
+                <button
+                  onClick={() => navigate("/president/departments/create")}
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/30 bg-white/10 hover:bg-white/20 text-white px-3.5 sm:px-4 py-2.5 text-sm font-medium transition shadow-xs backdrop-blur-sm"
+                >
+                  <Building2 className="w-4 h-4 text-green-100" />
+                  New Department
+                </button>
+                <button
+                  onClick={() => navigate("/president/department-heads/create")}
+                  className="inline-flex items-center gap-2 rounded-xl bg-white hover:bg-green-50 text-[#006400] px-3.5 sm:px-4 py-2.5 text-sm font-semibold transition shadow-sm"
+                >
+                  <UserCog className="w-4 h-4" />
+                  New Department Head
+                </button>
+              </div>
+            )}
+          </div>
+        </header>
       )}
 
       {/* ── Departments Section ─────────────────────────────────── */}
@@ -549,11 +553,10 @@ export default function DepartmentHeadManagement({ embedded = false }) {
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
-                          member.status === "active"
+                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${member.status === "active"
                             ? "bg-green-50 text-green-700 border-green-200"
                             : "bg-red-50 text-red-600 border-red-200"
-                        }`}
+                          }`}
                       >
                         {member.status === "active" ? "Active" : "Inactive"}
                       </span>

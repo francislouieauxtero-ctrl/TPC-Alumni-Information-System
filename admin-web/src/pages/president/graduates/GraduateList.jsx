@@ -73,17 +73,28 @@ export default function GraduateList() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-800">
-          Graduate Management
-        </h1>
-        {/* <button
-          onClick={() => navigate("create")}
-          className="px-6 py-2 bg-tpc-greenDeep hover:bg-tpc-green text-white rounded-full transition"
-        >
-          + Add Graduate
-        </button> */}
-      </div>
+      <header className="rounded-2xl bg-gradient-to-r from-[#006400] via-[#008000] to-[#00A000] p-4 sm:p-6 text-white shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-green-100">
+              GRADUATE MANAGEMENT
+            </p>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl text-white">
+              Graduates
+            </h1>
+            <p className="mt-1 text-sm text-green-50/90">
+              View and manage recorded graduate information.
+            </p>
+          </div>
+
+          <button
+            onClick={() => navigate("create")}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-green-50 text-[#006400] px-4 py-2.5 text-sm font-semibold transition shadow-sm self-start sm:self-auto shrink-0"
+          >
+            + Add Graduate
+          </button>
+        </div>
+      </header>
 
       {/* Filters */}
       <div className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-200">
@@ -130,72 +141,70 @@ export default function GraduateList() {
 
       {graduates.data && graduates.data.length > 0 ? (
         <div
-          className={`bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-opacity ${
-            loading ? "opacity-50" : "opacity-100"
-          }`}
+          className={`bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-opacity ${loading ? "opacity-50" : "opacity-100"
+            }`}
         >
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] text-left">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">
-                  Student Number
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">
-                  Name
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">
-                  Batch Year
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">
-                  Block
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">
-                  Department
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {graduates.data.map((graduate) => (
-                <tr
-                  key={graduate.id}
-                  className="border-b border-gray-200 hover:bg-gray-50"
-                >
-                  <td className="px-6 py-4 text-sm text-gray-800">
-                    {graduate.student_number}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-800">
-                    {graduate.name}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-800">
-                    {graduate.batch_year}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-800">
-                    {graduate.block || "-"}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-800">
-                    {graduate.department?.name || "-"}
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        graduate.registration_status === "registered"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-amber-100 text-amber-700"
-                      }`}
-                    >
-                      {graduate.registration_status === "registered"
-                        ? "Registered"
-                        : "Not Registered"}
-                    </span>
-                  </td>
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">
+                    Student Number
+                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">
+                    Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">
+                    Batch Year
+                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">
+                    Block
+                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">
+                    Department
+                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">
+                    Status
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {graduates.data.map((graduate) => (
+                  <tr
+                    key={graduate.id}
+                    className="border-b border-gray-200 hover:bg-gray-50"
+                  >
+                    <td className="px-6 py-4 text-sm text-gray-800">
+                      {graduate.student_number}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-800">
+                      {graduate.name}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-800">
+                      {graduate.batch_year}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-800">
+                      {graduate.block || "-"}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-800">
+                      {graduate.department?.name || "-"}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold ${graduate.registration_status === "registered"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-amber-100 text-amber-700"
+                          }`}
+                      >
+                        {graduate.registration_status === "registered"
+                          ? "Registered"
+                          : "Not Registered"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       ) : (

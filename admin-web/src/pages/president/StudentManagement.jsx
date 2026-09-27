@@ -102,11 +102,11 @@ function Avatar({ src, name, size = "md" }) {
     size === "lg" ? "shadow-lg ring-4 ring-white" : "shadow-sm";
   const initials = name
     ? name
-        .split(" ")
-        .map((n) => n[0])
-        .slice(0, 2)
-        .join("")
-        .toUpperCase()
+      .split(" ")
+      .map((n) => n[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase()
     : "?";
 
   if (resolvedSrc && !imageFailed) {
@@ -133,9 +133,9 @@ function ProfileModal({ alumni, onClose, jobHistory, jobHistoryLoading }) {
   const user = alumni.user ?? {};
   const batchYear = formatBatchYear(
     alumni.batch_year ??
-      alumni.alumniProfile?.batch_year ??
-      alumni.graduate?.batch_year ??
-      alumni.user?.alumniProfile?.batch_year,
+    alumni.alumniProfile?.batch_year ??
+    alumni.graduate?.batch_year ??
+    alumni.user?.alumniProfile?.batch_year,
   );
 
   const employmentStatus =
@@ -190,7 +190,7 @@ function ProfileModal({ alumni, onClose, jobHistory, jobHistoryLoading }) {
   const jobFeedback =
     inferredEmploymentStatus === "unemployed"
       ? (jobHistory?.find((job) => job.employment_type === "unemployed")
-          ?.industry ?? null)
+        ?.industry ?? null)
       : workAlignedReason;
   const sortedJobHistory = [...(jobHistory ?? [])].sort((first, second) => {
     if (first.is_current !== second.is_current) {
@@ -586,10 +586,10 @@ export default function StudentManagement() {
         !batchFilter ||
         String(
           alum.batch_year ??
-            alum.alumniProfile?.batch_year ??
-            alum.graduate?.batch_year ??
-            alum.user?.alumniProfile?.batch_year ??
-            alum.user?.batch_year,
+          alum.alumniProfile?.batch_year ??
+          alum.graduate?.batch_year ??
+          alum.user?.alumniProfile?.batch_year ??
+          alum.user?.batch_year,
         ) === String(batchFilter);
 
       return matchesSearch && matchesDepartment && matchesBatch;
@@ -610,12 +610,22 @@ export default function StudentManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="mb-4 sm:mb-6">
-        <h1 className="mb-1 text-2xl sm:text-3xl font-bold text-gray-900">Alumni</h1>
-        <p className="text-sm sm:text-base text-gray-500">
-          Browse and manage all approved alumni records
-        </p>
-      </div>
+      {/* Header */}
+      <header className="rounded-2xl bg-gradient-to-r from-[#006400] via-[#008000] to-[#00A000] p-4 sm:p-6 text-white shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-green-100">
+              ALUMNI MANAGEMENT
+            </p>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl text-white">
+              Registered Alumni
+            </h1>
+            <p className="mt-1 text-sm text-green-50/90">
+              Manage registered alumni records across departments.
+            </p>
+          </div>
+        </div>
+      </header>
 
       {error && (
         <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-red-600">
@@ -635,11 +645,10 @@ export default function StudentManagement() {
                   setBatchFilter("");
                 }
               }}
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-                viewMode === tab.key
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition ${viewMode === tab.key
                   ? "bg-tpc-greenDeep text-white"
                   : "border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
-              }`}
+                }`}
             >
               {tab.label}
             </button>
@@ -797,13 +806,13 @@ export default function StudentManagement() {
                       user.school_id ||
                       alum.student_number ||
                       alum.graduate?.student_number) && (
-                      <span className="flex-shrink-0 text-[11px] font-mono font-medium text-tpc-greenDeep bg-tpc-greenDeep/10 px-2 py-0.5 rounded">
-                        ID: {user.schoolId ||
-                          user.school_id ||
-                          alum.student_number ||
-                          alum.graduate?.student_number}
-                      </span>
-                    )}
+                        <span className="flex-shrink-0 text-[11px] font-mono font-medium text-tpc-greenDeep bg-tpc-greenDeep/10 px-2 py-0.5 rounded">
+                          ID: {user.schoolId ||
+                            user.school_id ||
+                            alum.student_number ||
+                            alum.graduate?.student_number}
+                        </span>
+                      )}
                   </div>
                   <p className="mb-1 truncate text-xs text-gray-400">
                     {user.email ?? "—"}

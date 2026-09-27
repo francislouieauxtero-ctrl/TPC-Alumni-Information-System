@@ -74,12 +74,12 @@ function FilterBar({
   const activeSelectStyle = (val) =>
     val
       ? {
-          ...selectBase,
-          borderColor: GREEN_DEEP,
-          color: GREEN_DEEP,
-          background: GREEN_SOFT,
-          fontWeight: 600,
-        }
+        ...selectBase,
+        borderColor: GREEN_DEEP,
+        color: GREEN_DEEP,
+        background: GREEN_SOFT,
+        fontWeight: 600,
+      }
       : selectBase;
 
   const clearOne = (key) => onChange({ ...filters, [key]: "" });
@@ -758,13 +758,13 @@ export default function Analytics({ onDrillDown }) {
   const departmentOptions =
     departments.length > 0
       ? departments.map((department) => ({
-          id: department.id,
-          name: department.name,
-        }))
+        id: department.id,
+        name: department.name,
+      }))
       : stats?.by_department
         ? Object.keys(stats.by_department)
-            .filter((name) => name !== "No department assigned")
-            .map((name) => ({ name }))
+          .filter((name) => name !== "No department assigned")
+          .map((name) => ({ name }))
         : [];
   const batchOptions = stats?.graduates_by_year
     ? Object.keys(stats.graduates_by_year).sort((a, b) => b - a)
@@ -793,15 +793,15 @@ export default function Analytics({ onDrillDown }) {
 
   const departmentData = filtered?.by_department
     ? Object.entries(filtered.by_department)
-        .filter(([name]) => name !== "No department assigned")
-        .map(([name, count]) => ({ name, count }))
+      .filter(([name]) => name !== "No department assigned")
+      .map(([name, count]) => ({ name, count }))
     : [];
 
   const graduationTrend = filtered?.graduates_by_year
     ? Object.entries(filtered.graduates_by_year).map(([year, count]) => ({
-        year,
-        graduates: count,
-      }))
+      year,
+      graduates: count,
+    }))
     : [];
 
   const maxDeptCount = Math.max(...departmentData.map((d) => d.count), 1);
@@ -810,253 +810,252 @@ export default function Analytics({ onDrillDown }) {
   return (
     <>
       <div
-        className={`min-h-full bg-gray-50 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 analytics-screen-ui ${
-          showReport ? "hidden" : "block"
-        } print:hidden`}
+        className={`min-h-full bg-gray-50 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 analytics-screen-ui ${showReport ? "hidden" : "block"
+          } print:hidden`}
       >
         <div className="mx-auto max-w-7xl space-y-5">
           {/* ── Header ── */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div className="min-w-0">
-              <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-tpc-greenDeep">
-                Insights dashboard
-              </p>
-              <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-                Analytics
-              </h1>
-              <p className="text-sm text-gray-400">
-                Overview of alumni, employment, and student data
-              </p>
+          <header className="rounded-2xl bg-gradient-to-r from-[#006400] via-[#008000] to-[#00A000] p-4 sm:p-6 text-white shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-wide text-green-100">
+                  ANALYTICS
+                </p>
+                <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl text-white">
+                  Employment & Alumni Analytics
+                </h1>
+                <p className="mt-1 text-sm text-green-50/90">
+                  Monitor alumni employment and graduate statistics.
+                </p>
+              </div>
+              <button
+                onClick={() => window.print()}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-green-50 text-[#006400] px-4 py-2.5 text-sm font-semibold transition shadow-sm self-start sm:self-auto shrink-0"
+              >
+                <Printer size={15} />
+                Print / Save as PDF
+              </button>
             </div>
-            <button
-              onClick={() => window.print()}
-              className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90 sm:w-auto"
-              style={{ background: GREEN_DEEP }}
-            >
-              <Printer size={14} />
-              Print / Save as PDF
-            </button>
-          </div>
+          </header>
 
-        {/* ── Filter Bar ── */}
-        <FilterBar
-          departments={departmentOptions}
-          batches={batchOptions}
-          filters={filters}
-          onChange={setFilters}
-          departmentLocked={isDeptHead}
-        />
+          {/* ── Filter Bar ── */}
+          <FilterBar
+            departments={departmentOptions}
+            batches={batchOptions}
+            filters={filters}
+            onChange={setFilters}
+            departmentLocked={isDeptHead}
+          />
 
-        {/* ── Active filter notice ── */}
-        {isFiltered && (
-          <FilterBanner filters={filters} departments={departmentOptions} />
-        )}
-
-        {/* ── Stat Cards ── */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-6">
-          <StatCard
-            title="Total Alumni"
-            value={filtered?.total_students ?? "—"}
-            icon={<Users className="w-4 h-4" />}
-            accent="bg-tpc-greenDeep"
-          />
-          <StatCard
-            title="Verified"
-            value={filtered?.verified_students ?? "—"}
-            icon={<GraduationCap className="w-4 h-4" />}
-            accent="bg-green-500"
-          />
-          <StatCard
-            title="Inactive Accounts"
-            value={filtered?.not_registered_graduates ?? "—"}
-            icon={<Clock className="w-4 h-4" />}
-            accent="bg-amber-500"
-          />
-          <StatCard
-            title="Employed"
-            value={filtered?.employed_alumni ?? "—"}
-            icon={<Briefcase className="w-4 h-4" />}
-            accent="bg-blue-500"
-          />
-          <StatCard
-            title="Graduates"
-            value={filtered?.total_graduates ?? "—"}
-            icon={<TrendingUp className="w-4 h-4" />}
-            accent="bg-purple-500"
-          />
-          <StatCard
-            title="Departments"
-            value={filtered?.total_departments ?? "—"}
-            icon={<Building2 className="w-4 h-4" />}
-            accent="bg-tpc-greenDeep"
-          />
-        </div>
-
-        {/* ── Row 1: Donut + Pie ── */}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <ChartCard title="Alumni Status Breakdown">
-            {studentStatusData.length > 0 ? (
-              <div className="flex items-center gap-6">
-                <DonutChart
-                  data={studentStatusData}
-                  colors={STATUS_COLORS}
-                  size={130}
-                  thickness={30}
-                />
-                <div className="flex flex-col gap-3 flex-1">
-                  {studentStatusData.map((d, i) => (
-                    <LegendRow
-                      key={d.name}
-                      color={STATUS_COLORS[i % STATUS_COLORS.length]}
-                      label={d.name}
-                      value={d.value}
-                      total={studentStatusData.reduce((s, x) => s + x.value, 0)}
-                    />
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <EmptyChart />
-            )}
-          </ChartCard>
-
-          <ChartCard title="Employment Status">
-            {employmentData.length > 0 ? (
-              <div className="flex flex-col items-center gap-4 overflow-x-auto">
-                <PieChartWithLabels
-                  data={employmentData}
-                  colors={EMPLOY_COLORS}
-                  labelColors={EMPLOY_LABEL_COLORS}
-                />
-                <div className="flex items-center justify-center gap-5 flex-wrap">
-                  {employmentData.map((d, i) => (
-                    <div key={d.name} className="flex items-center gap-1.5">
-                      <span
-                        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                        style={{
-                          background: EMPLOY_COLORS[i % EMPLOY_COLORS.length],
-                        }}
-                      />
-                      <span className="text-xs text-gray-500">{d.name}</span>
-                      <span className="text-xs font-semibold text-gray-800">
-                        {d.value}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <EmptyChart />
-            )}
-          </ChartCard>
-        </div>
-
-        {/* ── Row 2: Department Bars (super admin only) + Graduation Line ── */}
-        <div
-          className={`grid grid-cols-1 gap-4 ${isDeptHead ? "" : "lg:grid-cols-2"}`}
-        >
-          {!isDeptHead && (
-            <ChartCard title="Alumni per Department">
-              {departmentData.length > 0 ? (
-                <div className="flex flex-col gap-3">
-                  {departmentData.map((d) => (
-                    <div key={d.name} className="flex items-center gap-3">
-                      <span className="w-40 shrink-0 break-words text-xs leading-5 text-gray-500 sm:w-52">
-                        {d.name}
-                      </span>
-                      <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-tpc-greenDeep transition-all duration-500"
-                          style={{
-                            width: `${(d.count / maxDeptCount) * 100}%`,
-                          }}
-                        />
-                      </div>
-                      <span className="text-xs text-gray-400 w-6 text-right flex-shrink-0">
-                        {d.count}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <EmptyChart label="No department data available yet" />
-              )}
-            </ChartCard>
+          {/* ── Active filter notice ── */}
+          {isFiltered && (
+            <FilterBanner filters={filters} departments={departmentOptions} />
           )}
 
-          <ChartCard
-            title={
-              filters.batch
-                ? `Graduation Trend — Batch ${filters.batch}`
-                : "Graduation Trend by Year"
-            }
-          >
-            {graduationTrend.length > 0 ? (
-              <ResponsiveContainer width="100%" height={180}>
-                <LineChart
-                  data={graduationTrend}
-                  margin={{ top: 4, right: 12, left: -10, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis
-                    dataKey="year"
-                    tick={{ fontSize: 11, fill: "#9ca3af" }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 11, fill: "#9ca3af" }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: "8px",
-                      border: "1px solid #e5e7eb",
-                      fontSize: "12px",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="graduates"
-                    stroke={GREEN_DEEP}
-                    strokeWidth={2.5}
-                    dot={{
-                      fill: GREEN_DEEP,
-                      r: 4,
-                      strokeWidth: 2,
-                      stroke: "#fff",
-                    }}
-                    activeDot={{
-                      r: 6,
-                      fill: GREEN_DEEP,
-                      stroke: "#fff",
-                      strokeWidth: 2,
-                    }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <EmptyChart label="No graduation trend data available yet" />
-            )}
-          </ChartCard>
-        </div>
+          {/* ── Stat Cards ── */}
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-6">
+            <StatCard
+              title="Total Alumni"
+              value={filtered?.total_students ?? "—"}
+              icon={<Users className="w-4 h-4" />}
+              accent="bg-tpc-greenDeep"
+            />
+            <StatCard
+              title="Verified"
+              value={filtered?.verified_students ?? "—"}
+              icon={<GraduationCap className="w-4 h-4" />}
+              accent="bg-green-500"
+            />
+            <StatCard
+              title="Inactive Accounts"
+              value={filtered?.not_registered_graduates ?? "—"}
+              icon={<Clock className="w-4 h-4" />}
+              accent="bg-amber-500"
+            />
+            <StatCard
+              title="Employed"
+              value={filtered?.employed_alumni ?? "—"}
+              icon={<Briefcase className="w-4 h-4" />}
+              accent="bg-blue-500"
+            />
+            <StatCard
+              title="Graduates"
+              value={filtered?.total_graduates ?? "—"}
+              icon={<TrendingUp className="w-4 h-4" />}
+              accent="bg-purple-500"
+            />
+            <StatCard
+              title="Departments"
+              value={filtered?.total_departments ?? "—"}
+              icon={<Building2 className="w-4 h-4" />}
+              accent="bg-tpc-greenDeep"
+            />
+          </div>
 
-        {/* ── Row 3: Job–Course Alignment ── */}
-        <AlignmentSummaryWidget
-          onDrillDown={onDrillDown}
-          filters={filters}
-          onRowsLoaded={setAlignmentRows}
-        />
+          {/* ── Row 1: Donut + Pie ── */}
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <ChartCard title="Alumni Status Breakdown">
+              {studentStatusData.length > 0 ? (
+                <div className="flex items-center gap-6">
+                  <DonutChart
+                    data={studentStatusData}
+                    colors={STATUS_COLORS}
+                    size={130}
+                    thickness={30}
+                  />
+                  <div className="flex flex-col gap-3 flex-1">
+                    {studentStatusData.map((d, i) => (
+                      <LegendRow
+                        key={d.name}
+                        color={STATUS_COLORS[i % STATUS_COLORS.length]}
+                        label={d.name}
+                        value={d.value}
+                        total={studentStatusData.reduce((s, x) => s + x.value, 0)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <EmptyChart />
+              )}
+            </ChartCard>
+
+            <ChartCard title="Employment Status">
+              {employmentData.length > 0 ? (
+                <div className="flex flex-col items-center gap-4 overflow-x-auto">
+                  <PieChartWithLabels
+                    data={employmentData}
+                    colors={EMPLOY_COLORS}
+                    labelColors={EMPLOY_LABEL_COLORS}
+                  />
+                  <div className="flex items-center justify-center gap-5 flex-wrap">
+                    {employmentData.map((d, i) => (
+                      <div key={d.name} className="flex items-center gap-1.5">
+                        <span
+                          className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                          style={{
+                            background: EMPLOY_COLORS[i % EMPLOY_COLORS.length],
+                          }}
+                        />
+                        <span className="text-xs text-gray-500">{d.name}</span>
+                        <span className="text-xs font-semibold text-gray-800">
+                          {d.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <EmptyChart />
+              )}
+            </ChartCard>
+          </div>
+
+          {/* ── Row 2: Department Bars (super admin only) + Graduation Line ── */}
+          <div
+            className={`grid grid-cols-1 gap-4 ${isDeptHead ? "" : "lg:grid-cols-2"}`}
+          >
+            {!isDeptHead && (
+              <ChartCard title="Alumni per Department">
+                {departmentData.length > 0 ? (
+                  <div className="flex flex-col gap-3">
+                    {departmentData.map((d) => (
+                      <div key={d.name} className="flex items-center gap-3">
+                        <span className="w-40 shrink-0 break-words text-xs leading-5 text-gray-500 sm:w-52">
+                          {d.name}
+                        </span>
+                        <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-tpc-greenDeep transition-all duration-500"
+                            style={{
+                              width: `${(d.count / maxDeptCount) * 100}%`,
+                            }}
+                          />
+                        </div>
+                        <span className="text-xs text-gray-400 w-6 text-right flex-shrink-0">
+                          {d.count}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyChart label="No department data available yet" />
+                )}
+              </ChartCard>
+            )}
+
+            <ChartCard
+              title={
+                filters.batch
+                  ? `Graduation Trend — Batch ${filters.batch}`
+                  : "Graduation Trend by Year"
+              }
+            >
+              {graduationTrend.length > 0 ? (
+                <ResponsiveContainer width="100%" height={180}>
+                  <LineChart
+                    data={graduationTrend}
+                    margin={{ top: 4, right: 12, left: -10, bottom: 0 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis
+                      dataKey="year"
+                      tick={{ fontSize: 11, fill: "#9ca3af" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: "#9ca3af" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        borderRadius: "8px",
+                        border: "1px solid #e5e7eb",
+                        fontSize: "12px",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="graduates"
+                      stroke={GREEN_DEEP}
+                      strokeWidth={2.5}
+                      dot={{
+                        fill: GREEN_DEEP,
+                        r: 4,
+                        strokeWidth: 2,
+                        stroke: "#fff",
+                      }}
+                      activeDot={{
+                        r: 6,
+                        fill: GREEN_DEEP,
+                        stroke: "#fff",
+                        strokeWidth: 2,
+                      }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <EmptyChart label="No graduation trend data available yet" />
+              )}
+            </ChartCard>
+          </div>
+
+          {/* ── Row 3: Job–Course Alignment ── */}
+          <AlignmentSummaryWidget
+            onDrillDown={onDrillDown}
+            filters={filters}
+            onRowsLoaded={setAlignmentRows}
+          />
         </div>
       </div>
 
       {/* ── Dedicated Printable Report View (sole printable document) ── */}
       <div
-        className={`analytics-printable-report ${
-          showReport ? "block" : "hidden"
-        } print:block`}
+        className={`analytics-printable-report ${showReport ? "block" : "hidden"
+          } print:block`}
       >
         <PrintableReport
           stats={filtered}

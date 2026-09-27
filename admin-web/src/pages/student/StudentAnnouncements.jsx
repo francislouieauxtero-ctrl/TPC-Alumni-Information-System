@@ -34,17 +34,26 @@ export default function StudentAnnouncements() {
   };
   const [lightboxImage, setLightboxImage] = useState(null);
   return (
-    <div className="px-4 py-6 sm:p-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-            Announcements
-          </h1>
-          <p className="text-gray-500 mt-1 text-sm sm:text-base">
-            View the latest school-wide and department announcements.
-          </p>
+    <div className="px-4 py-6 sm:p-8 space-y-6">
+      {/* Header */}
+      <header className="rounded-2xl bg-gradient-to-r from-[#006400] via-[#008000] to-[#00A000] p-4 sm:p-6 text-white shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-green-100">
+              OFFICIAL BULLETINS
+            </p>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl text-white">
+              Announcements
+            </h1>
+            <p className="mt-1 text-sm text-green-50/90">
+              View the latest school and department announcements.
+            </p>
+          </div>
         </div>
+      </header>
 
+      {/* Search Toolbar */}
+      <div className="bg-white p-3.5 sm:p-4 rounded-xl shadow-sm border border-gray-200">
         <input
           type="text"
           value={search}
@@ -53,7 +62,7 @@ export default function StudentAnnouncements() {
             setCurrentPage(1);
           }}
           placeholder="Search announcements..."
-          className="w-full sm:w-80 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm text-gray-800 shadow-sm focus:border-tpc-green focus:outline-none focus:ring-2 focus:ring-tpc-green/20"
+          className="w-full sm:w-80 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-800 shadow-xs focus:border-tpc-green focus:outline-none focus:ring-2 focus:ring-tpc-green/20"
         />
       </div>
 
@@ -122,11 +131,10 @@ export default function StudentAnnouncements() {
                       {announcement.title || "Announcement"}
                     </h3>
                     <span
-                      className={`max-w-full rounded-lg px-2 py-1 text-xs font-semibold leading-5 ${
-                        announcement.scope === "school_wide"
+                      className={`max-w-full rounded-lg px-2 py-1 text-xs font-semibold leading-5 ${announcement.scope === "school_wide"
                           ? "bg-blue-100 text-blue-700"
                           : "bg-purple-100 text-purple-700"
-                      }`}
+                        }`}
                     >
                       <Users className="mr-1 inline h-3.5 w-3.5" />
                       {announcement.scope === "school_wide"

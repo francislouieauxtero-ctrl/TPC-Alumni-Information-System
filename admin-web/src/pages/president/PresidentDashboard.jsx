@@ -37,12 +37,12 @@ export default function PresidentDasboard() {
           eventService.getAll(),
           announcementService.getAll(),
         ]);
-        
+
         // Take top 3 events
         if (eventsRes?.data) {
           setEvents(eventsRes.data.slice(0, 3));
         }
-        
+
         // Take top 3 announcements
         if (announcementsRes?.data) {
           setAnnouncements(announcementsRes.data.slice(0, 3));
@@ -70,13 +70,13 @@ export default function PresidentDasboard() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-10">
-      <header className="rounded-2xl bg-gradient-to-r from-tpc-greenDeep via-tpc-green to-emerald-700 p-4 sm:p-6 text-white shadow-md">
+      <header className="rounded-2xl bg-gradient-to-r from-[#006400] via-[#008000] to-[#00A000] p-4 sm:p-6 text-white shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-green-100">
               President overview
             </p>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
+            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl text-white">
               President Dashboard
             </h1>
           </div>

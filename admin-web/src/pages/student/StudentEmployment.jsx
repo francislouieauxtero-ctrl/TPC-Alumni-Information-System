@@ -202,8 +202,8 @@ export default function StudentEmployment() {
         } catch (alignErr) {
           toast.error(
             alignErr?.message ||
-              alignErr?.errors?.is_work_aligned?.[0] ||
-              "Job saved, but alignment could not be updated.",
+            alignErr?.errors?.is_work_aligned?.[0] ||
+            "Job saved, but alignment could not be updated.",
           );
         }
       }
@@ -229,25 +229,31 @@ export default function StudentEmployment() {
   };
 
   return (
-    <div className="px-4 py-6 sm:p-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-            My Career
-          </h1>
-          <p className="text-gray-500 mt-1 text-sm sm:text-base">
-            Manage your employment history and keep your latest job details up
-            to date.
-          </p>
+    <div className="px-4 py-6 sm:p-8 space-y-6">
+      {/* Header */}
+      <header className="rounded-2xl bg-gradient-to-r from-[#006400] via-[#008000] to-[#00A000] p-4 sm:p-6 text-white shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-green-100">
+              CAREER
+            </p>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl text-white">
+              My Career
+            </h1>
+            <p className="mt-1 text-sm text-green-50/90">
+              Manage your employment information and career details.
+            </p>
+          </div>
+
+          <button
+            onClick={openAddModal}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-green-50 text-[#006400] px-4 py-2.5 text-sm font-semibold transition shadow-sm self-start sm:self-auto shrink-0"
+          >
+            <Plus className="h-4 w-4" />
+            Add Job
+          </button>
         </div>
-        <button
-          onClick={openAddModal}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-tpc-greenDeep px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-tpc-green sm:w-auto"
-        >
-          <Plus className="h-4 w-4" />
-          Add Job
-        </button>
-      </div>
+      </header>
 
       {loading ? (
         <div className="flex items-center justify-center h-48">
@@ -274,13 +280,12 @@ export default function StudentEmployment() {
                           @ {job.company}
                         </span>
                         <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                            job.employment_type === "self_employed"
+                          className={`rounded-full px-3 py-1 text-xs font-semibold ${job.employment_type === "self_employed"
                               ? "bg-violet-100 text-violet-700"
                               : job.employment_type === "unemployed"
                                 ? "bg-gray-100 text-gray-700"
                                 : "bg-emerald-100 text-emerald-700"
-                          }`}
+                            }`}
                         >
                           {job.employment_type === "self_employed"
                             ? "Self-employed"
@@ -524,11 +529,10 @@ export default function StudentEmployment() {
                       onClick={() =>
                         setForm((p) => ({ ...p, is_work_aligned: true }))
                       }
-                      className={`flex-1 rounded-xl border px-4 py-2.5 text-sm font-medium transition ${
-                        form.is_work_aligned === true
+                      className={`flex-1 rounded-xl border px-4 py-2.5 text-sm font-medium transition ${form.is_work_aligned === true
                           ? "border-emerald-400 bg-emerald-50 text-emerald-700"
                           : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
-                      }`}
+                        }`}
                     >
                       Aligned
                     </button>
@@ -537,11 +541,10 @@ export default function StudentEmployment() {
                       onClick={() =>
                         setForm((p) => ({ ...p, is_work_aligned: false }))
                       }
-                      className={`flex-1 rounded-xl border px-4 py-2.5 text-sm font-medium transition ${
-                        form.is_work_aligned === false
+                      className={`flex-1 rounded-xl border px-4 py-2.5 text-sm font-medium transition ${form.is_work_aligned === false
                           ? "border-red-300 bg-red-50 text-red-600"
                           : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
-                      }`}
+                        }`}
                     >
                       Not Aligned
                     </button>
