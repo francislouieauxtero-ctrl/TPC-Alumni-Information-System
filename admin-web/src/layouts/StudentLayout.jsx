@@ -25,6 +25,7 @@ const NAV_ITEMS = [
 
 export default function StudentLayout({ children }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
@@ -38,6 +39,10 @@ export default function StudentLayout({ children }) {
   const [studentAvatar, setStudentAvatar] = useState(
     localStorage.getItem("userAvatar") || "",
   );
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     const syncUser = () => {
@@ -74,16 +79,24 @@ export default function StudentLayout({ children }) {
     }
   };
 
+  const handleSidebarToggle = () => {
+    if (window.innerWidth < 850) {
+      setMobileMenuOpen(false);
+      return;
+    }
+    setSidebarOpen(!sidebarOpen);
+  };
+
   return (
-    <div className="flex h-screen bg-white text-gray-900 font-sans">
-      {/* ── Desktop sidebar ── */}
+    <div className="flex h-screen bg-slate-50 text-gray-900 font-sans">
+      {/* ── Sidebar ── */}
       <aside
-        className={`hidden min-[850px]:flex flex-col h-screen min-h-screen max-h-screen bg-tpc-greenDeep border-r border-white/10 px-3 py-3 transition-all duration-300 ${
-          sidebarOpen ? "w-56" : "w-20"
-        }`}
+        className={`${sidebarOpen ? "min-[850px]:w-[260px]" : "min-[850px]:w-20"
+          } fixed inset-y-0 left-0 z-50 flex h-screen min-h-screen max-h-screen w-[260px] ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+          } flex-col bg-white border-r border-slate-200/80 px-3 py-2.5 transition-all duration-300 min-[850px]:static min-[850px]:translate-x-0 shadow-sm`}
       >
-        {/* Logo + wordmark */}
-        <div className="shrink-0 px-2 pb-3 border-b border-white/20">
+        {/* Header / Branding */}
+        <div className="shrink-0 px-1 pb-2.5 border-b border-slate-200/80">
           <div
             className={`flex items-center gap-2.5 ${!sidebarOpen && "justify-center"}`}
           >
@@ -91,72 +104,92 @@ export default function StudentLayout({ children }) {
             <img
               src={logo}
               alt="Talibon Polytechnic College seal"
-              className="h-10 w-10 rounded-full border-2 border-tpc-gold object-cover shadow-xs shrink-0"
+              className="h-10 w-10 rounded-full border-2 border-tpc-gold object-cover shadow-xs shrink-0 ring-2 ring-slate-100"
             />
             {sidebarOpen && (
-              <span className="text-white text-base font-bold tracking-tight truncate">
-                Alumni
-              </span>
+              <div className="min-w-0 flex-1 flex flex-col justify-center text-left">
+                <h1 className="text-[#006400] text-xs font-bold tracking-tight whitespace-nowrap">
+                  Talibon Polytechnic College
+                </h1>
+                <p className="text-slate-400 text-[10px] font-semibold tracking-wider uppercase mt-0.5 whitespace-nowrap">
+                  OFFICIAL WEBSITE
+                </p>
+              </div>
+            )}
+            {/* Mobile close button */}
+            {mobileMenuOpen && (
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="min-[850px]:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0 ml-auto"
+                aria-label="Close menu"
+              >
+                <X className="w-5 h-5" />
+              </button>
             )}
           </div>
         </div>
 
-        {/* Nav */}
-        <nav className="flex-1 min-h-0 flex flex-col gap-1 py-2 overflow-y-auto">
+        {/* Navigation */}
+        <nav className="flex-1 min-h-0 flex flex-col gap-1 py-1.5 overflow-y-auto">
           {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
             <NavLink
               key={to}
               to={to}
-              icon={<Icon className="w-5 h-5 flex-shrink-0" />}
+              icon={<Icon className="w-5 h-5 shrink-0" />}
               label={label}
               sidebarOpen={sidebarOpen}
+              onNavigate={() => setMobileMenuOpen(false)}
             />
           ))}
         </nav>
 
-        {/* Footer: User info + Logout + Collapse toggle */}
-        <div className="shrink-0 mt-auto border-t border-white/20 pt-2 flex flex-col gap-1.5">
+        {/* Footer: Profile + Logout + Toggle */}
+        <div className="shrink-0 mt-auto border-t border-slate-200/80 pt-2 flex flex-col gap-1.5">
+          {/* User Profile */}
           <div
-            className={`flex items-center gap-2.5 px-1 py-1 ${!sidebarOpen && "justify-center"}`}
+            className={`flex items-center gap-2.5 py-1 ${!sidebarOpen && "justify-center"}`}
           >
-            <UserAvatar name={studentName} avatar={studentAvatar} size="sm" />
+            <UserAvatar
+              name={studentName}
+              avatar={studentAvatar}
+              size="sm"
+              className="shrink-0"
+            />
             {sidebarOpen && (
-              <div className="flex-1 min-w-0">
-                <p className="text-white text-sm font-semibold truncate">
+              <div className="flex-1 min-w-0 flex flex-col justify-center text-left">
+                <p className="text-slate-900 text-sm font-semibold truncate">
                   {studentName}
                 </p>
-                <p className="text-white/60 text-xs truncate">{studentEmail}</p>
+                <p className="text-slate-500 text-xs font-medium truncate">
+                  Alumni
+                </p>
               </div>
             )}
           </div>
 
-          {/* Logout */}
+          {/* Logout Button */}
           <button
             onClick={handleLogout}
             disabled={logoutLoading}
             title={!sidebarOpen ? "Logout" : undefined}
-            className={`w-full flex items-center justify-center gap-2 rounded-lg bg-white/10 text-white text-xs font-medium hover:bg-white/20 disabled:opacity-50 transition-colors ${
+            className={`w-full flex items-center justify-center gap-2 rounded-lg bg-[#F5F5F5] hover:bg-[#EAEAEA] border border-slate-200/80 text-slate-900 text-xs font-medium disabled:opacity-50 transition-colors shadow-xs ${
               sidebarOpen ? "px-3 py-2" : "p-2"
             }`}
           >
-            <LogOut className="w-4 h-4 flex-shrink-0" />
+            <LogOut className="w-4 h-4 text-slate-900 shrink-0" />
             {sidebarOpen && (
-              <span>{logoutLoading ? "Logging out…" : "Logout"}</span>
+              <span>{logoutLoading ? "Logging out..." : "Logout"}</span>
             )}
           </button>
 
-          {/* Collapse toggle */}
+          {/* Toggle Sidebar Control (Three-line Hamburger Icon) */}
           <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
+            onClick={handleSidebarToggle}
             title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
-            className="flex items-center justify-center h-8 rounded-lg text-white/60 hover:bg-white/10 hover:text-white transition-colors w-full"
+            className="w-full flex items-center justify-center h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
             aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
           >
-            {sidebarOpen ? (
-              <X className="w-4 h-4" />
-            ) : (
-              <Menu className="w-4 h-4" />
-            )}
+            <Menu className="w-4 h-4" />
           </button>
         </div>
       </aside>
@@ -169,82 +202,17 @@ export default function StudentLayout({ children }) {
         />
       )}
 
-      {/* ── Mobile drawer ── */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 flex h-screen min-h-screen max-h-screen w-[80vw] max-w-56 flex-col bg-tpc-greenDeep px-3 py-3 transition-transform duration-300 min-[850px]:hidden ${
-          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        {/* Logo row */}
-        <div className="shrink-0 flex items-center justify-between px-1 pb-3 border-b border-white/20">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <img
-              src={logo}
-              alt="Talibon Polytechnic College seal"
-              className="h-10 w-10 shrink-0 rounded-full border-2 border-tpc-gold object-cover shadow-xs"
-            />
-            <span className="text-white text-base font-bold tracking-tight truncate">
-              Student
-            </span>
-          </div>
-          <button
-            onClick={() => setMobileMenuOpen(false)}
-            className="rounded-lg p-1.5 text-white/70 hover:bg-white/10 hover:text-white transition-colors shrink-0"
-            aria-label="Close menu"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Nav */}
-        <nav className="flex-1 min-h-0 flex flex-col gap-1 py-2 overflow-y-auto">
-          {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
-            <NavLink
-              key={to}
-              to={to}
-              icon={<Icon className="w-5 h-5 flex-shrink-0" />}
-              label={label}
-              sidebarOpen={true}
-              onNavigate={() => setMobileMenuOpen(false)}
-            />
-          ))}
-        </nav>
-
-        {/* Footer: User info + Logout */}
-        <div className="shrink-0 mt-auto border-t border-white/20 pt-2 flex flex-col gap-1.5">
-          <div className="flex items-center gap-2.5 px-1 py-1">
-            <UserAvatar name={studentName} avatar={studentAvatar} size="sm" />
-            <div className="min-w-0">
-              <p className="text-white text-sm font-semibold truncate">
-                {studentName}
-              </p>
-              <p className="text-white/60 text-xs truncate">{studentEmail}</p>
-            </div>
-          </div>
-
-          {/* Logout */}
-          <button
-            onClick={handleLogout}
-            disabled={logoutLoading}
-            className="w-full flex items-center justify-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-white text-xs font-medium hover:bg-white/20 disabled:opacity-50 transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>{logoutLoading ? "Logging out…" : "Logout"}</span>
-          </button>
-        </div>
-      </aside>
-
       {/* ── Main content area ── */}
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         {/* Top bar */}
-        <header className="flex items-center justify-between border-b border-gray-200 bg-white px-3 py-3 sm:px-4 md:px-6 md:py-4">
+        <header className="flex items-center justify-between border-b border-gray-200 bg-white px-3 py-2.5 sm:px-6 sm:py-4">
           {/* Hamburger — mobile only */}
           <button
             onClick={() => setMobileMenuOpen(true)}
             className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors min-[850px]:hidden shrink-0"
             aria-label="Open menu"
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-6 h-6" />
           </button>
 
           {/* Mobile logo (center) */}
@@ -274,7 +242,7 @@ export default function StudentLayout({ children }) {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto bg-white">{children}</main>
+        <main className="flex-1 overflow-auto bg-slate-50">{children}</main>
 
         {/* ── Mobile bottom nav ── */}
         <nav className="flex border-t border-gray-200 bg-white min-[850px]:hidden">
@@ -301,34 +269,29 @@ function NavLink({ to, icon, label, sidebarOpen, onNavigate }) {
         onNavigate?.();
       }}
       title={!sidebarOpen ? label : undefined}
-      className={`group w-full flex items-center ${
-        sidebarOpen ? "gap-2.5 px-3 py-2.5" : "justify-center px-2 py-2.5"
-      } rounded-lg text-sm transition-colors duration-150 ${
-        isActive
+      className={`group w-full flex items-center ${sidebarOpen ? "gap-2.5 px-3 py-2" : "justify-center px-2 py-2"
+        } rounded-lg text-sm transition-colors duration-150 ${isActive
           ? "bg-[#006400] text-white font-semibold shadow-xs hover:bg-[#006400]"
-          : "text-white/80 hover:bg-[#00A000]/40 hover:text-white font-medium"
-      }`}
+          : "bg-white text-slate-800 hover:bg-[#00A000] hover:text-white font-medium"
+        }`}
     >
       <span
-        className={`shrink-0 transition-colors duration-150 ${
-          isActive ? "text-white" : "text-white/70 group-hover:text-white"
-        }`}
+        className={`shrink-0 transition-colors duration-150 ${isActive ? "text-white" : "text-slate-600 group-hover:text-white"
+          }`}
       >
         {icon}
       </span>
       {sidebarOpen && (
         <>
           <span
-            className={`truncate flex-1 text-left transition-colors duration-150 ${
-              isActive ? "text-white" : "text-white/90 group-hover:text-white"
-            }`}
+            className={`truncate flex-1 text-left transition-colors duration-150 ${isActive ? "text-white" : "text-slate-800 group-hover:text-white"
+              }`}
           >
             {label}
           </span>
           <ChevronRight
-            className={`w-4 h-4 shrink-0 transition-colors duration-150 ${
-              isActive ? "text-white" : "text-white/40 group-hover:text-white"
-            }`}
+            className={`w-4 h-4 shrink-0 transition-colors duration-150 ${isActive ? "text-white" : "text-slate-400 group-hover:text-white"
+              }`}
           />
         </>
       )}
@@ -339,14 +302,15 @@ function NavLink({ to, icon, label, sidebarOpen, onNavigate }) {
 function MobileNavItem({ to, icon: Icon, label }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const isActive = location.pathname === to;
+  const isActive =
+    location.pathname === to ||
+    (to !== "/student/dashboard" && location.pathname.startsWith(to + "/"));
 
   return (
     <button
       onClick={() => navigate(to)}
-      className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2 sm:py-2.5 text-[10px] sm:text-xs font-medium transition-colors min-w-0 ${
-        isActive ? "text-[#006400] font-semibold" : "text-gray-400 hover:text-gray-600"
-      }`}
+      className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2 sm:py-2.5 text-[10px] sm:text-xs font-medium transition-colors min-w-0 ${isActive ? "text-[#006400] font-semibold" : "text-gray-400 hover:text-gray-600"
+        }`}
     >
       <Icon className={`w-5 h-5 ${isActive ? "stroke-[2.5]" : ""}`} />
       <span className="truncate max-w-full px-0.5">{label}</span>
