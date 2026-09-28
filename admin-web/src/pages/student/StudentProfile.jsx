@@ -339,7 +339,7 @@ export default function StudentProfile() {
 
   const details = [
     { icon: User, label: "School ID", value: profile?.schoolId },
-    { icon: Mail, label: "Email", value: profile?.email },
+    { icon: Mail, label: "Email", value: profile?.email?.toLowerCase() },
     { icon: Building2, label: "Department", value: profile?.department?.name },
     {
       icon: Phone,
@@ -517,7 +517,11 @@ export default function StudentProfile() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs text-gray-400">{label}</p>
-                    <p className="truncate text-sm font-semibold text-gray-900 capitalize">
+                    <p
+                      className={`truncate text-sm font-semibold text-gray-900 ${
+                        label === "Email" ? "lowercase" : "capitalize"
+                      }`}
+                    >
                       {value || "—"}
                     </p>
                   </div>

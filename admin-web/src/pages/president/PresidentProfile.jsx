@@ -217,7 +217,7 @@ export default function PresidentProfile() {
 
   const details = [
     { icon: User, label: "Full name", value: profile?.name },
-    { icon: Mail, label: "Email", value: profile?.email },
+    { icon: Mail, label: "Email", value: profile?.email?.toLowerCase() },
     {
       icon: Key,
       label: "Role",
@@ -412,7 +412,11 @@ export default function PresidentProfile() {
                   </div>
                   <div>
                     <p className="text-xs text-gray-400">{label}</p>
-                    <p className="text-base font-semibold text-gray-900 capitalize">
+                    <p
+                      className={`text-base font-semibold text-gray-900 ${
+                        label === "Email" ? "lowercase" : "capitalize"
+                      }`}
+                    >
                       {value || "—"}
                     </p>
                   </div>

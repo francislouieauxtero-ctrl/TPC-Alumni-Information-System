@@ -219,7 +219,7 @@ export default function DepartmentHeadProfile() {
 
   const details = [
     { icon: User, label: "Full name", value: profile?.name },
-    { icon: Mail, label: "Email", value: profile?.email },
+    { icon: Mail, label: "Email", value: profile?.email?.toLowerCase() },
     { icon: Building2, label: "Department", value: profile?.department?.name },
     { icon: Key, label: "Role", value: "Department head" },
   ];
@@ -407,7 +407,11 @@ export default function DepartmentHeadProfile() {
                   </div>
                   <div>
                     <p className="text-xs text-gray-400">{label}</p>
-                    <p className="text-base font-semibold text-gray-900">
+                    <p
+                      className={`text-base font-semibold text-gray-900 ${
+                        label === "Email" ? "lowercase" : ""
+                      }`}
+                    >
                       {value || "—"}
                     </p>
                   </div>
