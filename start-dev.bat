@@ -10,11 +10,20 @@ echo.
 cd /d "%~dp0"
 
 echo [1/3] Ensuring Docker backend services are running...
+for /f "tokens=*" %%i in ('docker ps -q -a --filter "name=capstone_admin" 2^>nul') do (
+    echo [CLEANUP] Removing stale Docker frontend container capstone_admin...
+    docker rm -f capstone_admin >nul 2>&1
+)
+
 docker compose up -d
 if errorlevel 1 (
     echo [WARNING] Docker Compose encountered an issue. Please ensure Docker Desktop is running.
 ) else (
     echo [OK] Backend services ready at http://localhost:8070.
+)
+
+for /f "tokens=*" %%i in ('docker ps -q --filter "name=capstone_admin" 2^>nul') do (
+    docker rm -f capstone_admin >nul 2>&1
 )
 echo.
 
