@@ -17,6 +17,31 @@ const EMPTY_FORM = {
   work_aligned_reason: "",
 };
 
+export const EMOJI_REGEX = /\p{Extended_Pictographic}|\p{Emoji_Presentation}/u;
+export const EMOJI_GLOBAL_REGEX = /\p{Extended_Pictographic}|\p{Emoji_Presentation}/gu;
+export const ALLOWED_PROFESSIONAL_CHARS_REGEX = /^[\p{L}0-9 .&-]*$/u;
+
+export function getProfessionalFieldWarning(value) {
+  if (!value) return null;
+  const hasEmoji = EMOJI_REGEX.test(value);
+  const isValid = ALLOWED_PROFESSIONAL_CHARS_REGEX.test(value);
+
+  if (isValid) return null;
+
+  const withoutEmojis = value.replace(EMOJI_GLOBAL_REGEX, "");
+  const hasOtherInvalidChars = !ALLOWED_PROFESSIONAL_CHARS_REGEX.test(withoutEmojis);
+
+  if (hasEmoji && hasOtherInvalidChars) {
+    return "⚠️ Emojis and unsupported special characters are not allowed.";
+  }
+
+  if (hasEmoji) {
+    return "⚠️ Emojis are not allowed in this field.";
+  }
+
+  return "⚠️ Emojis and unsupported special characters are not allowed.";
+}
+
 export default function StudentEmployment() {
   const [jobs, setJobs] = useState({ data: [] });
   const [loading, setLoading] = useState(true);
@@ -67,7 +92,25 @@ export default function StudentEmployment() {
       is_work_aligned: job.is_work_aligned ?? null,
       work_aligned_reason: job.work_aligned_reason || "",
     });
-    setErrors({});
+
+    const initialErrors = {};
+    if (job.company) {
+      const warn = getProfessionalFieldWarning(job.company);
+      if (warn) initialErrors.company = warn;
+    }
+    if (job.position) {
+      const warn = getProfessionalFieldWarning(job.position);
+      if (warn) initialErrors.position = warn;
+    }
+    if (job.industry) {
+      if (job.employment_type === "unemployed") {
+        if (EMOJI_REGEX.test(job.industry)) initialErrors.industry = "⚠️ Emojis are not allowed in this field.";
+      } else {
+        const warn = getProfessionalFieldWarning(job.industry);
+        if (warn) initialErrors.industry = warn;
+      }
+    }
+    setErrors(initialErrors);
     setModalOpen(true);
 
     if (job.is_current && job.employment_type !== "unemployed") {
@@ -95,11 +138,12 @@ export default function StudentEmployment() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    const fieldValue = type === "checkbox" ? checked : value;
 
     setForm((prev) => {
       const next = {
         ...prev,
-        [name]: type === "checkbox" ? checked : value,
+        [name]: fieldValue,
       };
 
       if (name === "employment_type") {
@@ -120,8 +164,45 @@ export default function StudentEmployment() {
       return next;
     });
 
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: null }));
+    if (name === "company" || name === "position" || name === "industry") {
+      let warning = null;
+      if (typeof fieldValue === "string" && fieldValue.trim() !== "") {
+        if (name === "industry" && form.employment_type === "unemployed") {
+          if (EMOJI_REGEX.test(fieldValue)) {
+            warning = "⚠️ Emojis are not allowed in this field.";
+          }
+        } else {
+          warning = getProfessionalFieldWarning(fieldValue);
+        }
+      }
+
+      setErrors((prev) => {
+        if (warning) {
+          return { ...prev, [name]: warning };
+        }
+        if (prev[name]) {
+          const next = { ...prev };
+          delete next[name];
+          return next;
+        }
+        return prev;
+      });
+    } else {
+      if (name === "employment_type" && value === "unemployed") {
+        setErrors((prev) => {
+          const next = { ...prev };
+          delete next.company;
+          delete next.position;
+          delete next.employment_type;
+          return next;
+        });
+      } else if (errors[name]) {
+        setErrors((prev) => {
+          const next = { ...prev };
+          delete next[name];
+          return next;
+        });
+      }
     }
   };
 
@@ -133,11 +214,26 @@ export default function StudentEmployment() {
     }
 
     if (form.employment_type !== "unemployed") {
-      if (!form.company.trim()) next.company = "Company is required.";
-      if (!form.position.trim()) next.position = "Position is required.";
+      if (!form.company || !form.company.trim()) {
+        next.company = "Company is required.";
+      } else {
+        const warn = getProfessionalFieldWarning(form.company);
+        if (warn) next.company = warn;
+      }
+
+      if (!form.position || !form.position.trim()) {
+        next.position = "Position is required.";
+      } else {
+        const warn = getProfessionalFieldWarning(form.position);
+        if (warn) next.position = warn;
+      }
     }
 
     if (form.employment_type === "employed") {
+      if (form.industry && form.industry.trim()) {
+        const warn = getProfessionalFieldWarning(form.industry);
+        if (warn) next.industry = warn;
+      }
       if (!form.start_date) next.start_date = "Start date is required.";
       if (!form.is_current && !form.end_date) {
         next.end_date = "End date or current role is required.";
@@ -147,10 +243,19 @@ export default function StudentEmployment() {
       }
     }
 
+    if (form.employment_type === "self_employed") {
+      if (form.industry && form.industry.trim()) {
+        const warn = getProfessionalFieldWarning(form.industry);
+        if (warn) next.industry = warn;
+      }
+    }
+
     if (form.employment_type === "unemployed") {
       if (!form.industry || !form.industry.trim()) {
         next.industry =
           "Please provide feedback about your current unemployment status.";
+      } else if (EMOJI_REGEX.test(form.industry)) {
+        next.industry = "⚠️ Emojis are not allowed in this field.";
       }
     }
 
@@ -211,7 +316,16 @@ export default function StudentEmployment() {
       closeModal();
       fetchJobs();
     } catch (err) {
-      toast.error(err.message || "Failed to save job entry.");
+      if (err?.errors) {
+        const backendErrors = {};
+        for (const [key, msgs] of Object.entries(err.errors)) {
+          backendErrors[key] = Array.isArray(msgs) ? msgs[0] : msgs;
+        }
+        setErrors((prev) => ({ ...prev, ...backendErrors }));
+        toast.error("Please fix the validation errors.");
+      } else {
+        toast.error(err?.message || "Failed to save job entry.");
+      }
     } finally {
       setSaving(false);
     }
@@ -391,7 +505,11 @@ export default function StudentEmployment() {
                       name="company"
                       value={form.company}
                       onChange={handleChange}
-                      className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-tpc-green focus:ring-2 focus:ring-tpc-green/20"
+                      className={`w-full rounded-2xl border bg-white px-4 py-3 text-gray-900 outline-none transition ${
+                        errors.company
+                          ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                          : "border-gray-300 focus:border-tpc-green focus:ring-2 focus:ring-tpc-green/20"
+                      }`}
                     />
                     {errors.company && (
                       <p className="text-xs text-red-600">{errors.company}</p>
@@ -403,7 +521,11 @@ export default function StudentEmployment() {
                       name="position"
                       value={form.position}
                       onChange={handleChange}
-                      className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-tpc-green focus:ring-2 focus:ring-tpc-green/20"
+                      className={`w-full rounded-2xl border bg-white px-4 py-3 text-gray-900 outline-none transition ${
+                        errors.position
+                          ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                          : "border-gray-300 focus:border-tpc-green focus:ring-2 focus:ring-tpc-green/20"
+                      }`}
                     />
                     {errors.position && (
                       <p className="text-xs text-red-600">{errors.position}</p>
@@ -440,8 +562,15 @@ export default function StudentEmployment() {
                         name="industry"
                         value={form.industry}
                         onChange={handleChange}
-                        className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-tpc-green focus:ring-2 focus:ring-tpc-green/20"
+                        className={`w-full rounded-2xl border bg-white px-4 py-3 text-gray-900 outline-none transition ${
+                          errors.industry
+                            ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                            : "border-gray-300 focus:border-tpc-green focus:ring-2 focus:ring-tpc-green/20"
+                        }`}
                       />
+                      {errors.industry && (
+                        <p className="text-xs text-red-600">{errors.industry}</p>
+                      )}
                     </label>
                     <label className="space-y-2 text-sm text-gray-600">
                       Start Date
@@ -489,7 +618,11 @@ export default function StudentEmployment() {
                     onChange={handleChange}
                     rows={3}
                     placeholder="Please tell us why you are currently unemployed and what you are doing right now."
-                    className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-tpc-green focus:ring-2 focus:ring-tpc-green/20"
+                    className={`w-full rounded-2xl border bg-white px-4 py-3 text-gray-900 outline-none transition ${
+                      errors.industry
+                        ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                        : "border-gray-300 focus:border-tpc-green focus:ring-2 focus:ring-tpc-green/20"
+                    }`}
                   />
                   {errors.industry && (
                     <p className="text-xs text-red-600">{errors.industry}</p>
