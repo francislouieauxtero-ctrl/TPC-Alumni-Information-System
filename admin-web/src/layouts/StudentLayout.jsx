@@ -172,9 +172,8 @@ export default function StudentLayout({ children }) {
             onClick={handleLogout}
             disabled={logoutLoading}
             title={!sidebarOpen ? "Logout" : undefined}
-            className={`w-full flex items-center justify-center gap-2 rounded-lg bg-[#F5F5F5] hover:bg-[#EAEAEA] border border-slate-200/80 text-slate-900 text-xs font-medium disabled:opacity-50 transition-colors shadow-xs ${
-              sidebarOpen ? "px-3 py-2" : "p-2"
-            }`}
+            className={`w-full flex items-center justify-center gap-2 rounded-lg bg-[#F5F5F5] hover:bg-[#EAEAEA] border border-slate-200/80 text-slate-900 text-xs font-medium disabled:opacity-50 transition-colors shadow-xs ${sidebarOpen ? "px-3 py-2" : "p-2"
+              }`}
           >
             <LogOut className="w-4 h-4 text-slate-900 shrink-0" />
             {sidebarOpen && (

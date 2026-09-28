@@ -218,7 +218,8 @@ export default function PresidentLayout({ children }) {
         <div className="shrink-0 mt-auto border-t border-slate-200/80 pt-2 flex flex-col gap-1.5">
           {/* User Profile */}
           <div
-            className={`flex items-center gap-2.5 py-1 ${!sidebarOpen && "justify-center"}`}
+            className={`flex items-center gap-2.5 rounded-lg border border-[#8DB600] bg-white transition-all ${sidebarOpen ? "px-2.5 py-2" : "justify-center p-2"
+              }`}
           >
             <UserAvatar
               name={displayName}
@@ -243,9 +244,8 @@ export default function PresidentLayout({ children }) {
             onClick={handleLogout}
             disabled={logoutLoading}
             title={!sidebarOpen ? "Logout" : undefined}
-            className={`w-full flex items-center justify-center gap-2 rounded-lg bg-[#F5F5F5] hover:bg-[#EAEAEA] border border-slate-200/80 text-slate-900 text-xs font-medium disabled:opacity-50 transition-colors shadow-xs ${
-              sidebarOpen ? "px-3 py-2" : "p-2"
-            }`}
+            className={`w-full flex items-center justify-center gap-2 rounded-lg bg-[#F5F5F5] hover:bg-[#EAEAEA] border border-slate-200/80 text-slate-900 text-xs font-medium disabled:opacity-50 transition-colors shadow-xs ${sidebarOpen ? "px-3 py-2" : "p-2"
+              }`}
           >
             <LogOut className="w-4 h-4 text-slate-900 shrink-0" />
             {sidebarOpen && (

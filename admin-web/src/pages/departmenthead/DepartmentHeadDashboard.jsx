@@ -31,8 +31,8 @@ export default function DepartmentHeadDashboard() {
         const [statsResponse, eventsResponse, announcementsResponse] =
           await Promise.all([
             api.get("/department-head/dashboard"),
-            api.get("/events", { params: { limit: 2 } }),
-            api.get("/announcements", { params: { limit: 2 } }),
+            api.get("/events", { params: { limit: 3, include_past: false } }),
+            api.get("/announcements", { params: { limit: 3 } }),
           ]);
 
         const dashboardData = statsResponse.data?.data || {};

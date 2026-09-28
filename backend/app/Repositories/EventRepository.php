@@ -54,13 +54,32 @@ class EventRepository
             });
         }
 
+        $sortBy = $filters['sort_by'] ?? null;
+        $sortDirection = strtolower($filters['sort_direction'] ?? '') === 'desc' ? 'desc' : 'asc';
+
+        if ($sortBy === 'event_date') {
+            $orderColumn = 'event_date';
+            $orderDir = $sortDirection;
+        } elseif ($sortBy === 'created_at') {
+            $orderColumn = 'created_at';
+            $orderDir = strtolower($filters['sort_direction'] ?? '') === 'asc' ? 'asc' : 'desc';
+        } elseif (isset($filters['limit']) && !$includePast) {
+            // Dashboard upcoming events: chronological order (soonest upcoming first)
+            $orderColumn = 'event_date';
+            $orderDir = 'asc';
+        } else {
+            // Default for management and paginated list pages
+            $orderColumn = 'created_at';
+            $orderDir = 'desc';
+        }
+
         if (isset($filters['limit']) && is_numeric($filters['limit']) && (int) $filters['limit'] > 0) {
-            return $query->orderBy('created_at', 'desc')
+            return $query->orderBy($orderColumn, $orderDir)
                 ->limit((int) $filters['limit'])
                 ->get();
         }
 
-        return $query->orderBy('created_at', 'desc')->paginate(15);
+        return $query->orderBy($orderColumn, $orderDir)->paginate(15);
     }
 
     /**

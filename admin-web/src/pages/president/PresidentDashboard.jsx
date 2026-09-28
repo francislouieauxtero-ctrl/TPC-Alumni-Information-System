@@ -34,8 +34,13 @@ export default function PresidentDasboard() {
     const fetchEventsAndAnnouncements = async () => {
       try {
         const [eventsRes, announcementsRes] = await Promise.all([
-          eventService.getAll(),
-          announcementService.getAll(),
+          eventService.getAll({
+            limit: 3,
+            include_past: false,
+          }),
+          announcementService.getAll({
+            limit: 3,
+          }),
         ]);
 
         // Take top 3 events
