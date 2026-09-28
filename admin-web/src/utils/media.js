@@ -87,11 +87,41 @@ export function resolveStorageUrl(url) {
   return `/storage/${cleanPath}`;
 }
 
+export function getFirstImageUrl(item) {
+  if (!item) return null;
+
+  if (typeof item.image === "string" && item.image.trim()) {
+    return resolveStorageUrl(item.image);
+  }
+
+  if (Array.isArray(item.images) && item.images.length > 0) {
+    for (const img of item.images) {
+      const url = typeof img === "string" ? img : img?.url || img?.path || "";
+      if (url && typeof url === "string" && url.trim()) {
+        return resolveStorageUrl(url);
+      }
+    }
+  }
+
+  const attachments = getAttachmentUrls(item);
+  for (const raw of attachments) {
+    if (typeof raw === "string" && raw.trim()) {
+      const clean = raw.split("?")[0].toLowerCase();
+      if (/\.(jpg|jpeg|png|webp|gif|svg)$/i.test(clean)) {
+        return resolveStorageUrl(raw);
+      }
+    }
+  }
+
+  return null;
+}
+
 export default {
   getAttachmentUrls,
   renderTextWithLinks,
   getCreatorRoleLabel,
   resolveStorageUrl,
+  getFirstImageUrl,
 };
 
 

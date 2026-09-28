@@ -14,6 +14,7 @@ import {
   ArrowRight,
   GraduationCap,
 } from "lucide-react";
+import DashboardUpdatesSection from "../../components/dashboard/DashboardUpdatesSection";
 
 export default function DepartmentHeadDashboard() {
   const navigate = useNavigate();
@@ -218,106 +219,12 @@ export default function DepartmentHeadDashboard() {
         </div>
       </section>
 
-      {/* ROW 4 — INFORMATION */}
-
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="mb-5 flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                Upcoming Events
-              </h3>
-              <p className="text-sm text-gray-500">
-                Latest department activities
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => navigate("/department-head/events")}
-              className="inline-flex items-center gap-1 text-sm font-semibold text-tpc-greenDeep hover:text-tpc-green"
-            >
-              View all
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          </div>
-          {events.length > 0 ? (
-            <div className="space-y-4">
-              {events.slice(0, 3).map((event) => (
-                <div
-                  key={event.id}
-                  className="rounded-2xl border border-gray-100 bg-gray-50 p-4"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="font-semibold text-gray-900">
-                      {event.title || event.name}
-                    </p>
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-500">
-                      {event.scope || event.event_type || "Event"}
-                    </span>
-                  </div>
-                  <p className="mt-2 text-sm text-gray-600">
-                    {event.location || event.venue || "No location provided"}
-                  </p>
-                  <p className="mt-2 text-xs text-gray-500">
-                    {formatDateTime(
-                      event.date || event.event_date || event.starts_at,
-                    )}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
-              No upcoming events found.
-            </div>
-          )}
-        </section>
-
-        <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="mb-5 flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                Recent Announcements
-              </h3>
-              <p className="text-sm text-gray-500">Department updates</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => navigate("/department-head/announcements")}
-              className="inline-flex items-center gap-1 text-sm font-semibold text-tpc-greenDeep hover:text-tpc-green"
-            >
-              View all
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          </div>
-          {announcements.length > 0 ? (
-            <div className="space-y-4">
-              {announcements.slice(0, 3).map((announcement) => (
-                <div
-                  key={announcement.id}
-                  className="rounded-2xl border border-gray-100 bg-gray-50 p-4"
-                >
-                  <p className="font-semibold text-gray-900">
-                    {announcement.title}
-                  </p>
-                  <p className="mt-2 text-sm text-gray-600">
-                    {announcement.body || announcement.content}
-                  </p>
-                  <p className="mt-3 text-xs text-gray-400">
-                    {formatDateTime(
-                      announcement.created_at || announcement.published_at,
-                    )}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
-              No announcements available.
-            </div>
-          )}
-        </section>
-      </div>
+      {/* ROW 4 — TPC Updates: Events and Announcements */}
+      <DashboardUpdatesSection
+        events={events}
+        announcements={announcements}
+        role="department-head"
+      />
     </div>
   );
 }

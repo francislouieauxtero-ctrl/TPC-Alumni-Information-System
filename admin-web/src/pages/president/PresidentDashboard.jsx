@@ -9,9 +9,8 @@ import {
   AlertCircle,
   Briefcase,
   GraduationCap,
-  Calendar,
-  Megaphone,
 } from "lucide-react";
+import DashboardUpdatesSection from "../../components/dashboard/DashboardUpdatesSection";
 
 export default function PresidentDasboard() {
   const [stats, setStats] = useState(null);
@@ -135,83 +134,12 @@ export default function PresidentDasboard() {
 
 
 
-      {/* Events and Announcements Section */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {/* Upcoming Events */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
-          <div className="mb-4 sm:mb-5 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-tpc-greenDeep" />
-              <div>
-                <h3 className="text-base sm:text-lg font-semibold text-gray-800">
-                  Upcoming Events
-                </h3>
-                <p className="text-xs text-gray-500">Scheduled campus & alumni activities</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            {events.length > 0 ? (
-              events.map((event) => (
-                <div key={event.id} className="rounded-xl border border-gray-100 bg-gray-50 p-4 flex items-start gap-4">
-                  <div className="flex flex-col items-center justify-center bg-white border border-gray-200 rounded-lg p-2 min-w-[50px]">
-                    <span className="text-xs font-bold text-gray-500 uppercase">{format(new Date(event.event_date), "MMM")}</span>
-                    <span className="text-lg font-bold text-gray-900">{format(new Date(event.event_date), "d")}</span>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-medium">
-                        {event.department ? event.department.name : "TPC Community"}
-                      </span>
-                      <span className="text-xs text-gray-500">{format(new Date(event.event_date), "h:mm a")}</span>
-                    </div>
-                    <h4 className="text-sm font-semibold text-gray-900">{event.title}</h4>
-                    <p className="text-xs text-gray-500 mt-1 line-clamp-1">{event.location}</p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-gray-500 text-center py-4">No upcoming events</p>
-            )}
-          </div>
-        </div>
-
-        {/* Recent Announcements */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
-          <div className="mb-4 sm:mb-5 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <Megaphone className="h-5 w-5 text-amber-500" />
-              <div>
-                <h3 className="text-base sm:text-lg font-semibold text-gray-800">
-                  Recent Announcements
-                </h3>
-                <p className="text-xs text-gray-500">Latest university & alumni updates</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            {announcements.length > 0 ? (
-              announcements.map((announcement) => (
-                <div key={announcement.id} className="rounded-xl border border-amber-100/50 bg-amber-50/30 p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-medium">
-                      {announcement.department ? announcement.department.name : "TPC Community"}
-                    </span>
-                    <span className="text-xs text-gray-500">{format(new Date(announcement.created_at), "MMM d, yyyy")}</span>
-                  </div>
-                  <h4 className="text-sm font-bold text-gray-900 uppercase">{announcement.title}</h4>
-                  <p className="text-xs text-gray-600 mt-1 line-clamp-2">{announcement.content}</p>
-                  <p className="text-[10px] text-gray-400 mt-2 uppercase">Administrator: {announcement.author?.name}</p>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-gray-500 text-center py-4">No recent announcements</p>
-            )}
-          </div>
-        </div>
-      </section>
+      {/* TPC Updates: Events and Announcements */}
+      <DashboardUpdatesSection
+        events={events}
+        announcements={announcements}
+        role="president"
+      />
     </div>
   );
 }

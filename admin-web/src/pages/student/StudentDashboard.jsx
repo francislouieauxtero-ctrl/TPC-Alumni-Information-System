@@ -17,6 +17,7 @@ import {
   MapPin,
   Clock,
 } from "lucide-react";
+import DashboardUpdatesSection from "../../components/dashboard/DashboardUpdatesSection";
 
 export default function StudentDashboard() {
   const [student, setStudent] = useState(null);
@@ -157,117 +158,13 @@ export default function StudentDashboard() {
           </div>
         </div>
 
-        {/* Announcements + Events — side by side on lg, stacked on mobile */}
-        <div className="grid grid-cols-1 min-[850px]:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
-          {/* Latest Announcements */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6 flex flex-col">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <div className="flex min-w-0 items-center gap-2">
-                <Megaphone className="w-4 h-4 text-tpc-greenDeep" />
-                <h2 className="truncate text-sm font-semibold uppercase tracking-[0.18em] text-gray-700">
-                  Announcements
-                </h2>
-              </div>
-              <Link
-                to="/student/announcements"
-                className="flex items-center gap-1 text-xs text-tpc-greenDeep font-medium hover:underline"
-              >
-                View all <ArrowRight className="w-3 h-3" />
-              </Link>
-            </div>
-
-            {announcements.length === 0 ? (
-              <EmptyState text="No announcements yet." />
-            ) : (
-              <ul className="space-y-3 flex-1">
-                {announcements.map((a) => (
-                  <li
-                    key={a.id}
-                    className="flex items-start gap-3 border-b border-gray-50 pb-3 last:border-0 last:pb-0"
-                  >
-                    <ScopeBadge
-                      scope={a.scope}
-                      department={a.department?.name}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="line-clamp-2 break-words text-sm font-semibold text-gray-900">
-                        {a.title}
-                      </p>
-                      <p className="text-xs text-gray-400 mt-0.5">
-                        {new Date(a.created_at).toLocaleDateString(undefined, {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          {/* Upcoming Events */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6 flex flex-col">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <div className="flex min-w-0 items-center gap-2">
-                <CalendarDays className="w-4 h-4 text-tpc-greenDeep" />
-                <h2 className="truncate text-sm font-semibold uppercase tracking-[0.18em] text-gray-700">
-                  Upcoming Events
-                </h2>
-              </div>
-              <Link
-                to="/student/events"
-                className="flex items-center gap-1 text-xs text-tpc-greenDeep font-medium hover:underline"
-              >
-                View all <ArrowRight className="w-3 h-3" />
-              </Link>
-            </div>
-
-            {events.length === 0 ? (
-              <EmptyState text="No upcoming events." />
-            ) : (
-              <ul className="space-y-3 flex-1">
-                {events.map((e) => (
-                  <li
-                    key={e.id}
-                    className="flex items-start gap-3 border-b border-gray-50 pb-3 last:border-0 last:pb-0"
-                  >
-                    {/* Date block */}
-                    <div className="shrink-0 w-10 text-center bg-tpc-greenDeep/8 rounded-lg py-1.5">
-                      <p className="text-[10px] uppercase font-bold text-tpc-greenDeep leading-none">
-                        {new Date(e.event_date).toLocaleDateString(undefined, {
-                          month: "short",
-                        })}
-                      </p>
-                      <p className="text-base font-bold text-tpc-greenDeep leading-tight">
-                        {new Date(e.event_date).getDate()}
-                      </p>
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="line-clamp-2 break-words text-sm font-semibold text-gray-900">
-                        {e.title}
-                      </p>
-                      <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
-                        {e.location && (
-                          <span className="flex min-w-0 max-w-full items-center gap-1 text-xs text-gray-400">
-                            <MapPin className="w-3 h-3 shrink-0" />
-                            <span className="truncate">{e.location}</span>
-                          </span>
-                        )}
-                        {e.time && (
-                          <span className="flex items-center gap-1 text-xs text-gray-400">
-                            <Clock className="w-3 h-3 shrink-0" />
-                            {e.time}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+        {/* TPC Updates: Events & Announcements */}
+        <div className="mb-4 sm:mb-6">
+          <DashboardUpdatesSection
+            events={events}
+            announcements={announcements}
+            role="student"
+          />
         </div>
 
         {/* Help card */}
