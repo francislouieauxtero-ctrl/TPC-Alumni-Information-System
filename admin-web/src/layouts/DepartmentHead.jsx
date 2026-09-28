@@ -110,7 +110,7 @@ export default function DepartmentHeadLayout({ children }) {
                   Talibon Polytechnic College
                 </h1>
                 <p className="text-slate-400 text-[10px] font-semibold tracking-wider uppercase mt-0.5 whitespace-nowrap">
-                  OFFICIAL WEBSITE
+                  ALUMNI OFFICIAL WEBSITE
                 </p>
               </div>
             )}
