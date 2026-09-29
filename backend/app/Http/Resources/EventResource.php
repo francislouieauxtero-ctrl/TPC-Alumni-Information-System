@@ -30,6 +30,7 @@ class EventResource extends JsonResource
             }, $this->attachments ?? [])),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'reactions_summary' => $this->getReactionsSummary(request()->user()?->id),
         ];
     }
 

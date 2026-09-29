@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Concerns\HasReactions;
 
 class Announcement extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasReactions;
 
     public const SCOPE_SCHOOL_WIDE = 'school_wide';
     public const SCOPE_DEPARTMENT_SPECIFIC = 'department_specific';

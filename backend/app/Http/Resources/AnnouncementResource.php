@@ -25,6 +25,7 @@ class AnnouncementResource extends JsonResource
             'creator' => new UserResource($this->whenLoaded('creator')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'reactions_summary' => $this->getReactionsSummary(request()->user()?->id),
         ];
     }
 

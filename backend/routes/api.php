@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\AlumniController;
 use App\Http\Controllers\Api\V1\EventController;
 use App\Http\Controllers\Api\V1\AnnouncementController;
 use App\Http\Controllers\Api\V1\JobHistoryController;
+use App\Http\Controllers\Api\V1\ReactionController;
 
 Route::prefix('auth')->middleware('throttle:10,1')->controller(AuthController::class)->group(function () {
     Route::post('register', 'register');
@@ -90,9 +91,11 @@ Route::prefix('admin')->name('admin.')->middleware('role:super_admin,admin')->gr
 
     // Events - accessible to all authenticated users
     Route::apiResource('events', EventController::class);
+    Route::post('events/{id}/reaction', [ReactionController::class, 'reactToEvent']);
 
     // Announcements - accessible to all authenticated users
     Route::apiResource('announcements', AnnouncementController::class);
+    Route::post('announcements/{id}/reaction', [ReactionController::class, 'reactToAnnouncement']);
 
     Route::middleware(['role:user', 'verified.student'])->group(function () {
         Route::apiResource('employment', JobHistoryController::class);

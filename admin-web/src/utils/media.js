@@ -67,8 +67,14 @@ export function getCreatorRoleLabel(creator) {
 
 export function resolveStorageUrl(url) {
   if (!url || typeof url !== "string") return "";
-  const trimmed = url.trim();
+  let trimmed = url.trim();
   if (!trimmed) return "";
+
+  // Normalize any localhost/127.0.0.1 port URLs to portable root-relative /storage/...
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/storage\//i.test(trimmed)) {
+    trimmed = trimmed.replace(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i, "");
+  }
+
   if (
     trimmed.startsWith("http://") ||
     trimmed.startsWith("https://") ||
@@ -116,12 +122,131 @@ export function getFirstImageUrl(item) {
   return null;
 }
 
+export function formatPostDate(dateString) {
+  if (!dateString) return "";
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "";
+
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+
+    // If future by more than 45 seconds (e.g. clock drift or future dates)
+    if (diffMs < -45 * 1000) {
+      const month = date.toLocaleDateString("en-US", { month: "long" });
+      const day = date.getDate();
+      const year = date.getFullYear();
+      return `Published ${month} ${day}, ${year}`;
+    }
+
+    // If under 45 seconds
+    if (diffMs >= -45 * 1000 && diffMs < 45 * 1000) {
+      return "Just now";
+    }
+
+    const diffMinutes = Math.floor(diffMs / (60 * 1000));
+    if (diffMinutes < 60) {
+      return `${diffMinutes} ${diffMinutes === 1 ? "minute" : "minutes"} ago`;
+    }
+
+    const diffHours = Math.floor(diffMs / (60 * 60 * 1000));
+    if (diffHours < 24) {
+      return `${diffHours} ${diffHours === 1 ? "hour" : "hours"} ago`;
+    }
+
+    const diffDays = Math.floor(diffMs / (24 * 60 * 60 * 1000));
+    if (diffDays === 1) {
+      return "1 day ago";
+    }
+
+    // Older than 1 day: "Published Month DD, YYYY"
+    const month = date.toLocaleDateString("en-US", { month: "long" });
+    const day = date.getDate();
+    const year = date.getFullYear();
+    return `Published ${month} ${day}, ${year}`;
+  } catch {
+    return "";
+  }
+}
+
+export function getEventStatusInfo(dateString) {
+  if (!dateString) {
+    return {
+      status: "UPCOMING",
+      label: "UPCOMING",
+      badgeClass: "bg-emerald-50 text-[#006400] border border-emerald-200/90",
+    };
+  }
+
+  try {
+    const eventDate = new Date(dateString);
+    if (isNaN(eventDate.getTime())) {
+      return {
+        status: "UPCOMING",
+        label: "UPCOMING",
+        badgeClass: "bg-emerald-50 text-[#006400] border border-emerald-200/90",
+      };
+    }
+
+    const now = new Date();
+
+    const todayMidnight = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+    const eventMidnight = new Date(
+      eventDate.getFullYear(),
+      eventDate.getMonth(),
+      eventDate.getDate()
+    );
+
+    const diffMs = eventMidnight.getTime() - todayMidnight.getTime();
+    const dayDiff = Math.round(diffMs / (24 * 60 * 60 * 1000));
+
+    if (dayDiff < 0) {
+      return {
+        status: "PAST",
+        label: "PAST",
+        badgeClass: "bg-gray-100 text-gray-600 border border-gray-200",
+      };
+    } else if (dayDiff === 0) {
+      return {
+        status: "TODAY",
+        label: "TODAY",
+        badgeClass: "bg-emerald-100 text-[#006400] border border-emerald-300 font-bold",
+      };
+    } else if (dayDiff === 1) {
+      return {
+        status: "TOMORROW",
+        label: "TOMORROW",
+        badgeClass: "bg-blue-50 text-blue-700 border border-blue-200 font-semibold",
+      };
+    } else {
+      return {
+        status: "UPCOMING",
+        label: "UPCOMING",
+        badgeClass: "bg-emerald-50 text-[#008000] border border-emerald-200 font-medium",
+      };
+    }
+  } catch {
+    return {
+      status: "UPCOMING",
+      label: "UPCOMING",
+      badgeClass: "bg-emerald-50 text-[#006400] border border-emerald-200/90",
+    };
+  }
+}
+
 export default {
   getAttachmentUrls,
   renderTextWithLinks,
   getCreatorRoleLabel,
   resolveStorageUrl,
   getFirstImageUrl,
+  formatPostDate,
+  getEventStatusInfo,
 };
+
 
 

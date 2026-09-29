@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import DashboardEventsCard from "./DashboardEventsCard";
 import DashboardAnnouncementsCard from "./DashboardAnnouncementsCard";
 
@@ -28,6 +29,26 @@ export default function DashboardUpdatesSection({
   announcements = [],
   role = "president",
 }) {
+  const queryClient = useQueryClient();
+
+  // Populate React Query single caches in memory for instant zero-delay navigation
+  useEffect(() => {
+    if (Array.isArray(events) && events.length > 0) {
+      events.forEach((evt) => {
+        if (evt?.id) {
+          queryClient.setQueryData(["event", String(evt.id)], evt);
+        }
+      });
+    }
+    if (Array.isArray(announcements) && announcements.length > 0) {
+      announcements.forEach((ann) => {
+        if (ann?.id) {
+          queryClient.setQueryData(["announcement", String(ann.id)], ann);
+        }
+      });
+    }
+  }, [events, announcements, queryClient]);
+
   const hasEvents = Array.isArray(events) && events.length > 0;
   const hasAnnouncements =
     Array.isArray(announcements) && announcements.length > 0;

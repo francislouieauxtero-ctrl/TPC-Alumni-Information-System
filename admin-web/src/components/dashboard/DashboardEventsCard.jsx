@@ -135,6 +135,7 @@ function FeaturedEventCard({ event, detailPath, isFullWidth = false }) {
   return (
     <Link
       to={detailPath}
+      state={{ event }}
       className={`group block rounded-xl border border-slate-200/90 bg-white p-3.5 sm:p-4 transition-all duration-150 hover:border-emerald-300 hover:shadow-xs hover:-translate-y-0.5 ${
         isFullWidth ? "md:flex md:items-center md:gap-5" : ""
       }`}
@@ -257,6 +258,7 @@ function SecondaryEventItem({ event, detailPath }) {
   return (
     <Link
       to={detailPath}
+      state={{ event }}
       className="group flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/60 p-2 sm:p-2.5 transition-all duration-150 hover:bg-white hover:border-slate-200 hover:shadow-2xs hover:-translate-y-0.5"
     >
       {/* Date badge */}

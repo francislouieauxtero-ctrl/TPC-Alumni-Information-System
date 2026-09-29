@@ -13,6 +13,7 @@ class AnnouncementRepository
         $query = Announcement::query()->with([
             'creator:id,name,avatar,role',
             'department:id,name',
+            'reactions:id,user_id,reactable_type,reactable_id,type',
         ]);
 
         if (!$actor->isSuperAdmin()) {
@@ -54,6 +55,7 @@ class AnnouncementRepository
         return Announcement::with([
             'creator:id,name,avatar,role',
             'department:id,name',
+            'reactions:id,user_id,reactable_type,reactable_id,type',
         ])->find($id);
     }
 
