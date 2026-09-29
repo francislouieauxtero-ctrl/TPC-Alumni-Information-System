@@ -67,7 +67,7 @@ class EventService
                     $path = $file->store('events', 'public');
                     $attachments[] = [
                         'path' => $path,
-                        'url' => Storage::url($path),
+                        'url' => '/storage/' . $path,
                         'name' => $file->getClientOriginalName(),
                     ];
                 }
@@ -121,9 +121,19 @@ class EventService
                 foreach ($existing as $att) {
                     $keep = true;
                     foreach ($toRemove as $r) {
-                        if (isset($att['url']) && $att['url'] === $r) {
-                            // delete file by path
-                            if (isset($att['path'])) Storage::disk('public')->delete($att['path']);
+                        $matchUrl = isset($att['url']) && (
+                            $att['url'] === $r ||
+                            ($this->getStoragePath($att['url']) && $this->getStoragePath($att['url']) === $this->getStoragePath($r))
+                        );
+                        $matchPath = isset($att['path']) && (
+                            $att['path'] === $r ||
+                            $att['path'] === $this->getStoragePath($r)
+                        );
+                        if ($matchUrl || $matchPath) {
+                            $diskPath = $att['path'] ?? $this->getStoragePath($att['url'] ?? '');
+                            if ($diskPath && Storage::disk('public')->exists($diskPath)) {
+                                Storage::disk('public')->delete($diskPath);
+                            }
                             $keep = false;
                             break;
                         }
@@ -140,7 +150,7 @@ class EventService
                     $path = $file->store('events', 'public');
                     $existing[] = [
                         'path' => $path,
-                        'url' => Storage::url($path),
+                        'url' => '/storage/' . $path,
                         'name' => $file->getClientOriginalName(),
                     ];
                 }
@@ -231,5 +241,18 @@ class EventService
                 'exception' => $e,
             ]);
         }
+    }
+
+    protected function getStoragePath(string $urlOrPath): ?string
+    {
+        $clean = $urlOrPath;
+        if (str_starts_with($clean, 'http://') || str_starts_with($clean, 'https://')) {
+            $clean = parse_url($clean, PHP_URL_PATH) ?? '';
+        }
+        $clean = ltrim($clean, '/');
+        if (str_starts_with($clean, 'storage/')) {
+            $clean = substr($clean, 8);
+        }
+        return $clean ?: null;
     }
 }

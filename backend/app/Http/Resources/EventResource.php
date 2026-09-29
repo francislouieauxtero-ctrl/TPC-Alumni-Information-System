@@ -22,9 +22,36 @@ class EventResource extends JsonResource
             'scope' => $this->scope,
             'is_future' => $this->isFuture(),
             'is_past' => $this->isPast(),
-            'attachments' => $this->attachments ?? [],
+            'attachments' => array_values(array_map(function ($att) {
+                if (is_array($att) && isset($att['url'])) {
+                    $att['url'] = $this->normalizeUrl($att['url']);
+                }
+                return $att;
+            }, $this->attachments ?? [])),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
+    }
+
+    protected function normalizeUrl(?string $url): ?string
+    {
+        if (!$url || !is_string($url)) {
+            return $url;
+        }
+
+        if (str_starts_with($url, '/storage/')) {
+            return $url;
+        }
+
+        if (str_starts_with($url, 'http://') || str_starts_with($url, 'https://')) {
+            $host = parse_url($url, PHP_URL_HOST);
+            $path = parse_url($url, PHP_URL_PATH);
+            if ($path && (str_starts_with($path, '/storage/') || in_array($host, ['localhost', '127.0.0.1']))) {
+                return $path;
+            }
+            return $url;
+        }
+
+        return '/storage/' . ltrim($url, '/');
     }
 }

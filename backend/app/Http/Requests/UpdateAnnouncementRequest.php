@@ -24,6 +24,8 @@ class UpdateAnnouncementRequest extends FormRequest
             'department_category' => ['nullable', 'string', 'max:255'],
             'images' => ['nullable', 'array'],
             'images.*' => ['file', 'mimes:jpg,jpeg,png,webp,pdf,doc,docx,xls,xlsx,ppt,pptx,txt,mp4,mov,avi,webm,zip,rar', 'max:10240'],
+            'removed_images' => ['nullable', 'array'],
+            'removed_images.*' => ['string'],
         ];
     }
 }

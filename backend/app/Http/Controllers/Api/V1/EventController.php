@@ -25,7 +25,7 @@ class EventController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $filters = request()->only(['scope', 'department_id', 'search', 'include_past', 'page', 'limit', 'sort_by', 'sort_direction']);
+            $filters = request()->only(['scope', 'department_id', 'search', 'include_past', 'only_past', 'page', 'limit', 'sort_by', 'sort_direction', 'per_page']);
 
             $events = $this->eventService->getVisibleEvents(auth()->user(), $filters);
 

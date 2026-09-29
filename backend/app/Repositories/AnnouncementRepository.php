@@ -37,12 +37,16 @@ class AnnouncementRepository
         }
 
         if (isset($filters['limit']) && is_numeric($filters['limit']) && (int) $filters['limit'] > 0) {
+            $limit = min((int) $filters['limit'], 50);
             return $query->orderBy('created_at', 'desc')
-                ->limit((int) $filters['limit'])
+                ->limit($limit)
                 ->get();
         }
 
-        return $query->orderBy('created_at', 'desc')->paginate(15);
+        $perPage = isset($filters['per_page']) && is_numeric($filters['per_page']) ? (int) $filters['per_page'] : 15;
+        $perPage = max(1, min($perPage, 50));
+
+        return $query->orderBy('created_at', 'desc')->paginate($perPage);
     }
 
     public function find(int $id): ?Announcement

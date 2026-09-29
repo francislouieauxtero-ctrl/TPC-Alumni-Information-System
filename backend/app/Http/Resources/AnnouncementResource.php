@@ -20,11 +20,33 @@ class AnnouncementResource extends JsonResource
             'posted_at' => $this->posted_at?->toISOString(),
             'posted_by' => $this->posted_by,
             'department_category' => $this->department_category,
-            'images' => $this->images ?? [],
+            'images' => array_values(array_filter(array_map(fn ($img) => $this->normalizeUrl($img), $this->images ?? []))),
             'created_by' => $this->created_by,
             'creator' => new UserResource($this->whenLoaded('creator')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
+    }
+
+    protected function normalizeUrl(?string $url): ?string
+    {
+        if (!$url || !is_string($url)) {
+            return $url;
+        }
+
+        if (str_starts_with($url, '/storage/')) {
+            return $url;
+        }
+
+        if (str_starts_with($url, 'http://') || str_starts_with($url, 'https://')) {
+            $host = parse_url($url, PHP_URL_HOST);
+            $path = parse_url($url, PHP_URL_PATH);
+            if ($path && (str_starts_with($path, '/storage/') || in_array($host, ['localhost', '127.0.0.1']))) {
+                return $path;
+            }
+            return $url;
+        }
+
+        return '/storage/' . ltrim($url, '/');
     }
 }

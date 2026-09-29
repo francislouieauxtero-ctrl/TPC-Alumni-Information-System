@@ -41,8 +41,12 @@ class EventRepository
             $query->where('department_id', $filters['department_id']);
         }
 
-        $includePast = $filters['include_past'] ?? false;
-        if (!$includePast) {
+        $includePast = filter_var($filters['include_past'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $onlyPast = filter_var($filters['only_past'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+        if ($onlyPast) {
+            $query->where('event_date', '<', now());
+        } elseif (!$includePast) {
             $query->where('event_date', '>=', now());
         }
 
@@ -55,31 +59,33 @@ class EventRepository
         }
 
         $sortBy = $filters['sort_by'] ?? null;
-        $sortDirection = strtolower($filters['sort_direction'] ?? '') === 'desc' ? 'desc' : 'asc';
+        $sortDirection = strtolower($filters['sort_direction'] ?? '');
 
         if ($sortBy === 'event_date') {
             $orderColumn = 'event_date';
-            $orderDir = $sortDirection;
+            $orderDir = $sortDirection === 'desc' ? 'desc' : 'asc';
         } elseif ($sortBy === 'created_at') {
             $orderColumn = 'created_at';
-            $orderDir = strtolower($filters['sort_direction'] ?? '') === 'asc' ? 'asc' : 'desc';
-        } elseif (isset($filters['limit']) && !$includePast) {
-            // Dashboard upcoming events: chronological order (soonest upcoming first)
-            $orderColumn = 'event_date';
-            $orderDir = 'asc';
+            $orderDir = $sortDirection === 'asc' ? 'asc' : 'desc';
         } else {
-            // Default for management and paginated list pages
-            $orderColumn = 'created_at';
-            $orderDir = 'desc';
+            // Default chronological event ordering:
+            // UPCOMING EVENTS (default): event_date ASC (soonest upcoming first)
+            // PAST EVENTS: event_date DESC (most recently passed first)
+            $orderColumn = 'event_date';
+            $orderDir = ($includePast || $onlyPast) ? 'desc' : 'asc';
         }
 
         if (isset($filters['limit']) && is_numeric($filters['limit']) && (int) $filters['limit'] > 0) {
+            $limit = min((int) $filters['limit'], 50);
             return $query->orderBy($orderColumn, $orderDir)
-                ->limit((int) $filters['limit'])
+                ->limit($limit)
                 ->get();
         }
 
-        return $query->orderBy($orderColumn, $orderDir)->paginate(15);
+        $perPage = isset($filters['per_page']) && is_numeric($filters['per_page']) ? (int) $filters['per_page'] : 15;
+        $perPage = max(1, min($perPage, 50));
+
+        return $query->orderBy($orderColumn, $orderDir)->paginate($perPage);
     }
 
     /**
@@ -104,7 +110,10 @@ class EventRepository
             });
         }
 
-        return $query->orderBy('event_date', 'desc')->paginate(15);
+        $perPage = isset($filters['per_page']) && is_numeric($filters['per_page']) ? (int) $filters['per_page'] : 15;
+        $perPage = max(1, min($perPage, 50));
+
+        return $query->orderBy('event_date', 'desc')->paginate($perPage);
     }
 
     /**
