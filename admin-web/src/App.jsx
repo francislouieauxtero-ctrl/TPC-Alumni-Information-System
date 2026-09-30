@@ -92,12 +92,61 @@ const DashboardRedirect = () => {
   return <Navigate to={getDashboardPath(userRole)} replace />;
 };
 
-// Component to check user on app load
+// Elegant, minimal, professional splash screen using the official TPC logo
+const SplashScreen = ({ isFadingOut }) => {
+  return (
+    <div
+      className={`fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-white px-6 select-none transition-opacity duration-300 ease-out ${
+        isFadingOut ? "opacity-0 pointer-events-none" : "opacity-100"
+      }`}
+      style={{
+        paddingTop: "max(1.5rem, env(safe-area-inset-top))",
+        paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))",
+      }}
+      aria-label="Talibon Polytechnic College Initializing"
+      role="status"
+    >
+      <div
+        className={`flex flex-col items-center text-center max-w-[380px] w-full transition-transform duration-300 ease-out ${
+          isFadingOut ? "scale-[1.01]" : "scale-100"
+        }`}
+      >
+        {/* Official TPC Seal */}
+        <div className="relative splash-logo-enter">
+          <img
+            src={tpcLogo}
+            alt="Talibon Polytechnic College Seal"
+            className="w-[clamp(84px,14vw,112px)] h-[clamp(84px,14vw,112px)] rounded-full border-[2.5px] border-[#c9a84c] object-cover shadow-[0_8px_24px_rgba(15,58,92,0.08)] ring-4 ring-[#0f3a5c]/5 aspect-square"
+          />
+        </div>
+
+        {/* Tagline */}
+        <h2 className="mt-5 sm:mt-6 text-[clamp(16px,2.5vw,20px)] font-semibold text-[#0f3a5c] tracking-tight leading-[1.45] splash-tagline-enter">
+          Reconnect, Reminisce,
+          <span className="block sm:inline sm:ml-1">Reunite.</span>
+        </h2>
+
+        {/* Subtle Institutional Loading Line */}
+        <div className="mt-6 sm:mt-7 w-[clamp(120px,18vw,160px)] h-[2.5px] bg-slate-100 rounded-full overflow-hidden relative splash-indicator-enter">
+          <div className="absolute inset-y-0 w-2/5 rounded-full bg-gradient-to-r from-[#0f3a5c] via-[#0f3a5c] to-[#c9a84c] splash-progress-line" />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Component to check user on app load with smooth splash transition
 const AuthProvider = ({ children }) => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
+  const [isFadingOut, setIsFadingOut] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
+    let isMounted = true;
+    const startTime = performance.now();
+    const MIN_SPLASH_DURATION = 3000; // Minimum 3 seconds display time
+
     const checkAuth = async () => {
       try {
         const token = localStorage.getItem("token");
@@ -108,7 +157,7 @@ const AuthProvider = ({ children }) => {
             if (!sessionUser?.role) {
               throw new Error("Authenticated session is missing a role");
             }
-            setUser(sessionUser);
+            if (isMounted) setUser(sessionUser);
             storeAuthSession(token, sessionUser);
           }
         }
@@ -117,30 +166,49 @@ const AuthProvider = ({ children }) => {
         localStorage.removeItem("token");
         localStorage.removeItem("userRole");
       } finally {
-        setIsLoading(false);
+        if (!isMounted) return;
+
+        const prefersReducedMotion =
+          typeof window !== "undefined" &&
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        if (prefersReducedMotion) {
+          setAuthChecked(true);
+          setShowSplash(false);
+          return;
+        }
+
+        const elapsed = performance.now() - startTime;
+        const remainingDelay = Math.max(0, MIN_SPLASH_DURATION - elapsed);
+
+        setTimeout(() => {
+          if (!isMounted) return;
+          // Mount verified children underneath the overlay
+          setAuthChecked(true);
+          // Softly fade out splash screen
+          setIsFadingOut(true);
+
+          setTimeout(() => {
+            if (!isMounted) return;
+            setShowSplash(false);
+          }, 320);
+        }, remainingDelay);
       }
     };
 
     checkAuth();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-brand-bg">
-        <div className="text-center">
-          <img
-            src={tpcLogo}
-            alt="Talibon Polytechnic College"
-            className="h-16 w-16 mx-auto mb-4 rounded-full border-2 border-tpc-gold object-cover shadow-sm"
-          />
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-accent1 mx-auto mb-4"></div>
-          <p className="text-text-secondary text-sm">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  return children;
+  return (
+    <>
+      {authChecked && children}
+      {showSplash && <SplashScreen isFadingOut={isFadingOut} />}
+    </>
+  );
 };
 
 export default function App() {

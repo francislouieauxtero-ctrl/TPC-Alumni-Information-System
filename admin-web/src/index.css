@@ -25,3 +25,79 @@
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
 }
+
+/* ─── Initial Splash Screen Animations ─────────────────────────────────────── */
+@keyframes splashFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes splashTaglineFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes splashIndicatorFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes splashProgressSweep {
+  0% {
+    left: -40%;
+    width: 35%;
+  }
+  50% {
+    left: 35%;
+    width: 45%;
+  }
+  100% {
+    left: 100%;
+    width: 35%;
+  }
+}
+
+.splash-logo-enter {
+  animation: splashFadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.splash-tagline-enter {
+  animation: splashTaglineFadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
+}
+
+.splash-indicator-enter {
+  animation: splashIndicatorFadeIn 0.4s ease-out 0.22s both;
+}
+
+.splash-progress-line {
+  animation: splashProgressSweep 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-logo-enter,
+  .splash-tagline-enter,
+  .splash-indicator-enter,
+  .splash-progress-line {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    transition: none !important;
+  }
+}
+

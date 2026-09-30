@@ -30,15 +30,30 @@
 
 <body>
   <div id="root">
-    <div style="display:flex;align-items:center;justify-content:center;height:100vh;background-color:#f5f0e8;font-family:system-ui,-apple-system,sans-serif;">
-      <div style="text-align:center;">
-        <img src="/favicon.png" alt="Talibon Polytechnic College" style="width:64px;height:64px;border-radius:50%;border:2px solid #c9a84c;object-fit:cover;margin:0 auto 16px;display:block;box-shadow:0 1px 3px rgba(0,0,0,0.1);" />
-        <div style="width:36px;height:36px;border:3px solid #e2e8f0;border-top-color:#1a3a5c;border-radius:50%;animation:initial-spin 1s linear infinite;margin:0 auto 12px;"></div>
-        <p style="color:#64748b;font-size:14px;margin:0;">Loading...</p>
+    <div style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background-color:#ffffff;font-family:'Inter',system-ui,-apple-system,sans-serif;z-index:99999;padding:1.5rem;box-sizing:border-box;">
+      <div style="display:flex;flex-direction:column;align-items:center;text-align:center;max-width:380px;width:100%;">
+        <img
+          src="/tpc-logo.jpg"
+          alt="Talibon Polytechnic College Seal"
+          style="width:clamp(84px, 14vw, 112px);height:clamp(84px, 14vw, 112px);border-radius:50%;border:2.5px solid #c9a84c;object-fit:cover;display:block;box-shadow:0 8px 24px rgba(15, 58, 92, 0.08);aspect-ratio:1/1;"
+        />
+        <h2 style="margin:1.5rem 0 0 0;font-size:clamp(16px, 2.5vw, 20px);font-weight:600;color:#0f3a5c;letter-spacing:0.01em;line-height:1.45;">
+          Reconnect, Reminisce,<br style="display:inline;" />Reunite.
+        </h2>
+        <div style="margin-top:1.5rem;width:clamp(120px, 18vw, 160px);height:2.5px;background-color:#f1f5f9;border-radius:9999px;overflow:hidden;position:relative;">
+          <div style="position:absolute;top:0;bottom:0;width:40%;background:linear-gradient(90deg, #0f3a5c, #c9a84c);border-radius:9999px;animation:initial-progress 1.4s ease-in-out infinite;"></div>
+        </div>
       </div>
     </div>
     <style>
-      @keyframes initial-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      @keyframes initial-progress {
+        0% { left: -40%; width: 35%; }
+        50% { left: 35%; width: 45%; }
+        100% { left: 100%; width: 35%; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #root div div div div { animation: none !important; }
+      }
     </style>
   </div>
   <script type="module" src="/src/main.jsx"></script>
