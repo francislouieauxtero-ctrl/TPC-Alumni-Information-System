@@ -110,7 +110,7 @@ export default function PresidentDasboard() {
           detail="Registered alumni accounts"
         />
         <StatCard
-          title="Not Registered Alumni"
+          title="Unregistered Graduates"
           value={stats?.not_registered_graduates || 0}
           icon={<Users className="h-5 w-5" />}
           color="bg-amber-500"

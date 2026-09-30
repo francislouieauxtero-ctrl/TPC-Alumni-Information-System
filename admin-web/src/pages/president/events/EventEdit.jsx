@@ -254,7 +254,7 @@ export default function EventEdit() {
                     className="w-4 h-4 text-tpc-green"
                   />
                   <span className="text-gray-700">
-                    <strong>School-wide</strong> - Visible to all departments
+                    <strong>🌐 All Users</strong> - Visible to all authenticated system users
                   </span>
                 </label>
                 <label className="flex items-center gap-3 cursor-pointer">

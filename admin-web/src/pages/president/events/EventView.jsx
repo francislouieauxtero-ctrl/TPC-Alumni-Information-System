@@ -205,7 +205,7 @@ export default function EventView() {
                 }`}
               >
                 {event.scope === "school_wide"
-                  ? "School-wide"
+                  ? "🌐 All Users"
                   : "Department-specific"}
               </span>
             </div>
@@ -228,14 +228,14 @@ export default function EventView() {
           <Detail label="Department">
             {event.department?.name ?? (
               <span className="text-gray-400 italic">
-                {event.scope === "school_wide" ? "All departments" : "—"}
+                {event.scope === "school_wide" ? "All Users" : "—"}
               </span>
             )}
           </Detail>
 
           <Detail label="Scope">
             {event.scope === "school_wide"
-              ? "School-wide"
+              ? "🌐 All Users"
               : "Department-specific"}
           </Detail>
         </div>

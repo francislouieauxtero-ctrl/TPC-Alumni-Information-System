@@ -227,7 +227,7 @@ function ScopeBadge({ scope, department }) {
           : "bg-purple-100 text-purple-600"
         }`}
     >
-      {isSchoolWide ? "School" : department || "Dept"}
+      {isSchoolWide ? "🌐 All" : department || "Dept"}
     </span>
   );
 }

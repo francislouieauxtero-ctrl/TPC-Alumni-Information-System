@@ -155,7 +155,7 @@ export default function PrintableReport({
               value={overview.totalGraduates}
             />
             <ReportStat
-              label="Not Registered Graduates"
+              label="Unregistered Graduates"
               value={overview.notRegisteredGraduates}
             />
             <ReportStat label="Employed" value={overview.employed} />
@@ -231,13 +231,13 @@ function computeReportOverview(stats, alignmentRows) {
   // Overall alignment rate: weighted average across departments,
   // weighted by each department's employed count.
   const totalEmployedAcrossDepts = (alignmentRows || []).reduce(
-    (sum, r) => sum + (r.total_employed || 0),
+    (sum, r) => sum + Number(r.total_employed || 0),
     0,
   );
   const alignmentRate =
     totalEmployedAcrossDepts > 0
       ? (alignmentRows || []).reduce(
-          (sum, r) => sum + (r.alignment_rate || 0) * (r.total_employed || 0),
+          (sum, r) => sum + Number(r.alignment_rate || 0) * Number(r.total_employed || 0),
           0,
         ) / totalEmployedAcrossDepts
       : 0;
@@ -443,7 +443,7 @@ function ReportAlignmentTable({ rows }) {
           <th className="col-dept">Department</th>
           <th className="col-aligned">Aligned</th>
           <th className="col-not-aligned">Not Aligned</th>
-          <th className="col-not-reg">Not Registered Graduates</th>
+          <th className="col-not-reg">Unregistered Graduates</th>
           <th className="col-rate">Alignment Rate</th>
         </tr>
       </thead>

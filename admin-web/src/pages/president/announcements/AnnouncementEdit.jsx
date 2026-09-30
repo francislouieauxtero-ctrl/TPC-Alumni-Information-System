@@ -197,7 +197,7 @@ export default function AnnouncementEdit({
                   className="w-4 h-4 text-tpc-green"
                 />
                 <span className="text-gray-700">
-                  <strong>School-wide</strong> - All alumni and departments can
+                  <strong>🌐 All Users</strong> - All authenticated system users can
                   see this
                 </span>
               </label>

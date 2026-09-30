@@ -183,7 +183,7 @@ export default function AnnouncementView() {
               }`}
             >
               {announcement.scope === "school_wide"
-                ? "School-wide"
+                ? "🌐 All Users"
                 : announcement.department?.name || "Department-specific"}
             </span>
           </div>

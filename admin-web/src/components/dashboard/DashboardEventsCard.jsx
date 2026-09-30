@@ -130,7 +130,7 @@ function FeaturedEventCard({ event, detailPath, isFullWidth = false }) {
   const time = safeFormat(event.event_date, "h:mm a");
   const scopeLabel =
     event.department?.name ||
-    (event.scope === "all" ? "All Campus" : "TPC Community");
+    (event.scope === "all" || event.scope === "school_wide" ? "🌐 All Users" : "Department");
 
   return (
     <Link
@@ -253,7 +253,7 @@ function SecondaryEventItem({ event, detailPath }) {
   const time = safeFormat(event.event_date, "h:mm a");
   const scopeLabel =
     event.department?.name ||
-    (event.scope === "all" ? "All Campus" : "TPC Community");
+    (event.scope === "all" || event.scope === "school_wide" ? "🌐 All Users" : "Department");
 
   return (
     <Link

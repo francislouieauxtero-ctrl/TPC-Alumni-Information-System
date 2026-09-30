@@ -198,7 +198,7 @@ export default function GraduateList() {
                       >
                         {graduate.registration_status === "registered"
                           ? "Registered"
-                          : "Not Registered"}
+                          : "Unregistered"}
                       </span>
                     </td>
                   </tr>

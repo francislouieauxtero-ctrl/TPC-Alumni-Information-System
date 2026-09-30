@@ -144,7 +144,7 @@ export default function DepartmentHeadDashboard() {
           detail="Registered alumni accounts"
         />
         <StatCard
-          title="Not Registered Alumni"
+          title="Unregistered Graduates"
           value={stats?.not_registered_graduates || 0}
           icon={<Users className="w-5 h-5" />}
           color="bg-amber-500"

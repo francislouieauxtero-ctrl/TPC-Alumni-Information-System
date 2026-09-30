@@ -60,7 +60,7 @@ export default function PostHeader({
                 {isSchoolWide ? (
                   <>
                     <Globe className="w-3 h-3 text-[#008000] shrink-0" />
-                    <span>School-wide</span>
+                    <span>All Users</span>
                   </>
                 ) : (
                   <>

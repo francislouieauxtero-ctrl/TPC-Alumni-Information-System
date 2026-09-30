@@ -138,7 +138,7 @@ function FeaturedAnnouncementCard({
     "TPC Administration";
   const scopeLabel =
     announcement.department?.name ||
-    (announcement.scope === "all" ? "All Campus" : "TPC Community");
+    (announcement.scope === "all" || announcement.scope === "school_wide" ? "🌐 All Users" : "Department");
 
   return (
     <Link
@@ -250,7 +250,7 @@ function SecondaryAnnouncementItem({ announcement, detailPath }) {
     "TPC Administration";
   const scopeLabel =
     announcement.department?.name ||
-    (announcement.scope === "all" ? "All Campus" : "TPC Community");
+    (announcement.scope === "all" || announcement.scope === "school_wide" ? "🌐 All Users" : "Department");
 
   return (
     <Link

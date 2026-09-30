@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import api from "../../services/api";
 import alumniService from "../../services/alumniService";
 import PrintableReport from "./PrintableReport";
@@ -7,43 +7,45 @@ import {
   Briefcase,
   GraduationCap,
   TrendingUp,
-  Building2,
-  Clock,
   CheckCircle2,
   XCircle,
-  HelpCircle,
+  Clock,
   ChevronRight,
   Loader2,
-  AlertCircle,
   BriefcaseIcon,
   SlidersHorizontal,
-  X,
   ChevronDown,
   Printer,
 } from "lucide-react";
 import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
   LineChart,
   Line,
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
 } from "recharts";
 
-// ── Theme tokens ──────────────────────────────────────────────────────────
-const GREEN_DEEP = "#02451C";
-const GREEN_MID = "#035c25";
-const GREEN_SOFT = "#e8f4ed"; // tinted bg for pills / banners
-const GREEN_RING = "#86c99a"; // focus ring
+// ── Approved Executive Body Visual Palette ─────────────────────────────────
+const COLOR_PRIMARY_BLUE = "#0F3A5C";
+const COLOR_SECONDARY_BLUE = "#2563EB";
+const COLOR_GOLD_ACCENT = "#D4A72C";
+const COLOR_MUTED_GRAY = "#94A3B8";
+const COLOR_LIGHT_GRAY = "#CBD5E1";
+const COLOR_DANGER = "#EF4444";
 
-// ── Color palettes ────────────────────────────────────────────────────────
-const STATUS_COLORS = [GREEN_DEEP, "#d97706", "#ef4444", "#8b5cf6"];
-const EMPLOY_COLORS = [GREEN_DEEP, "#ef4444", "#2563eb"];
-const EMPLOY_LABEL_COLORS = ["#16a34a", "#ef4444", "#3b82f6"];
-const ALIGNMENT_LINE_COLOR = "#3b9b6d";
-const ALIGNMENT_LINE2_COLOR = "#60a5fa";
-const ALIGNMENT_CHART_BACKGROUND = "#ffffff";
+// Semantic Chart Tokens
+const COLOR_REGISTERED = COLOR_PRIMARY_BLUE;
+const COLOR_UNREGISTERED = COLOR_MUTED_GRAY;
+
+const COLOR_EMPLOYED = COLOR_SECONDARY_BLUE;
+const COLOR_SELF_EMPLOYED = COLOR_GOLD_ACCENT;
+const COLOR_UNEMPLOYED = COLOR_DANGER;
+const COLOR_NOT_SPECIFIED = COLOR_LIGHT_GRAY;
 
 // ── FilterBar ─────────────────────────────────────────────────────────────
 function FilterBar({
@@ -62,10 +64,12 @@ function FilterBar({
     paddingRight: "32px",
     fontSize: "13px",
     fontWeight: 500,
-    color: "#1a2e1f",
-    background: "white",
-    border: `1.5px solid #c8ddd0`,
-    borderRadius: "8px",
+    color: "#0F172A",
+    background: "#FFFFFF",
+    borderWidth: "1.5px",
+    borderStyle: "solid",
+    borderColor: "#E2E8F0",
+    borderRadius: "10px",
     cursor: "pointer",
     outline: "none",
     transition: "border-color 0.15s, box-shadow 0.15s",
@@ -74,64 +78,31 @@ function FilterBar({
   const activeSelectStyle = (val) =>
     val
       ? {
-        ...selectBase,
-        borderColor: GREEN_DEEP,
-        color: GREEN_DEEP,
-        background: GREEN_SOFT,
-        fontWeight: 600,
-      }
+          ...selectBase,
+          borderColor: COLOR_PRIMARY_BLUE,
+          color: COLOR_PRIMARY_BLUE,
+          background: "#F8FAFC",
+          fontWeight: 600,
+        }
       : selectBase;
 
-  const clearOne = (key) => onChange({ ...filters, [key]: "" });
-
   return (
-    <div
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        gap: "10px",
-        background: "white",
-        border: "1.5px solid #dce8e0",
-        borderRadius: "12px",
-        padding: "12px 16px",
-        boxShadow: "0 1px 4px rgba(2,69,28,0.06)",
-      }}
-    >
-      {/* Label */}
-      <span
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "6px",
-          fontSize: "12px",
-          fontWeight: 700,
-          color: GREEN_DEEP,
-          textTransform: "uppercase",
-          letterSpacing: "0.06em",
-          flexShrink: 0,
-        }}
-      >
-        <SlidersHorizontal size={13} />
-        Filter
+    <div className="flex flex-wrap items-center gap-2.5 bg-white border border-slate-200/80 rounded-2xl px-4 py-3 shadow-xs">
+      <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 shrink-0">
+        <SlidersHorizontal size={13} className="text-[#0F3A5C]" />
+        Filters
       </span>
 
-      {/* Divider */}
-      <span
-        style={{ width: 1, height: 20, background: "#dce8e0", flexShrink: 0 }}
-      />
+      <span className="w-px h-5 bg-slate-200 shrink-0" />
 
       {/* Department select */}
-      <div style={{ position: "relative", flexShrink: 0 }}>
+      <div className="relative shrink-0">
         <select
           value={filters.department}
           onChange={(e) => onChange({ ...filters, department: e.target.value })}
           style={activeSelectStyle(filters.department)}
-          onFocus={(e) =>
-            (e.target.style.boxShadow = `0 0 0 3px ${GREEN_RING}55`)
-          }
-          onBlur={(e) => (e.target.style.boxShadow = "none")}
           disabled={departmentLocked}
+          aria-label="Filter by Department"
         >
           {!departmentLocked ? (
             <option value="">All Departments</option>
@@ -149,27 +120,17 @@ function FilterBar({
         </select>
         <ChevronDown
           size={13}
-          style={{
-            position: "absolute",
-            right: 9,
-            top: "50%",
-            transform: "translateY(-50%)",
-            pointerEvents: "none",
-            color: filters.department ? GREEN_DEEP : "#9ca3af",
-          }}
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"
         />
       </div>
 
       {/* Batch select */}
-      <div style={{ position: "relative", flexShrink: 0 }}>
+      <div className="relative shrink-0">
         <select
           value={filters.batch}
           onChange={(e) => onChange({ ...filters, batch: e.target.value })}
           style={activeSelectStyle(filters.batch)}
-          onFocus={(e) =>
-            (e.target.style.boxShadow = `0 0 0 3px ${GREEN_RING}55`)
-          }
-          onBlur={(e) => (e.target.style.boxShadow = "none")}
+          aria-label="Filter by Graduation Batch"
         >
           <option value="">All Batches</option>
           {batches.map((year) => (
@@ -180,454 +141,19 @@ function FilterBar({
         </select>
         <ChevronDown
           size={13}
-          style={{
-            position: "absolute",
-            right: 9,
-            top: "50%",
-            transform: "translateY(-50%)",
-            pointerEvents: "none",
-            color: filters.batch ? GREEN_DEEP : "#9ca3af",
-          }}
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"
         />
       </div>
-
-      {/* Active pills */}
-      {filters.department && (
-        <ActivePill
-          label={
-            departments.find(
-              (d) => String(d.id ?? d.name) === String(filters.department),
-            )?.name ?? filters.department
-          }
-          prefix="Dept"
-          onRemove={() => clearOne("department")}
-        />
-      )}
-      {filters.batch && (
-        <ActivePill
-          label={`Batch ${filters.batch}`}
-          onRemove={() => clearOne("batch")}
-        />
-      )}
 
       {/* Clear all */}
       {hasFilters && (
         <button
           onClick={() => onChange({ department: "", batch: "" })}
-          style={{
-            marginLeft: "auto",
-            fontSize: "12px",
-            color: "#6b7280",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            textDecoration: "underline",
-            textUnderlineOffset: "2px",
-            padding: "2px 4px",
-            flexShrink: 0,
-          }}
-          onMouseEnter={(e) => (e.target.style.color = GREEN_DEEP)}
-          onMouseLeave={(e) => (e.target.style.color = "#6b7280")}
+          className="ml-auto text-xs text-slate-500 hover:text-[#0F3A5C] underline underline-offset-2 px-1 cursor-pointer transition shrink-0 font-medium"
         >
-          Clear all
+          Reset filters
         </button>
       )}
-    </div>
-  );
-}
-
-function ActivePill({ label, prefix, onRemove }) {
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "5px",
-        background: GREEN_SOFT,
-        border: `1px solid ${GREEN_RING}`,
-        color: GREEN_DEEP,
-        borderRadius: "999px",
-        padding: "3px 10px 3px 10px",
-        fontSize: "12px",
-        fontWeight: 600,
-        flexShrink: 0,
-      }}
-    >
-      {prefix && (
-        <span style={{ fontWeight: 400, opacity: 0.65, fontSize: "11px" }}>
-          {prefix}:{" "}
-        </span>
-      )}
-      {label}
-      <button
-        onClick={onRemove}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          padding: 0,
-          color: GREEN_MID,
-          marginLeft: "2px",
-        }}
-      >
-        <X size={11} strokeWidth={2.5} />
-      </button>
-    </span>
-  );
-}
-
-// ── Filter notice banner ──────────────────────────────────────────────────
-function FilterBanner({ filters, departments }) {
-  const parts = [];
-  if (filters.department) {
-    const name =
-      departments.find(
-        (d) => String(d.id ?? d.name) === String(filters.department),
-      )?.name ?? filters.department;
-    parts.push(`Department: ${name}`);
-  }
-  if (filters.batch) parts.push(`Batch ${filters.batch}`);
-  if (parts.length === 0) return null;
-
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "8px",
-        background: GREEN_SOFT,
-        border: `1px solid ${GREEN_RING}`,
-        borderRadius: "8px",
-        padding: "9px 14px",
-        fontSize: "12.5px",
-        color: GREEN_DEEP,
-        fontWeight: 500,
-      }}
-    >
-      <SlidersHorizontal size={13} style={{ flexShrink: 0 }} />
-      <span>
-        Showing filtered results —{" "}
-        {parts.map((p, i) => (
-          <span key={i}>
-            {i > 0 && <span style={{ opacity: 0.4, margin: "0 6px" }}>·</span>}
-            <strong>{p}</strong>
-          </span>
-        ))}
-      </span>
-    </div>
-  );
-}
-
-// ── Donut chart (Canvas) ─────────────────────────────────────────────────
-function DonutChart({ data, colors, size = 130, thickness = 28 }) {
-  const canvasRef = useRef(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = size * dpr;
-    canvas.height = size * dpr;
-    canvas.style.width = `${size}px`;
-    canvas.style.height = `${size}px`;
-    ctx.scale(dpr, dpr);
-
-    const cx = size / 2;
-    const cy = size / 2;
-    const r = size / 2 - 6;
-    const total = data.reduce((s, d) => s + d.value, 0);
-    if (total === 0) return;
-
-    let startAngle = -Math.PI / 2;
-    data.forEach((segment, i) => {
-      const sweep = (segment.value / total) * 2 * Math.PI;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, startAngle, startAngle + sweep);
-      ctx.arc(cx, cy, r - thickness, startAngle + sweep, startAngle, true);
-      ctx.closePath();
-      ctx.fillStyle = colors[i % colors.length];
-      ctx.fill();
-      startAngle += sweep;
-
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.arc(cx, cy, r + 2, startAngle - 0.01, startAngle + 0.01);
-      ctx.closePath();
-      ctx.fillStyle = "#ffffff";
-      ctx.fill();
-    });
-
-    ctx.fillStyle = "#111827";
-    ctx.font = `600 ${Math.round(size * 0.18)}px sans-serif`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(total, cx, cy);
-  }, [data, colors, size, thickness]);
-
-  return <canvas ref={canvasRef} style={{ flexShrink: 0 }} />;
-}
-
-// ── Pie Chart (Canvas) ────────────────────────────────────────────────────
-// Canvas width is now computed dynamically from the actual label text widths
-// (via an offscreen measuring context) so leader-line labels like
-// "Self-employed 100%" can never get clipped by a fixed canvas boundary,
-// regardless of how long a department/status name is.
-function PieChartWithLabels({ data, colors, labelColors }) {
-  const canvasRef = useRef(null);
-  const H = 260;
-  const pieR = 80;
-  const labelR = pieR + 34;
-  const tailLen = 16;
-  const font = "600 11px sans-serif";
-  const minHalfWidth = 170; // keeps the pie itself from getting too small
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const total = data.reduce((s, d) => s + d.value, 0);
-
-    // ── Pass 1: measure label widths with an offscreen context ──────────
-    const measureCtx = document.createElement("canvas").getContext("2d");
-    measureCtx.font = font;
-    let maxLabelWidth = 0;
-    if (total > 0) {
-      data.forEach((segment) => {
-        const pct = Math.round((segment.value / total) * 100);
-        const text = `${segment.name} ${pct}%`;
-        const w = measureCtx.measureText(text).width;
-        if (w > maxLabelWidth) maxLabelWidth = w;
-      });
-    }
-
-    // Half-width needed = pie radius + leader tail + gap + longest label text
-    const neededHalfWidth = Math.max(
-      minHalfWidth,
-      labelR + 2 + tailLen + 6 + maxLabelWidth,
-    );
-    const W = Math.ceil(neededHalfWidth * 2);
-    const cx = W / 2;
-    const cy = H / 2;
-
-    // ── Pass 2: actually draw at the computed size ───────────────────────
-    const ctx = canvas.getContext("2d");
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
-    canvas.style.width = `${W}px`;
-    canvas.style.height = `${H}px`;
-    ctx.scale(dpr, dpr);
-    ctx.clearRect(0, 0, W, H);
-
-    if (total === 0) return;
-
-    let startAngle = -Math.PI / 2;
-    data.forEach((segment, i) => {
-      const sweep = (segment.value / total) * 2 * Math.PI;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.arc(cx, cy, pieR, startAngle, startAngle + sweep);
-      ctx.closePath();
-      ctx.fillStyle = colors[i % colors.length];
-      ctx.fill();
-      ctx.strokeStyle = "#ffffff";
-      ctx.lineWidth = 2.5;
-      ctx.stroke();
-      startAngle += sweep;
-    });
-
-    startAngle = -Math.PI / 2;
-    data.forEach((segment, i) => {
-      const sweep = (segment.value / total) * 2 * Math.PI;
-      const midAngle = startAngle + sweep / 2;
-      const pct = Math.round((segment.value / total) * 100);
-      const x1 = cx + Math.cos(midAngle) * (pieR + 4);
-      const y1 = cy + Math.sin(midAngle) * (pieR + 4);
-      const x2 = cx + Math.cos(midAngle) * (labelR + 2);
-      const y2 = cy + Math.sin(midAngle) * (labelR + 2);
-      const isRight = Math.cos(midAngle) >= 0;
-      const x3 = x2 + (isRight ? tailLen : -tailLen);
-      const y3 = y2;
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
-      ctx.lineTo(x3, y3);
-      ctx.strokeStyle = colors[i % colors.length];
-      ctx.lineWidth = 1.2;
-      ctx.stroke();
-      ctx.textAlign = isRight ? "left" : "right";
-      ctx.textBaseline = "bottom";
-      ctx.font = font;
-      ctx.fillStyle = labelColors[i % labelColors.length];
-      ctx.fillText(`${segment.name} ${pct}%`, x3 + (isRight ? 3 : -3), y3 - 1);
-      startAngle += sweep;
-    });
-  }, [data, colors, labelColors]);
-
-  return <canvas ref={canvasRef} style={{ flexShrink: 0, display: "block" }} />;
-}
-
-// ── Alignment Line Chart ──────────────────────────────────────────────────
-function AlignmentLineChart({ rows }) {
-  if (!rows || rows.length === 0) return null;
-  const chartData = rows.map((row) => ({
-    name:
-      row.department?.name?.length > 8
-        ? row.department.name.slice(0, 8) + "…"
-        : row.department?.name || `Dept ${row.department_id}`,
-    rate:
-      row.total_employed > 0
-        ? ((row.no_response ?? 0) / row.total_employed) * 100
-        : 0,
-    employed: row.total_employed ?? 0,
-  }));
-
-  return (
-    <div
-      style={{
-        background: ALIGNMENT_CHART_BACKGROUND,
-        borderRadius: "12px",
-        padding: "20px 20px 8px",
-      }}
-    >
-      <p
-        style={{
-          color: "#1f2937",
-          fontSize: "11px",
-          fontWeight: 600,
-          letterSpacing: "0.05em",
-          textTransform: "uppercase",
-          marginBottom: "4px",
-        }}
-      >
-        No-Response Rate by Department
-      </p>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "16px",
-          marginBottom: "12px",
-        }}
-      >
-        <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-          <span
-            style={{
-              width: 24,
-              height: 2,
-              background: ALIGNMENT_LINE_COLOR,
-              display: "inline-block",
-              borderRadius: 2,
-            }}
-          />
-          <span style={{ fontSize: "11px", color: "#4b5563" }}>
-            No-Response %
-          </span>
-        </span>
-        <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-          <span
-            style={{
-              width: 24,
-              height: 2,
-              background: ALIGNMENT_LINE2_COLOR,
-              display: "inline-block",
-              borderRadius: 2,
-              borderTop: "2px dashed " + ALIGNMENT_LINE2_COLOR,
-            }}
-          />
-          <span style={{ fontSize: "11px", color: "#4b5563" }}>
-            Employed count
-          </span>
-        </span>
-      </div>
-      <ResponsiveContainer width="100%" height={200}>
-        <LineChart
-          data={chartData}
-          margin={{ top: 4, right: 12, left: -20, bottom: 0 }}
-        >
-          <CartesianGrid strokeDasharray="4 4" stroke="#e5e7eb" />
-          <XAxis
-            dataKey="name"
-            tick={{ fontSize: 10, fill: "#64748b" }}
-            axisLine={false}
-            tickLine={false}
-          />
-          <YAxis
-            yAxisId="left"
-            tick={{ fontSize: 10, fill: "#64748b" }}
-            axisLine={false}
-            tickLine={false}
-            domain={[0, 100]}
-            tickFormatter={(v) => `${v}%`}
-          />
-          <YAxis
-            yAxisId="right"
-            orientation="right"
-            tick={{ fontSize: 10, fill: "#64748b" }}
-            axisLine={false}
-            tickLine={false}
-          />
-          <Tooltip
-            contentStyle={{
-              background: "#ffffff",
-              border: `1px solid ${GREEN_RING}33`,
-              borderRadius: "8px",
-              fontSize: "11px",
-              color: "#1f2937",
-              boxShadow: "0 4px 16px rgba(15,23,42,0.12)",
-            }}
-            labelStyle={{ color: "#4b5563", marginBottom: "4px" }}
-            formatter={(value, name) =>
-              name === "rate"
-                ? [`${value}%`, "No-response rate"]
-                : [value, "Employed"]
-            }
-          />
-          <Line
-            yAxisId="left"
-            type="monotone"
-            dataKey="rate"
-            stroke={ALIGNMENT_LINE_COLOR}
-            strokeWidth={2.5}
-            dot={{
-              fill: ALIGNMENT_LINE_COLOR,
-              r: 4,
-              strokeWidth: 2,
-              stroke: GREEN_DEEP,
-            }}
-            activeDot={{
-              r: 6,
-              fill: ALIGNMENT_LINE_COLOR,
-              stroke: GREEN_DEEP,
-              strokeWidth: 2,
-            }}
-          />
-          <Line
-            yAxisId="right"
-            type="monotone"
-            dataKey="employed"
-            stroke={ALIGNMENT_LINE2_COLOR}
-            strokeWidth={2}
-            strokeDasharray="5 3"
-            dot={{
-              fill: ALIGNMENT_LINE2_COLOR,
-              r: 3,
-              strokeWidth: 2,
-              stroke: GREEN_DEEP,
-            }}
-            activeDot={{
-              r: 5,
-              fill: ALIGNMENT_LINE2_COLOR,
-              stroke: GREEN_DEEP,
-              strokeWidth: 2,
-            }}
-          />
-        </LineChart>
-      </ResponsiveContainer>
     </div>
   );
 }
@@ -663,10 +189,441 @@ function applyFilters(stats, filters, departments = []) {
   return result;
 }
 
+// ── Executive KPI Card ────────────────────────────────────────────────────
+function ExecutiveKpiCard({
+  title,
+  value,
+  detail,
+  icon,
+  accentColor = "text-[#0F3A5C]",
+  bgAccent = "bg-blue-50/70",
+}) {
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex flex-col justify-between">
+      <div>
+        <div className="flex items-center justify-between">
+          <span className={`p-2.5 rounded-xl ${bgAccent} ${accentColor} shrink-0`}>
+            {icon}
+          </span>
+        </div>
+        <p className="mt-3 text-xs font-semibold uppercase tracking-wider text-slate-500 truncate">
+          {title}
+        </p>
+        <p className="mt-1 text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          {value}
+        </p>
+      </div>
+      {detail && (
+        <p className="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-500 font-medium">
+          {detail}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ── Chart Legend Component ────────────────────────────────────────────────
+function ChartLegend({ data, total }) {
+  return (
+    <div className="flex flex-col gap-2 w-full max-w-[210px] shrink-0">
+      {data.map((item) => {
+        const itemVal = Number(item.value || 0);
+        const totalVal = Number(total || 0);
+        const pct = totalVal > 0 ? Math.round((itemVal / totalVal) * 100) : 0;
+        return (
+          <div key={item.name} className="flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2 truncate pr-2">
+              <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+              <span className="text-slate-600 truncate">{item.name}</span>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="font-semibold text-slate-800">{itemVal.toLocaleString()}</span>
+              <span className="text-slate-400 text-[11px]">({pct}%)</span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Response / Attention Areas Section ────────────────────────────────────
+function AttentionAreasSection({ rows }) {
+  if (!rows || rows.length === 0) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs flex flex-col justify-between">
+        <div>
+          <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900">Response / Attention Areas</h3>
+              <p className="text-xs text-gray-400 mt-0.5">Programs prioritized by alignment survey response completeness</p>
+            </div>
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#0F3A5C]" />
+          </div>
+        </div>
+        <p className="text-xs text-slate-400 py-12 text-center">No program alignment records available yet.</p>
+      </div>
+    );
+  }
+
+  // Ensure strict numeric values to prevent string concatenation bugs
+  const sorted = [...rows]
+    .map((row) => {
+      const aligned = Number(row.aligned || 0);
+      const notAligned = Number(row.not_aligned || 0);
+      const total = Number(row.total_employed || 0);
+      const pending = Number(row.no_response || 0);
+      const answered = aligned + notAligned;
+      const responseRate = total > 0 ? (answered / total) * 100 : 0;
+      return {
+        ...row,
+        aligned,
+        notAligned,
+        answered,
+        total,
+        responseRate,
+        pending,
+        displayName: row.department?.name || `Dept ${row.department_id}`,
+      };
+    })
+    .sort((a, b) => a.responseRate - b.responseRate);
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs flex flex-col justify-between">
+      <div>
+        <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900">Response / Attention Areas</h3>
+            <p className="text-xs text-gray-400 mt-0.5">Programs prioritized by alignment survey response completeness</p>
+          </div>
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#0F3A5C]" />
+        </div>
+
+        <div className="space-y-3 max-h-[290px] overflow-y-auto pr-1">
+          {sorted.map((item) => {
+            const pct = Math.round(item.responseRate);
+            const isAttention = pct < 50;
+            const barColor = isAttention ? "bg-rose-500" : pct >= 80 ? "bg-[#0F3A5C]" : "bg-[#2563EB]";
+            const badgeColor = isAttention
+              ? "bg-rose-50 text-rose-700 border-rose-200"
+              : pct >= 80
+              ? "bg-blue-50/70 text-[#0F3A5C] border-blue-200"
+              : "bg-slate-50 text-slate-700 border-slate-200";
+
+            return (
+              <div key={item.department_id} className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs gap-2">
+                  <span className="font-medium text-slate-800 truncate" title={item.displayName}>
+                    {item.displayName}
+                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-[11px] text-slate-400">
+                      {item.pending > 0 ? `${item.pending} pending` : "All declared"}
+                    </span>
+                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${badgeColor}`}>
+                      {pct}% Response
+                    </span>
+                  </div>
+                </div>
+                <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full ${barColor} transition-all duration-500`}
+                    style={{ width: `${Math.min(pct, 100)}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <p className="text-[11px] text-slate-400 mt-4 pt-3 border-t border-slate-100">
+        Prioritizes programs with pending responses to assist leadership in coordinating follow-ups.
+      </p>
+    </div>
+  );
+}
+
+// ── Job–Course Alignment Section ──────────────────────────────────────────
+function JobCourseAlignmentSection({
+  rows,
+  filterDepartment,
+  filterBatch,
+  departments = [],
+  onDrillDown,
+}) {
+  // Normalize row values to strict numbers to avoid string concatenation
+  const normalizedRows = useMemo(() => {
+    if (!rows || !Array.isArray(rows)) return [];
+    return rows.map((r) => {
+      const aligned = Number(r.aligned || 0);
+      const notAligned = Number(r.not_aligned || 0);
+      const pending = Number(r.no_response || 0);
+      const totalEmployed = Number(r.total_employed || 0);
+      const answered = aligned + notAligned;
+      const rate =
+        r.alignment_rate !== undefined && r.alignment_rate !== null && !isNaN(Number(r.alignment_rate))
+          ? Number(r.alignment_rate)
+          : answered > 0
+          ? (aligned / answered) * 100
+          : 0;
+      return {
+        ...r,
+        aligned,
+        not_aligned: notAligned,
+        no_response: pending,
+        total_employed: totalEmployed,
+        alignment_rate: rate,
+      };
+    });
+  }, [rows]);
+
+  const tpcTotals = useMemo(() => {
+    if (!normalizedRows || normalizedRows.length === 0) {
+      return { totalEmployed: 0, aligned: 0, notAligned: 0, pending: 0, rate: 0 };
+    }
+    const totalEmployed = normalizedRows.reduce((s, r) => s + r.total_employed, 0);
+    const aligned = normalizedRows.reduce((s, r) => s + r.aligned, 0);
+    const notAligned = normalizedRows.reduce((s, r) => s + r.not_aligned, 0);
+    const pending = normalizedRows.reduce((s, r) => s + r.no_response, 0);
+    const answered = aligned + notAligned;
+    const rate = answered > 0 ? (aligned / answered) * 100 : 0;
+    return { totalEmployed, aligned, notAligned, pending, rate };
+  }, [normalizedRows]);
+
+  const selectedDept = useMemo(() => {
+    if (!filterDepartment) return null;
+    return (
+      departments.find(
+        (d) =>
+          String(d.id) === String(filterDepartment) ||
+          d.name?.toLowerCase() === String(filterDepartment).toLowerCase(),
+      ) || null
+    );
+  }, [departments, filterDepartment]);
+
+  const selectedRow = useMemo(() => {
+    if (!filterDepartment || !normalizedRows || normalizedRows.length === 0) return null;
+    return (
+      normalizedRows.find(
+        (r) =>
+          String(r.department_id) === String(filterDepartment) ||
+          (selectedDept &&
+            (String(r.department_id) === String(selectedDept.id) ||
+              r.department?.name?.toLowerCase() ===
+                selectedDept.name?.toLowerCase())),
+      ) || (normalizedRows.length === 1 && filterDepartment ? normalizedRows[0] : null)
+    );
+  }, [normalizedRows, filterDepartment, selectedDept]);
+
+  const isProgramSpecific = Boolean(filterDepartment);
+
+  const currentData = isProgramSpecific
+    ? {
+        title:
+          selectedRow?.department?.name ||
+          selectedDept?.name ||
+          (typeof filterDepartment === "string" && isNaN(filterDepartment)
+            ? filterDepartment
+            : `Department ${filterDepartment}`),
+        isProgramSpecific: true,
+        departmentId:
+          selectedRow?.department_id ||
+          selectedDept?.id ||
+          filterDepartment,
+        totalEmployed: selectedRow?.total_employed || 0,
+        aligned: selectedRow?.aligned || 0,
+        notAligned: selectedRow?.not_aligned || 0,
+        pending: selectedRow?.no_response || 0,
+        rate: selectedRow ? selectedRow.alignment_rate : 0,
+      }
+    : {
+        title: "All Departments",
+        isProgramSpecific: false,
+        departmentId: null,
+        totalEmployed: tpcTotals.totalEmployed,
+        aligned: tpcTotals.aligned,
+        notAligned: tpcTotals.notAligned,
+        pending: tpcTotals.pending,
+        rate: tpcTotals.rate,
+      };
+
+  const answeredCount = currentData.aligned + currentData.notAligned;
+  const rawRate = Number(currentData.rate || 0);
+  const alignmentRateFormatted = rawRate % 1 === 0 ? rawRate.toFixed(0) : rawRate.toFixed(1);
+
+  const displayDepartmentScope = isProgramSpecific
+    ? currentData.title
+    : "All Departments";
+  const displayBatchScope = filterBatch
+    ? `Batch ${filterBatch}`
+    : "All Graduation Batches";
+
+  const totalEmployedVal = currentData.totalEmployed;
+  const alignedPct = totalEmployedVal > 0 ? (currentData.aligned / totalEmployedVal) * 100 : 0;
+  const notAlignedPct = totalEmployedVal > 0 ? (currentData.notAligned / totalEmployedVal) * 100 : 0;
+  const pendingPct = totalEmployedVal > 0 ? (currentData.pending / totalEmployedVal) * 100 : 0;
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 border-b border-gray-100 pb-4 mb-5">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="p-1.5 rounded-lg bg-blue-50 text-[#0F3A5C]">
+              <BriefcaseIcon size={16} />
+            </span>
+            <h3 className="text-base font-semibold text-gray-900">Job–Course Alignment</h3>
+          </div>
+          <p className="text-xs text-gray-400 mt-0.5">
+            Employment alignment based on reported alumni responses
+          </p>
+        </div>
+
+        {/* Global Filter Context Tag (Read-only status indicator — No duplicate inputs) */}
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200/80 px-3 py-1.5 rounded-xl">
+            <span className="w-2 h-2 rounded-full bg-[#0F3A5C]" />
+            <span className="font-semibold text-slate-800 truncate max-w-[200px] sm:max-w-xs" title={displayDepartmentScope}>
+              {displayDepartmentScope}
+            </span>
+            <span className="text-slate-300">·</span>
+            <span className="text-slate-500 shrink-0">{displayBatchScope}</span>
+          </span>
+        </div>
+      </div>
+
+      {/* Main Alignment Details Container */}
+      <div className="bg-[#F8FAFC] border border-slate-200/70 rounded-xl p-4 sm:p-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[#0F3A5C]">
+                {currentData.isProgramSpecific ? "Selected Department" : "Institutional Benchmark"}
+              </span>
+              <span className="text-slate-300">·</span>
+              <span className="text-xs text-slate-500 font-medium">
+                {currentData.totalEmployed.toLocaleString()} Employed Alumni
+              </span>
+            </div>
+            <h4 className="text-lg sm:text-xl font-bold text-slate-900 mt-0.5 truncate" title={currentData.title}>
+              {currentData.title}
+            </h4>
+          </div>
+
+          <div className="flex items-center gap-4 shrink-0">
+            <div className="text-right">
+              <p className="text-xs text-slate-500 font-medium">Alignment Rate</p>
+              <p className="text-3xl sm:text-4xl font-extrabold text-[#0F3A5C] tracking-tight">
+                {alignmentRateFormatted}%
+              </p>
+            </div>
+            {currentData.isProgramSpecific && onDrillDown && currentData.departmentId && (
+              <button
+                type="button"
+                onClick={() => onDrillDown(currentData.departmentId)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-[#0F3A5C] hover:bg-[#0A2A44] rounded-xl transition shadow-xs cursor-pointer"
+              >
+                <span>View Details</span>
+                <ChevronRight size={14} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Breakdown Badges */}
+        <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-slate-700 flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4 text-[#0F3A5C]" />
+                Aligned
+              </span>
+              <span className="text-lg font-bold text-gray-900">
+                {currentData.aligned.toLocaleString()}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">
+              {answeredCount > 0 ? Math.round((currentData.aligned / answeredCount) * 100) : 0}% of declared
+            </p>
+          </div>
+
+          <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-slate-700 flex items-center gap-1.5">
+                <XCircle className="h-4 w-4 text-rose-500" />
+                Not Aligned
+              </span>
+              <span className="text-lg font-bold text-gray-900">
+                {currentData.notAligned.toLocaleString()}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">
+              {answeredCount > 0 ? Math.round((currentData.notAligned / answeredCount) * 100) : 0}% of declared
+            </p>
+          </div>
+
+          <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-slate-700 flex items-center gap-1.5">
+                <Clock className="h-4 w-4 text-slate-400" />
+                Pending Alignment Response
+              </span>
+              <span className="text-lg font-bold text-gray-700">
+                {currentData.pending.toLocaleString()}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">
+              {currentData.totalEmployed > 0
+                ? Math.round((currentData.pending / currentData.totalEmployed) * 100)
+                : 0}
+              % of employed
+            </p>
+          </div>
+        </div>
+
+        {/* Clean horizontal visualization */}
+        {totalEmployedVal > 0 && (
+          <div className="mt-4 pt-3 border-t border-slate-200/60">
+            <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden flex">
+              <div
+                className="h-full bg-[#0F3A5C] transition-all duration-500"
+                style={{ width: `${alignedPct}%` }}
+                title={`Aligned: ${currentData.aligned}`}
+              />
+              <div
+                className="h-full bg-[#D4A72C] transition-all duration-500"
+                style={{ width: `${notAlignedPct}%` }}
+                title={`Not Aligned: ${currentData.notAligned}`}
+              />
+              <div
+                className="h-full bg-slate-300 transition-all duration-500"
+                style={{ width: `${pendingPct}%` }}
+                title={`Pending: ${currentData.pending}`}
+              />
+            </div>
+            <div className="flex items-center justify-between text-[11px] text-slate-400 mt-2">
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-[#0F3A5C]" /> Aligned ({Math.round(alignedPct)}%)
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-[#D4A72C]" /> Not Aligned ({Math.round(notAlignedPct)}%)
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-slate-300" /> Pending ({Math.round(pendingPct)}%)
+                </span>
+              </div>
+              <span>Total: {totalEmployedVal.toLocaleString()}</span>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Main Component ────────────────────────────────────────────────────────
 export default function Analytics({ onDrillDown }) {
-  // "admin" = department head (single-department scope).
-  // Anything else reaching this page (e.g. "super_admin") is the president,
-  // who is the only role allowed to see the cross-department breakdown.
   const userRole = localStorage.getItem("userRole");
   const userDepartment = localStorage.getItem("userDepartment");
   const isDeptHead = userRole === "admin";
@@ -718,7 +675,46 @@ export default function Analytics({ onDrillDown }) {
     fetchDepartments();
   }, []);
 
-  // Re-fetch on filter change (pass params if backend supports them)
+  // Fetch alignment summary once (re-fetches only when global batch/dept filter changes)
+  useEffect(() => {
+    const fetchAlignment = async () => {
+      try {
+        const params = {};
+        if (filters?.department) params.department_id = filters.department;
+        if (filters?.batch) params.batch = filters.batch;
+        const data = await alumniService.getAlignmentSummary(params);
+        const normalized = Array.isArray(data)
+          ? data.map((r) => {
+              const aligned = Number(r.aligned || 0);
+              const notAligned = Number(r.not_aligned || 0);
+              const pending = Number(r.no_response || 0);
+              const totalEmployed = Number(r.total_employed || 0);
+              const answered = aligned + notAligned;
+              const rate =
+                r.alignment_rate !== undefined && r.alignment_rate !== null && !isNaN(Number(r.alignment_rate))
+                  ? Number(r.alignment_rate)
+                  : answered > 0
+                  ? (aligned / answered) * 100
+                  : 0;
+              return {
+                ...r,
+                aligned,
+                not_aligned: notAligned,
+                no_response: pending,
+                total_employed: totalEmployed,
+                alignment_rate: rate,
+              };
+            })
+          : [];
+        setAlignmentRows(normalized);
+      } catch (err) {
+        console.error("Failed to fetch alignment summary:", err);
+      }
+    };
+    fetchAlignment();
+  }, [filters]);
+
+  // Re-fetch dashboard on filter change
   useEffect(() => {
     if (!stats) return;
     const fetchFiltered = async () => {
@@ -727,7 +723,7 @@ export default function Analytics({ onDrillDown }) {
         if (filters.department) params.department_id = filters.department;
         if (filters.batch) params.batch = filters.batch;
         const endpoint =
-          localStorage.getItem("userRole") === "admin"
+          userRole === "admin"
             ? "/department-head/dashboard"
             : "/admin/dashboard";
         const response = await api.get(endpoint, { params });
@@ -742,100 +738,110 @@ export default function Analytics({ onDrillDown }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-white">
+      <div className="flex items-center justify-center h-screen bg-[#F8FAFC]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tpc-greenDeep mx-auto mb-4" />
-          <p className="text-gray-500">Loading analytics...</p>
+          <Loader2 className="animate-spin h-10 w-10 text-[#0F3A5C] mx-auto mb-3" />
+          <p className="text-sm font-medium text-slate-500">Loading analytics...</p>
         </div>
       </div>
     );
   }
 
-  // Build dropdown options from raw stats
+  // Department options for dropdown
   const departmentOptions =
     departments.length > 0
-      ? departments.map((department) => ({
-        id: department.id,
-        name: department.name,
-      }))
-      : stats?.by_department
-        ? Object.keys(stats.by_department)
-          .filter((name) => name !== "No department assigned")
-          .map((name) => ({ name }))
-        : [];
+      ? departments.map((d) => ({ id: d.id, name: d.name }))
+      : [];
   const batchOptions = stats?.graduates_by_year
     ? Object.keys(stats.graduates_by_year).sort((a, b) => b - a)
     : [];
 
-  // Client-side filter overlay (graceful fallback if API ignores params)
   const filtered = applyFilters(stats, filters, departmentOptions);
 
-  // Derived chart data
-  const studentStatusData = [
-    {
-      name: "Registered Graduates",
-      value: filtered?.registered_alumni || 0,
-    },
-    {
-      name: "Not Registered Graduates",
-      value: filtered?.not_registered_graduates || 0,
-    },
+  // ── KPI Calculations ───────────────────────────────────────────────────
+  const totalGraduates = Number(filtered?.total_graduates ?? 0);
+  const regAlumni = Number(filtered?.registered_alumni ?? 0);
+  const unregGraduates = Number(filtered?.not_registered_graduates ?? 0);
+  const rawRegCoverage =
+    totalGraduates > 0 ? (regAlumni / totalGraduates) * 100 : 0;
+  const regCoveragePct =
+    rawRegCoverage % 1 === 0
+      ? rawRegCoverage.toFixed(0)
+      : rawRegCoverage.toFixed(1);
+
+  const employed = Number(filtered?.employed_alumni ?? 0);
+  const selfEmployed = Number(filtered?.self_employed_alumni ?? 0);
+  const unemployed = Number(filtered?.unemployed_alumni ?? 0);
+  const notSpecified = Number(filtered?.not_specified_alumni ?? 0);
+
+  const workingTotal = employed + selfEmployed;
+  const declaredTotal = workingTotal + unemployed;
+  const rawEmploymentRate =
+    declaredTotal > 0 ? (workingTotal / declaredTotal) * 100 : 0;
+  const employmentRatePct =
+    rawEmploymentRate % 1 === 0
+      ? rawEmploymentRate.toFixed(0)
+      : rawEmploymentRate.toFixed(1);
+
+  const declaredCompletionPct =
+    regAlumni > 0 ? Math.round((declaredTotal / regAlumni) * 100) : 0;
+
+  // ── Registration Coverage Chart Data ───────────────────────────────────
+  const registrationChartData = [
+    { name: "Registered Alumni", value: regAlumni, color: COLOR_REGISTERED },
+    { name: "Unregistered Graduates", value: unregGraduates, color: COLOR_UNREGISTERED },
   ].filter((d) => d.value > 0);
 
-  const employmentData = [
-    { name: "Employed", value: filtered?.employed_alumni || 0 },
-    { name: "Unemployed", value: filtered?.unemployed_alumni || 0 },
-    { name: "Self-employed", value: filtered?.self_employed_alumni || 0 },
+  // ── Employment Status Chart Data ───────────────────────────────────────
+  const employmentChartData = [
+    { name: "Employed", value: employed, color: COLOR_EMPLOYED },
+    { name: "Self-Employed", value: selfEmployed, color: COLOR_SELF_EMPLOYED },
+    { name: "Unemployed", value: unemployed, color: COLOR_UNEMPLOYED },
+    { name: "Not Specified", value: notSpecified, color: COLOR_NOT_SPECIFIED },
   ].filter((d) => d.value > 0);
 
-  const departmentData = filtered?.by_department
-    ? Object.entries(filtered.by_department)
-      .filter(([name]) => name !== "No department assigned")
-      .map(([name, count]) => ({ name, count }))
-    : [];
-
-  const graduationTrend = filtered?.graduates_by_year
+  // ── Graduation Trend Chart Data ────────────────────────────────────────
+  const graduationTrendData = filtered?.graduates_by_year
     ? Object.entries(filtered.graduates_by_year).map(([year, count]) => ({
-      year,
-      graduates: count,
-    }))
+        year: `Batch ${year}`,
+        graduates: Number(count || 0),
+      }))
     : [];
-
-  const maxDeptCount = Math.max(...departmentData.map((d) => d.count), 1);
-  const isFiltered = filters.department !== "" || filters.batch !== "";
 
   return (
     <>
       <div
-        className={`min-h-full bg-gray-50 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 analytics-screen-ui ${showReport ? "hidden" : "block"
-          } print:hidden`}
+        className={`min-h-full bg-[#F8FAFC] px-4 py-6 sm:px-6 sm:py-7 lg:px-8 analytics-screen-ui ${
+          showReport ? "hidden" : "block"
+        } print:hidden`}
       >
-        <div className="mx-auto max-w-7xl space-y-5">
-          {/* ── Header ── */}
+        <div className="mx-auto max-w-7xl space-y-6">
+          {/* ── Page Header (matching restored Department Head heading style — PRESERVED EXACTLY) ── */}
           <header className="rounded-2xl bg-gradient-to-r from-[#006400] via-[#008000] to-[#00A000] p-4 sm:p-6 text-white shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
               <div className="min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-wide text-green-100">
-                  ANALYTICS
+                  Institutional Analytics
                 </p>
                 <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl text-white">
                   Employment & Alumni Analytics
                 </h1>
                 <p className="mt-1 text-sm text-green-50/90">
-                  Monitor alumni employment and graduate statistics.
+                  Executive monitoring of graduate registration coverage, employment outcomes, and curricular alignment.
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => window.print()}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-green-50 text-[#006400] px-4 py-2.5 text-sm font-semibold transition shadow-sm self-start sm:self-auto shrink-0"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-green-50 text-[#006400] px-4 py-2.5 text-sm font-semibold transition shadow-sm self-start sm:self-auto shrink-0 cursor-pointer"
               >
                 <Printer size={15} />
-                Print / Save as PDF
+                <span>Print / Save as PDF</span>
               </button>
             </div>
           </header>
 
-          {/* ── Filter Bar ── */}
+          {/* ── Filter Bar (Single Global Filter) ── */}
           <FilterBar
             departments={departmentOptions}
             batches={batchOptions}
@@ -844,215 +850,234 @@ export default function Analytics({ onDrillDown }) {
             departmentLocked={isDeptHead}
           />
 
-          {/* ── Active filter notice ── */}
-          {isFiltered && (
-            <FilterBanner filters={filters} departments={departmentOptions} />
-          )}
+          {/* ── 1. EXECUTIVE KPI SUMMARY (3 CARDS ONLY) ── */}
+          <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <ExecutiveKpiCard
+              title="Total Graduates"
+              value={totalGraduates.toLocaleString()}
+              detail="Recorded institutional graduate database"
+              icon={<GraduationCap className="w-5 h-5 text-[#0F3A5C]" />}
+              accentColor="text-[#0F3A5C]"
+              bgAccent="bg-blue-50/70"
+            />
+            <ExecutiveKpiCard
+              title="Registration Coverage"
+              value={`${regCoveragePct}%`}
+              detail={`${regAlumni.toLocaleString()} of ${totalGraduates.toLocaleString()} graduates registered`}
+              icon={<Users className="w-5 h-5 text-[#2563EB]" />}
+              accentColor="text-[#2563EB]"
+              bgAccent="bg-blue-50/70"
+            />
+            <ExecutiveKpiCard
+              title="Employment Rate"
+              value={`${employmentRatePct}%`}
+              detail={`${workingTotal.toLocaleString()} employed/self-employed of ${declaredTotal.toLocaleString()} respondents`}
+              icon={<Briefcase className="w-5 h-5 text-[#D4A72C]" />}
+              accentColor="text-[#D4A72C]"
+              bgAccent="bg-amber-50/70"
+            />
+          </section>
 
-          {/* ── Stat Cards ── */}
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-6">
-            <StatCard
-              title="Total Alumni"
-              value={filtered?.total_students ?? "—"}
-              icon={<Users className="w-4 h-4" />}
-              accent="bg-tpc-greenDeep"
-            />
-            <StatCard
-              title="Verified"
-              value={filtered?.verified_students ?? "—"}
-              icon={<GraduationCap className="w-4 h-4" />}
-              accent="bg-green-500"
-            />
-            <StatCard
-              title="Inactive Accounts"
-              value={filtered?.not_registered_graduates ?? "—"}
-              icon={<Clock className="w-4 h-4" />}
-              accent="bg-amber-500"
-            />
-            <StatCard
-              title="Employed"
-              value={filtered?.employed_alumni ?? "—"}
-              icon={<Briefcase className="w-4 h-4" />}
-              accent="bg-blue-500"
-            />
-            <StatCard
-              title="Graduates"
-              value={filtered?.total_graduates ?? "—"}
-              icon={<TrendingUp className="w-4 h-4" />}
-              accent="bg-purple-500"
-            />
-            <StatCard
-              title="Departments"
-              value={filtered?.total_departments ?? "—"}
-              icon={<Building2 className="w-4 h-4" />}
-              accent="bg-tpc-greenDeep"
-            />
-          </div>
-
-          {/* ── Row 1: Donut + Pie ── */}
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <ChartCard title="Alumni Status Breakdown">
-              {studentStatusData.length > 0 ? (
-                <div className="flex items-center gap-6">
-                  <DonutChart
-                    data={studentStatusData}
-                    colors={STATUS_COLORS}
-                    size={130}
-                    thickness={30}
-                  />
-                  <div className="flex flex-col gap-3 flex-1">
-                    {studentStatusData.map((d, i) => (
-                      <LegendRow
-                        key={d.name}
-                        color={STATUS_COLORS[i % STATUS_COLORS.length]}
-                        label={d.name}
-                        value={d.value}
-                        total={studentStatusData.reduce((s, x) => s + x.value, 0)}
-                      />
-                    ))}
+          {/* ── 2 & 3. REGISTRATION COVERAGE & EMPLOYMENT STATUS ── */}
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {/* Registration Coverage Card */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-900">Registration Coverage</h3>
+                    <p className="text-xs text-gray-400">Graduates who created an alumni portal account</p>
                   </div>
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#0F3A5C]" />
                 </div>
-              ) : (
-                <EmptyChart />
-              )}
-            </ChartCard>
 
-            <ChartCard title="Employment Status">
-              {employmentData.length > 0 ? (
-                <div className="flex flex-col items-center gap-4 overflow-x-auto">
-                  <PieChartWithLabels
-                    data={employmentData}
-                    colors={EMPLOY_COLORS}
-                    labelColors={EMPLOY_LABEL_COLORS}
-                  />
-                  <div className="flex items-center justify-center gap-5 flex-wrap">
-                    {employmentData.map((d, i) => (
-                      <div key={d.name} className="flex items-center gap-1.5">
-                        <span
-                          className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                          style={{
-                            background: EMPLOY_COLORS[i % EMPLOY_COLORS.length],
-                          }}
-                        />
-                        <span className="text-xs text-gray-500">{d.name}</span>
-                        <span className="text-xs font-semibold text-gray-800">
-                          {d.value}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <EmptyChart />
-              )}
-            </ChartCard>
-          </div>
-
-          {/* ── Row 2: Department Bars (super admin only) + Graduation Line ── */}
-          <div
-            className={`grid grid-cols-1 gap-4 ${isDeptHead ? "" : "lg:grid-cols-2"}`}
-          >
-            {!isDeptHead && (
-              <ChartCard title="Alumni per Department">
-                {departmentData.length > 0 ? (
-                  <div className="flex flex-col gap-3">
-                    {departmentData.map((d) => (
-                      <div key={d.name} className="flex items-center gap-3">
-                        <span className="w-40 shrink-0 break-words text-xs leading-5 text-gray-500 sm:w-52">
-                          {d.name}
-                        </span>
-                        <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                          <div
-                            className="h-full rounded-full bg-tpc-greenDeep transition-all duration-500"
-                            style={{
-                              width: `${(d.count / maxDeptCount) * 100}%`,
+                {registrationChartData.length > 0 ? (
+                  <div className="flex flex-col sm:flex-row items-center justify-around gap-4 py-2">
+                    <div className="w-44 h-44 shrink-0">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={registrationChartData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={48}
+                            outerRadius={70}
+                            paddingAngle={4}
+                            dataKey="value"
+                          >
+                            {registrationChartData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: "#ffffff",
+                              borderRadius: "10px",
+                              border: "1px solid #e2e8f0",
+                              fontSize: "12px",
+                              boxShadow: "0 4px 12px rgba(15,23,42,0.08)",
                             }}
+                            formatter={(val, name) => [Number(val).toLocaleString(), name]}
                           />
-                        </div>
-                        <span className="text-xs text-gray-400 w-6 text-right flex-shrink-0">
-                          {d.count}
-                        </span>
-                      </div>
-                    ))}
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <ChartLegend data={registrationChartData} total={totalGraduates} />
                   </div>
                 ) : (
-                  <EmptyChart label="No department data available yet" />
+                  <p className="text-xs text-slate-400 py-12 text-center">No registration records found.</p>
                 )}
-              </ChartCard>
-            )}
+              </div>
 
-            <ChartCard
-              title={
-                filters.batch
-                  ? `Graduation Trend — Batch ${filters.batch}`
-                  : "Graduation Trend by Year"
-              }
-            >
-              {graduationTrend.length > 0 ? (
-                <ResponsiveContainer width="100%" height={180}>
-                  <LineChart
-                    data={graduationTrend}
-                    margin={{ top: 4, right: 12, left: -10, bottom: 0 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis
-                      dataKey="year"
-                      tick={{ fontSize: 11, fill: "#9ca3af" }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      tick={{ fontSize: 11, fill: "#9ca3af" }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        borderRadius: "8px",
-                        border: "1px solid #e5e7eb",
-                        fontSize: "12px",
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="graduates"
-                      stroke={GREEN_DEEP}
-                      strokeWidth={2.5}
-                      dot={{
-                        fill: GREEN_DEEP,
-                        r: 4,
-                        strokeWidth: 2,
-                        stroke: "#fff",
-                      }}
-                      activeDot={{
-                        r: 6,
-                        fill: GREEN_DEEP,
-                        stroke: "#fff",
-                        strokeWidth: 2,
-                      }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : (
-                <EmptyChart label="No graduation trend data available yet" />
-              )}
-            </ChartCard>
-          </div>
+              <div className="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500 flex items-center justify-between">
+                <span>Total Institutional Graduates:</span>
+                <span className="font-semibold text-slate-800">{totalGraduates.toLocaleString()}</span>
+              </div>
+            </div>
 
-          {/* ── Row 3: Job–Course Alignment ── */}
-          <AlignmentSummaryWidget
-            onDrillDown={onDrillDown}
-            filters={filters}
-            onRowsLoaded={setAlignmentRows}
-          />
+            {/* Employment Status Card */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-900">Employment Status</h3>
+                    <p className="text-xs text-gray-400">Self-reported status distribution of registered alumni</p>
+                  </div>
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#2563EB]" />
+                </div>
+
+                {employmentChartData.length > 0 ? (
+                  <div className="flex flex-col sm:flex-row items-center justify-around gap-4 py-2">
+                    <div className="w-44 h-44 shrink-0">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={employmentChartData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={48}
+                            outerRadius={70}
+                            paddingAngle={3}
+                            dataKey="value"
+                          >
+                            {employmentChartData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: "#ffffff",
+                              borderRadius: "10px",
+                              border: "1px solid #e2e8f0",
+                              fontSize: "12px",
+                              boxShadow: "0 4px 12px rgba(15,23,42,0.08)",
+                            }}
+                            formatter={(val, name) => [Number(val).toLocaleString(), name]}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <ChartLegend data={employmentChartData} total={regAlumni} />
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400 py-12 text-center">No employment records available.</p>
+                )}
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500 flex items-center justify-between">
+                <span>Status Completion:</span>
+                <span className="font-semibold text-slate-800">
+                  {declaredCompletionPct}% ({declaredTotal} of {regAlumni} declared)
+                </span>
+              </div>
+            </div>
+          </section>
+
+          {/* ── 4. JOB–COURSE ALIGNMENT (Driven by Global Filter) ── */}
+          <section>
+            <JobCourseAlignmentSection
+              rows={alignmentRows}
+              filterDepartment={filters.department}
+              filterBatch={filters.batch}
+              departments={departmentOptions}
+              onDrillDown={onDrillDown}
+            />
+          </section>
+
+          {/* ── 5 & 6. RESPONSE / ATTENTION AREAS & GRADUATION TREND ── */}
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {/* Attention Areas Section */}
+            <AttentionAreasSection rows={alignmentRows} />
+
+            {/* Graduation Trend by Year */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-900">Graduation Trend by Year</h3>
+                    <p className="text-xs text-gray-400">Total graduates recorded across academic batches</p>
+                  </div>
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#0F3A5C]" />
+                </div>
+
+                {graduationTrendData.length > 0 ? (
+                  <div className="py-2">
+                    <ResponsiveContainer width="100%" height={210}>
+                      <LineChart
+                        data={graduationTrendData}
+                        margin={{ top: 10, right: 15, left: -20, bottom: 0 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                        <XAxis
+                          dataKey="year"
+                          tick={{ fontSize: 11, fill: "#64748b" }}
+                          axisLine={{ stroke: "#e2e8f0" }}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          tick={{ fontSize: 11, fill: "#64748b" }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "#ffffff",
+                            borderRadius: "10px",
+                            border: "1px solid #e2e8f0",
+                            fontSize: "12px",
+                            boxShadow: "0 4px 12px rgba(15,23,42,0.08)",
+                          }}
+                          formatter={(v) => [`${Number(v).toLocaleString()} Graduates`, "Graduates"]}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="graduates"
+                          stroke={COLOR_PRIMARY_BLUE}
+                          strokeWidth={2.5}
+                          dot={{ fill: COLOR_PRIMARY_BLUE, r: 4, stroke: "#fff", strokeWidth: 2 }}
+                          activeDot={{ r: 6, fill: COLOR_PRIMARY_BLUE, stroke: "#fff", strokeWidth: 2 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400 py-12 text-center">No graduation batch records available.</p>
+                )}
+              </div>
+
+              <p className="text-[11px] text-slate-400 mt-4 pt-3 border-t border-slate-100">
+                Displays the volume of institutional degree completions per academic year.
+              </p>
+            </div>
+          </section>
         </div>
       </div>
 
       {/* ── Dedicated Printable Report View (sole printable document) ── */}
       <div
-        className={`analytics-printable-report ${showReport ? "block" : "hidden"
-          } print:block`}
+        className={`analytics-printable-report ${
+          showReport ? "block" : "hidden"
+        } print:block`}
       >
         <PrintableReport
           stats={filtered}
@@ -1064,201 +1089,5 @@ export default function Analytics({ onDrillDown }) {
         />
       </div>
     </>
-  );
-}
-
-/* ── AlignmentSummaryWidget ─────────────────────────────────────────────── */
-
-function AlignmentSummaryWidget({ onDrillDown, filters, onRowsLoaded }) {
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    const fetchSummary = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const params = {};
-        if (filters?.department) params.department_id = filters.department;
-        if (filters?.batch) params.batch = filters.batch;
-        const data = await alumniService.getAlignmentSummary(params);
-        setRows(data);
-        onRowsLoaded?.(data);
-      } catch (err) {
-        setError(err?.message || "Failed to load alignment data.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchSummary();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center rounded-xl border border-gray-200 bg-white p-8">
-        <Loader2 className="h-5 w-5 animate-spin text-tpc-greenDeep" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
-        <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-        <p className="text-sm">{error}</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-      <div className="flex items-center gap-2.5 border-b border-gray-100 px-5 py-4">
-        <div className="bg-tpc-greenDeep/10 p-1.5 rounded-lg">
-          <BriefcaseIcon className="h-4 w-4 text-tpc-greenDeep" />
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-gray-900">
-            Job–Course Alignment
-          </p>
-          <p className="text-xs text-gray-400">
-            Self-reported by employed alumni per department
-          </p>
-        </div>
-      </div>
-
-      {rows.length === 0 ? (
-        <div className="px-5 py-8 text-center text-sm text-gray-400">
-          No alignment data yet.
-        </div>
-      ) : (
-        <div className="p-5 space-y-5">
-          <AlignmentLineChart rows={rows} />
-          <div className="divide-y divide-gray-100 rounded-xl border border-gray-100 overflow-hidden">
-            {rows.map((row) => {
-              const rate =
-                row.total_employed > 0
-                  ? ((row.no_response ?? 0) / row.total_employed) * 100
-                  : 0;
-              const hasData = row.total_employed > 0;
-              return (
-                <button
-                  key={row.department_id}
-                  type="button"
-                  onClick={() => onDrillDown?.(row.department_id)}
-                  className="flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="break-words text-sm font-semibold text-gray-800">
-                      {row.department?.name ||
-                        `Department ${row.department_id}`}
-                    </p>
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
-                        <CheckCircle2 className="h-3 w-3" />
-                        {row.aligned} aligned
-                      </span>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600">
-                        <XCircle className="h-3 w-3" />
-                        {row.not_aligned} not aligned
-                      </span>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500">
-                        <HelpCircle className="h-3 w-3" />
-                        {row.not_registered ?? 0} not registered graduates
-                      </span>
-                    </div>
-                    {hasData && (
-                      <div className="mt-2.5">
-                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
-                          <div
-                            className="h-full rounded-full bg-tpc-greenDeep transition-all"
-                            style={{ width: `${rate}%` }}
-                          />
-                        </div>
-                        <p className="mt-1 text-xs text-gray-400">
-                          {rate.toFixed(1)}% inactive / no-response rate
-                          <span className="ml-1 text-gray-300">
-                            ({row.total_employed} employed)
-                          </span>
-                        </p>
-                      </div>
-                    )}
-                    {!hasData && (
-                      <p className="mt-1 text-xs text-gray-400">
-                        No responses yet — {row.total_employed} employed
-                      </p>
-                    )}
-                  </div>
-                  <ChevronRight className="h-4 w-4 flex-shrink-0 text-gray-300" />
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ── Shared sub-components ──────────────────────────────────────────────── */
-
-function StatCard({ title, value, icon, accent }) {
-  return (
-    <div className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md sm:p-4">
-      <div className="flex items-start justify-between">
-        <div className="min-w-0">
-          <p className="mb-2 truncate text-[11px] font-medium text-gray-400 sm:text-xs">
-            {title}
-          </p>
-          <p className="text-2xl font-extrabold leading-none tracking-tight text-gray-900 sm:text-4xl">
-            {value}
-          </p>
-        </div>
-        <div
-          className={`${accent} flex-shrink-0 rounded-lg p-2 text-white sm:p-2.5`}
-        >
-          {icon}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ChartCard({ title, children }) {
-  return (
-    <div className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
-      <div className="mb-4 flex items-center justify-between gap-3 border-b border-gray-100 pb-3">
-        <h3 className="min-w-0 text-sm font-semibold text-gray-800">{title}</h3>
-        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-tpc-greenDeep" />
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function LegendRow({ color, label, value, total }) {
-  const pct = total > 0 ? Math.round((value / total) * 100) : 0;
-  return (
-    <div className="flex items-center gap-2">
-      <span
-        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-        style={{ background: color }}
-      />
-      <span className="text-xs text-gray-500 flex-1 min-w-0 truncate">
-        {label}
-      </span>
-      <span className="text-xs font-semibold text-gray-800">{value}</span>
-      <span className="text-xs text-gray-400 w-8 text-right">{pct}%</span>
-    </div>
-  );
-}
-
-function EmptyChart({ label = "No data available yet" }) {
-  return (
-    <div className="h-44 flex flex-col items-center justify-center text-gray-300 gap-2">
-      <TrendingUp className="w-8 h-8 opacity-40" />
-      <p className="text-xs">{label}</p>
-    </div>
   );
 }
