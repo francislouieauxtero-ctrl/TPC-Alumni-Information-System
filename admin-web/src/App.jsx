@@ -57,6 +57,7 @@ import {
   storeAuthSession,
 } from "./utils/authSession";
 import TermsAndPrivacy from "./pages/landingpage/Termsandprivacy";
+import tpcLogo from "./assets/tpcL.jpg";
 
 const queryClient = new QueryClient();
 
@@ -127,8 +128,13 @@ const AuthProvider = ({ children }) => {
     return (
       <div className="flex items-center justify-center h-screen bg-brand-bg">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-accent1 mx-auto mb-4"></div>
-          <p className="text-text-secondary">Loading...</p>
+          <img
+            src={tpcLogo}
+            alt="Talibon Polytechnic College"
+            className="h-16 w-16 mx-auto mb-4 rounded-full border-2 border-tpc-gold object-cover shadow-sm"
+          />
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-accent1 mx-auto mb-4"></div>
+          <p className="text-text-secondary text-sm">Loading...</p>
         </div>
       </div>
     );

@@ -1,30 +1,47 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>admin-web</title>
-    <script>
-      if ('serviceWorker' in navigator && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-        navigator.serviceWorker.getRegistrations().then(function(registrations) {
-          for (var i = 0; i < registrations.length; i++) {
-            registrations[i].unregister();
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap"
+    rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>admin-web</title>
+  <script>
+    if ('serviceWorker' in navigator && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+      navigator.serviceWorker.getRegistrations().then(function (registrations) {
+        for (var i = 0; i < registrations.length; i++) {
+          registrations[i].unregister();
+        }
+      });
+      if ('caches' in window) {
+        caches.keys().then(function (names) {
+          for (var j = 0; j < names.length; j++) {
+            caches.delete(names[j]);
           }
         });
-        if ('caches' in window) {
-          caches.keys().then(function(names) {
-            for (var j = 0; j < names.length; j++) {
-              caches.delete(names[j]);
-            }
-          });
-        }
       }
-    </script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+    }
+  </script>
+</head>
+
+<body>
+  <div id="root">
+    <div style="display:flex;align-items:center;justify-content:center;height:100vh;background-color:#f5f0e8;font-family:system-ui,-apple-system,sans-serif;">
+      <div style="text-align:center;">
+        <img src="/favicon.png" alt="Talibon Polytechnic College" style="width:64px;height:64px;border-radius:50%;border:2px solid #c9a84c;object-fit:cover;margin:0 auto 16px;display:block;box-shadow:0 1px 3px rgba(0,0,0,0.1);" />
+        <div style="width:36px;height:36px;border:3px solid #e2e8f0;border-top-color:#1a3a5c;border-radius:50%;animation:initial-spin 1s linear infinite;margin:0 auto 12px;"></div>
+        <p style="color:#64748b;font-size:14px;margin:0;">Loading...</p>
+      </div>
+    </div>
+    <style>
+      @keyframes initial-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+  </div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>
