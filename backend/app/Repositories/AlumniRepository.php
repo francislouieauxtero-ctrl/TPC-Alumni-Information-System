@@ -137,8 +137,7 @@ class AlumniRepository
             ")
             ->employed()   // scope on AlumniProfile: excludes STATUS_UNEMPLOYED
             ->whereHas('department')
-            ->groupBy('department_id')
-            ->with('department:id,name');
+            ->groupBy('department_id');
 
         if ($actor->isAdmin()) {
             $query->where('department_id', $actor->department_id);
@@ -188,6 +187,8 @@ class AlumniRepository
                     'alignment_rate' => 0,
                     'department' => $department,
                 ];
+            } else {
+                $row->setRelation('department', $department);
             }
 
             $row->not_registered = (int) ($notRegisteredByDepartment[$department->id] ?? 0);

@@ -663,30 +663,36 @@ function applyFilters(stats, filters, departments = []) {
   return result;
 }
 
-// ── Main component ────────────────────────────────────────────────────────
 export default function Analytics({ onDrillDown }) {
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({ department: "", batch: "" });
-  const [alignmentRows, setAlignmentRows] = useState([]);
-  const [departments, setDepartments] = useState([]);
-  const [showReport, setShowReport] = useState(false);
-
   // "admin" = department head (single-department scope).
   // Anything else reaching this page (e.g. "super_admin") is the president,
   // who is the only role allowed to see the cross-department breakdown.
   const userRole = localStorage.getItem("userRole");
+  const userDepartment = localStorage.getItem("userDepartment");
   const isDeptHead = userRole === "admin";
+
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState(() => ({
+    department: isDeptHead && userDepartment ? userDepartment : "",
+    batch: "",
+  }));
+  const [alignmentRows, setAlignmentRows] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [showReport, setShowReport] = useState(false);
 
   // Initial fetch
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
         const endpoint =
-          localStorage.getItem("userRole") === "admin"
+          userRole === "admin"
             ? "/department-head/dashboard"
             : "/admin/dashboard";
-        const response = await api.get(endpoint);
+        const params = {};
+        if (filters.department) params.department_id = filters.department;
+        if (filters.batch) params.batch = filters.batch;
+        const response = await api.get(endpoint, { params });
         if (response.data.status) setStats(response.data.data.stats);
       } catch (error) {
         console.error("Failed to fetch analytics:", error);
@@ -710,15 +716,6 @@ export default function Analytics({ onDrillDown }) {
     };
 
     fetchDepartments();
-  }, []);
-
-  // Pre-lock department filter for department-head role using stored auth info
-  useEffect(() => {
-    const role = localStorage.getItem("userRole");
-    const deptId = localStorage.getItem("userDepartment");
-    if (role === "admin" && deptId) {
-      setFilters((f) => ({ ...f, department: deptId }));
-    }
   }, []);
 
   // Re-fetch on filter change (pass params if backend supports them)
