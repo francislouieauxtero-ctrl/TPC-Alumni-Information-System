@@ -41,31 +41,31 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "apple-touch-icon.png"],
+      includeAssets: ["favicon.ico", "favicon.png", "favicon.svg", "apple-touch-icon.png", "tpc-logo.jpg"],
       manifest: {
         name: "TPC Alumni Management System",
         short_name: "TPC AMS",
         description: "Talibon Polytechnic College Alumni Management System",
-        theme_color: "#1a3a5c",
-        background_color: "#f5f0e8",
+        theme_color: "#0f3a5c",
+        background_color: "#ffffff",
         display: "standalone",
         start_url: "/",
         scope: "/",
         icons: [
           {
-            src: "/icons/pwa-192x192.png",
+            src: "/icons/tpc-192x192.png",
             sizes: "192x192",
             type: "image/png",
             purpose: "any",
           },
           {
-            src: "/icons/pwa-512x512.png",
+            src: "/icons/tpc-512x512.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "any",
           },
           {
-            src: "/icons/pwa-512x512.png",
+            src: "/icons/tpc-512-maskable.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "maskable",
