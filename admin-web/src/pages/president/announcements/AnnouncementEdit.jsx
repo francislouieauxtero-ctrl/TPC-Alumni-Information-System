@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import announcementService from "../../../services/announcementService";
 import departmentService from "../../../services/departmentService";
 import { toast } from "react-toastify";
@@ -8,6 +9,7 @@ export default function AnnouncementEdit({
   basePath = "/president/announcements",
 }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { id } = useParams();
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -106,6 +108,9 @@ export default function AnnouncementEdit({
       }
 
       await announcementService.update(id, payload);
+      queryClient.invalidateQueries({ queryKey: ["admin_announcements"] });
+      queryClient.invalidateQueries({ queryKey: ["dept_announcements"] });
+      queryClient.invalidateQueries({ queryKey: ["announcements"] });
       toast.success("Announcement updated successfully");
       navigate(basePath);
     } catch (err) {

@@ -26,6 +26,8 @@ export default function EventList() {
     search: debouncedSearch,
     include_past: includePast,
     page: currentPage,
+    sort_by: "created_at",
+    sort_direction: "desc",
   };
 
   if (userRole === "admin" && deptId) {
@@ -33,7 +35,7 @@ export default function EventList() {
     queryFilters.include_school_wide = true;
   }
 
-  // React Query fetching with 5-minute staleTime and fast cached placeholderData
+  // React Query fetching with 30s staleTime and fast cached placeholderData
   const { data: response, isLoading, isError, error } = useQuery({
     queryKey: ["admin_events", queryFilters],
     queryFn: () => eventService.getAll(queryFilters),
@@ -51,11 +53,16 @@ export default function EventList() {
       }
       return undefined;
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 30,
     gcTime: 1000 * 60 * 30,
   });
 
-  const events = response?.data || [];
+  const rawEvents = response?.data || [];
+  const events = [...rawEvents].sort((a, b) => {
+    const timeA = new Date(a.created_at || a.published_at || 0).getTime();
+    const timeB = new Date(b.created_at || b.published_at || 0).getTime();
+    return timeB - timeA;
+  });
   const meta = response?.meta || {};
 
   const handleDelete = async (id) => {
@@ -65,6 +72,8 @@ export default function EventList() {
       await eventService.delete(id);
       toast.success("Event deleted successfully");
       queryClient.invalidateQueries({ queryKey: ["admin_events"] });
+      queryClient.invalidateQueries({ queryKey: ["events"] });
+      queryClient.invalidateQueries({ queryKey: ["student_events"] });
     } catch (err) {
       toast.error(err.message || "Failed to delete event");
     }

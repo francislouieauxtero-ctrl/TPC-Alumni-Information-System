@@ -32,7 +32,13 @@ export default function StudentDashboard() {
         const [dashRes, annRes, evtRes] = await Promise.all([
           api.get("/student/dashboard"),
           announcementService.getAll({ page: 1, limit: 3 }),
-          eventService.getAll({ include_past: false, page: 1, limit: 3 }),
+          eventService.getAll({
+            include_past: false,
+            page: 1,
+            limit: 3,
+            sort_by: "created_at",
+            sort_direction: "desc",
+          }),
         ]);
 
         const success = dashRes.data.status ?? dashRes.data.success;

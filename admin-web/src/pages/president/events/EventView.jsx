@@ -184,9 +184,16 @@ export default function EventView() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
 
-            {/* Status badge */}
-            <div className="flex flex-col items-end gap-2 shrink-0">
+        {/* Details section */}
+        <div className="px-8 py-6 border-b border-gray-100 space-y-6">
+          <div className="flex items-start justify-between gap-4">
+            <Detail label="Department">
+              {event.department?.name || (event.scope === "school_wide" ? "All Departments" : "—")}
+            </Detail>
+            <div className="shrink-0 pt-0.5">
               {(() => {
                 const statusInfo = getEventStatusInfo(event.event_date);
                 return (
@@ -197,47 +204,21 @@ export default function EventView() {
                   </span>
                 );
               })()}
-              <span
-                className={`text-xs font-semibold px-3 py-1 rounded-full shadow-2xs ${
-                  event.scope === "school_wide"
-                    ? "bg-emerald-50 text-[#006400] border border-emerald-200/90"
-                    : "bg-purple-50 text-purple-700 border border-purple-200/90"
-                }`}
-              >
-                {event.scope === "school_wide"
-                  ? "🌐 All Users"
-                  : "Department-specific"}
-              </span>
             </div>
           </div>
-        </div>
 
-        {/* Details grid */}
-        <div className="px-8 py-6 grid grid-cols-1 sm:grid-cols-2 gap-6 border-b border-gray-100">
-          <Detail label="Event Date">
-            {new Date(event.event_date).toLocaleDateString("en-PH", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </Detail>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <Detail label="Event Date">
+              {new Date(event.event_date).toLocaleDateString("en-PH", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </Detail>
 
-          <Detail label="Location">{event.location || "—"}</Detail>
-
-          <Detail label="Department">
-            {event.department?.name ?? (
-              <span className="text-gray-400 italic">
-                {event.scope === "school_wide" ? "All Users" : "—"}
-              </span>
-            )}
-          </Detail>
-
-          <Detail label="Scope">
-            {event.scope === "school_wide"
-              ? "🌐 All Users"
-              : "Department-specific"}
-          </Detail>
+            <Detail label="Location">{event.location || "—"}</Detail>
+          </div>
         </div>
 
         {/* Description */}

@@ -22,21 +22,29 @@ export default function StudentEvents() {
   const [lightboxData, setLightboxData] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
-  // React Query fetching with 5-minute staleTime
+  // React Query fetching with 30s staleTime
+  const queryParams = {
+    search: debouncedSearch,
+    include_past: includePast,
+    page: currentPage,
+    sort_by: "created_at",
+    sort_direction: "desc",
+  };
+
   const { data: response, isLoading, isError, error } = useQuery({
-    queryKey: ["student_events", { search: debouncedSearch, include_past: includePast, page: currentPage }],
-    queryFn: () =>
-      eventService.getAll({
-        search: debouncedSearch,
-        include_past: includePast,
-        page: currentPage,
-      }),
+    queryKey: ["student_events", queryParams],
+    queryFn: () => eventService.getAll(queryParams),
     placeholderData: keepPreviousData,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 30,
     gcTime: 1000 * 60 * 30,
   });
 
-  const events = response?.data || [];
+  const rawEvents = response?.data || [];
+  const events = [...rawEvents].sort((a, b) => {
+    const timeA = new Date(a.created_at || a.published_at || 0).getTime();
+    const timeB = new Date(b.created_at || b.published_at || 0).getTime();
+    return timeB - timeA;
+  });
   const meta = response?.meta || {};
 
   const handleOpenLightbox = (images, index, title) => {

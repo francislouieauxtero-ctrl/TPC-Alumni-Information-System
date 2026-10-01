@@ -65,15 +65,10 @@ class EventRepository
         if ($sortBy === 'event_date') {
             $orderColumn = 'event_date';
             $orderDir = $sortDirection === 'desc' ? 'desc' : 'asc';
-        } elseif ($sortBy === 'created_at') {
+        } else {
+            // Default ordering: latest posts on top (created_at DESC)
             $orderColumn = 'created_at';
             $orderDir = $sortDirection === 'asc' ? 'asc' : 'desc';
-        } else {
-            // Default chronological event ordering:
-            // UPCOMING EVENTS (default): event_date ASC (soonest upcoming first)
-            // PAST EVENTS: event_date DESC (most recently passed first)
-            $orderColumn = 'event_date';
-            $orderDir = ($includePast || $onlyPast) ? 'desc' : 'asc';
         }
 
         if (isset($filters['limit']) && is_numeric($filters['limit']) && (int) $filters['limit'] > 0) {
@@ -112,10 +107,15 @@ class EventRepository
             });
         }
 
+        $sortBy = $filters['sort_by'] ?? 'created_at';
+        $sortDirection = strtolower($filters['sort_direction'] ?? 'desc');
+        $orderColumn = in_array($sortBy, ['event_date', 'created_at']) ? $sortBy : 'created_at';
+        $orderDir = $sortDirection === 'asc' ? 'asc' : 'desc';
+
         $perPage = isset($filters['per_page']) && is_numeric($filters['per_page']) ? (int) $filters['per_page'] : 15;
         $perPage = max(1, min($perPage, 50));
 
-        return $query->orderBy('event_date', 'desc')->paginate($perPage);
+        return $query->orderBy($orderColumn, $orderDir)->paginate($perPage);
     }
 
     /**

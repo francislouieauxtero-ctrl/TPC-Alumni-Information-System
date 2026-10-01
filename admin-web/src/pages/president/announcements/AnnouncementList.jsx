@@ -41,7 +41,7 @@ export default function AnnouncementList({
       }
       return undefined;
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 30,
     gcTime: 1000 * 60 * 30,
   });
 

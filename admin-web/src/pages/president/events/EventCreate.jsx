@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import eventService from "../../../services/eventService";
 import api from "../../../services/api";
 import { toast } from "react-toastify";
 
 export default function EventCreate() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const basePath =
     localStorage.getItem("userRole") === "admin"
       ? "/department-head/events"
@@ -126,6 +128,9 @@ export default function EventCreate() {
       }
 
       const created = await eventService.create(payload);
+      queryClient.invalidateQueries({ queryKey: ["admin_events"] });
+      queryClient.invalidateQueries({ queryKey: ["events"] });
+      queryClient.invalidateQueries({ queryKey: ["student_events"] });
       toast.success("Event created successfully");
       navigate(basePath + (created?.id ? `/${created.id}` : ""));
     } catch (err) {

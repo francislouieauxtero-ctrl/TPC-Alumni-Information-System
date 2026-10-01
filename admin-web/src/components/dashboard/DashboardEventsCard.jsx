@@ -128,9 +128,7 @@ function FeaturedEventCard({ event, detailPath, isFullWidth = false }) {
   const day = safeFormat(event.event_date, "d");
   const fullDate = safeFormat(event.event_date, "EEEE, MMMM d, yyyy");
   const time = safeFormat(event.event_date, "h:mm a");
-  const scopeLabel =
-    event.department?.name ||
-    (event.scope === "all" || event.scope === "school_wide" ? "🌐 All Users" : "Department");
+  const scopeLabel = event.department?.name || "All Departments";
 
   return (
     <Link
@@ -251,9 +249,7 @@ function SecondaryEventItem({ event, detailPath }) {
   const month = safeFormat(event.event_date, "MMM");
   const day = safeFormat(event.event_date, "d");
   const time = safeFormat(event.event_date, "h:mm a");
-  const scopeLabel =
-    event.department?.name ||
-    (event.scope === "all" || event.scope === "school_wide" ? "🌐 All Users" : "Department");
+  const scopeLabel = event.department?.name || "All Departments";
 
   return (
     <Link

@@ -36,6 +36,8 @@ export default function PresidentDasboard() {
           eventService.getAll({
             limit: 3,
             include_past: false,
+            sort_by: "created_at",
+            sort_direction: "desc",
           }),
           announcementService.getAll({
             limit: 3,

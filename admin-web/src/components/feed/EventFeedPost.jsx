@@ -84,6 +84,7 @@ export default function EventFeedPost({
         onEdit={onEdit ? () => onEdit(event) : undefined}
         onDelete={onDelete ? () => onDelete(event.id) : undefined}
         onView={onView ? () => onView(event) : undefined}
+        isEvent={true}
       />
 
       {/* Event Details Banner */}

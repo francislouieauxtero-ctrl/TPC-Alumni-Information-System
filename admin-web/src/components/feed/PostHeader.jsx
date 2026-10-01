@@ -13,6 +13,7 @@ export default function PostHeader({
   onDelete,
   onView,
   extraBadge,
+  isEvent = false,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -60,7 +61,7 @@ export default function PostHeader({
                 {isSchoolWide ? (
                   <>
                     <Globe className="w-3 h-3 text-[#008000] shrink-0" />
-                    <span>All Users</span>
+                    <span>{isEvent ? "All Departments" : "All Users"}</span>
                   </>
                 ) : (
                   <>
