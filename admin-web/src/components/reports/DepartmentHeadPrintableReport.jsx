@@ -18,6 +18,7 @@ export default function DepartmentHeadPrintableReport({
   departmentName = "",
   departmentId,
   batchLabel = "All Batches",
+  batch = "",
   generatedAt,
   reportType = "summary",
   alumniList = [],
@@ -25,6 +26,8 @@ export default function DepartmentHeadPrintableReport({
   preparedByName,
   graduatesByYear = {},
 }) {
+  const isAllBatches = !batch || batch === "" || batch === "all" || batchLabel === "All Batches";
+
   // Fail-safe guard: If no assigned department, never fall back to institution-wide statistics.
   if (!departmentId && !departmentName) {
     return (
@@ -50,62 +53,77 @@ export default function DepartmentHeadPrintableReport({
 
   return (
     <div className="report-sheet">
-      {/* 1. Official TPC Header */}
-      <PrintableReportHeader title={title} subtitle={subtitle} />
+      <table className="report-page-table">
+        <thead>
+          <tr>
+            <td>
+              {/* 1. Official TPC Header (repeats at top of each printed page) */}
+              <PrintableReportHeader title={title} subtitle={subtitle} />
+            </td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              {/* 2. Scope Metadata */}
+              <ReportMetadata
+                departmentLabel={departmentName}
+                batchLabel={batchLabel}
+                generatedAt={generatedAt}
+                classification="Official Academic Report"
+                reportTypeLabel={reportType === "detailed" ? "Detailed Alumni Roster" : "Department Summary"}
+              />
 
-      {/* 2. Scope Metadata */}
-      <ReportMetadata
-        departmentLabel={departmentName}
-        batchLabel={batchLabel}
-        generatedAt={generatedAt}
-        classification="Official Academic Report"
-        reportTypeLabel={reportType === "detailed" ? "Detailed Alumni Roster" : "Department Summary"}
-      />
+              {reportType === "summary" ? (
+                <>
+                  {/* 3. Executive Summary */}
+                  <ExecutiveSummaryTable overview={overview} />
 
-      {reportType === "summary" ? (
-        <>
-          {/* 3. Executive Summary */}
-          <ExecutiveSummaryTable overview={overview} />
+                  {/* 4. Employment Status Distribution */}
+                  <EmploymentStatusTable
+                    employed={overview.employed}
+                    selfEmployed={overview.selfEmployed}
+                    unemployed={overview.unemployed}
+                    notSpecified={overview.notSpecified}
+                    registeredAlumni={overview.regAlumni}
+                  />
 
-          {/* 4. Employment Status Distribution */}
-          <EmploymentStatusTable
-            employed={overview.employed}
-            selfEmployed={overview.selfEmployed}
-            unemployed={overview.unemployed}
-            notSpecified={overview.notSpecified}
-            registeredAlumni={overview.regAlumni}
-          />
+                  {/* 5. Department Job–Course Alignment Analysis */}
+                  <JobAlignmentTable
+                    aligned={overview.aligned}
+                    notAligned={overview.notAligned}
+                    pending={overview.pending}
+                    totalEmployed={overview.workingTotal}
+                    alignmentRatePct={overview.alignmentRatePct}
+                  />
 
-          {/* 5. Department Job–Course Alignment Analysis */}
-          <JobAlignmentTable
-            aligned={overview.aligned}
-            notAligned={overview.notAligned}
-            pending={overview.pending}
-            totalEmployed={overview.workingTotal}
-            alignmentRatePct={overview.alignmentRatePct}
-          />
+                  {/* 6. Graduation Cohort Distribution ONLY if All Batches */}
+                  {isAllBatches && (
+                    <BatchSummaryTable
+                      graduatesByYear={graduatesByYear}
+                      totalGraduates={overview.totalGraduates}
+                    />
+                  )}
+                </>
+              ) : (
+                /* Detailed Alumni Roster for Assigned Department */
+                <DetailedAlumniTable
+                  alumniList={alumniList}
+                  loading={loadingAlumni}
+                />
+              )}
 
-          {/* 6. Graduation Cohort Distribution */}
-          <BatchSummaryTable
-            graduatesByYear={graduatesByYear}
-            totalGraduates={overview.totalGraduates}
-          />
-        </>
-      ) : (
-        /* Detailed Alumni Roster for Assigned Department */
-        <DetailedAlumniTable
-          alumniList={alumniList}
-          loading={loadingAlumni}
-        />
-      )}
-
-      {/* 7. Signatory & Official Footer */}
-      <ReportSignatory
-        role="admin"
-        preparedByName={preparedByName}
-        departmentName={departmentName}
-        generatedAt={generatedAt}
-      />
+              {/* 7. Signatory */}
+              <ReportSignatory
+                role="admin"
+                preparedByName={preparedByName}
+                departmentName={departmentName}
+                generatedAt={generatedAt}
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 }

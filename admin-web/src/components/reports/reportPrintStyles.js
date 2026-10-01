@@ -41,7 +41,7 @@ export function getReportPrintStyles(paperSize = "A4", orientation = "portrait")
       text-align: center;
       border-bottom: 2.5px solid #02451C;
       padding-bottom: 8px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .report-header-banner-container {
@@ -56,8 +56,8 @@ export function getReportPrintStyles(paperSize = "A4", orientation = "portrait")
       width: 100%;
       max-width: 100%;
       height: auto;
-      max-height: 80px;
       object-fit: contain;
+      display: block;
     }
 
     .report-header-text {
@@ -66,7 +66,7 @@ export function getReportPrintStyles(paperSize = "A4", orientation = "portrait")
 
     .report-title {
       font-family: Arial, Helvetica, sans-serif;
-      font-size: 15pt;
+      font-size: 14.5pt;
       font-weight: 700;
       color: #02451C;
       margin: 0;
@@ -77,11 +77,28 @@ export function getReportPrintStyles(paperSize = "A4", orientation = "portrait")
 
     .report-subtitle {
       font-family: Arial, Helvetica, sans-serif;
-      font-size: 10.5pt;
+      font-size: 10pt;
       font-weight: 600;
       color: #475569;
       margin: 3px 0 0;
       line-height: 1.3;
+    }
+
+    /* ── Master Repeating Page Table ── */
+    .report-page-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: none;
+    }
+
+    .report-page-table > thead {
+      display: table-header-group;
+    }
+
+    .report-page-table > tbody > tr > td {
+      padding: 0;
+      border: none;
+      vertical-align: top;
     }
 
     /* ── Scope Metadata Bar ── */
@@ -89,19 +106,19 @@ export function getReportPrintStyles(paperSize = "A4", orientation = "portrait")
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
-      gap: 6px 16px;
+      gap: 4px 14px;
       background: #f8fafc;
       border: 1px solid #e2e8f0;
       border-radius: 4px;
-      padding: 6px 12px;
-      margin-bottom: 14px;
-      font-size: 9pt;
+      padding: 5px 10px;
+      margin-bottom: 10px;
+      font-size: 8.5pt;
     }
 
     .report-meta-item {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
 
     .report-meta-label {
@@ -116,23 +133,24 @@ export function getReportPrintStyles(paperSize = "A4", orientation = "portrait")
 
     /* ── Section Headings ── */
     .report-section {
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
 
     .report-section-title {
       font-family: Arial, Helvetica, sans-serif;
-      font-size: 11pt;
+      font-size: 10.5pt;
       font-weight: 700;
       color: #02451C;
       border-bottom: 1.5px solid #cbd5e1;
-      padding-bottom: 3px;
-      margin: 0 0 6px;
+      padding-bottom: 2px;
+      margin: 0 0 5px;
       letter-spacing: 0.02em;
       text-transform: uppercase;
+      break-after: avoid;
     }
 
     .report-badge-rate {
-      font-size: 9.5pt;
+      font-size: 9pt;
       color: #02451C;
       font-weight: 600;
     }
@@ -143,29 +161,29 @@ export function getReportPrintStyles(paperSize = "A4", orientation = "portrait")
       border-collapse: collapse;
       table-layout: auto;
       font-family: Arial, Helvetica, sans-serif;
-      font-size: 9pt;
-      line-height: 1.35;
-      margin-bottom: 4px;
+      font-size: 8.5pt;
+      line-height: 1.3;
+      margin-bottom: 3px;
     }
 
     .report-table th {
       background: #f1f5f9;
       color: #1e293b;
       font-weight: 700;
-      font-size: 8.5pt;
+      font-size: 8pt;
       text-transform: uppercase;
       letter-spacing: 0.03em;
       border-top: 1px solid #cbd5e1;
       border-bottom: 1.5px solid #94a3b8;
       border-left: 1px solid #e2e8f0;
       border-right: 1px solid #e2e8f0;
-      padding: 5px 6px;
+      padding: 4px 6px;
       vertical-align: middle;
     }
 
     .report-table td {
       border: 1px solid #e2e8f0;
-      padding: 4.5px 6px;
+      padding: 3.5px 6px;
       color: #1e293b;
       vertical-align: middle;
       font-size: 8.5pt;
@@ -186,8 +204,8 @@ export function getReportPrintStyles(paperSize = "A4", orientation = "portrait")
     .report-note-text {
       font-size: 7.5pt;
       color: #64748b;
-      margin-top: 3px;
-      line-height: 1.3;
+      margin-top: 2px;
+      line-height: 1.25;
       font-style: italic;
     }
 
@@ -201,36 +219,36 @@ export function getReportPrintStyles(paperSize = "A4", orientation = "portrait")
 
     /* ── Signatory & Official Footer ── */
     .report-footer-section {
-      margin-top: 18px;
-      padding-top: 10px;
+      margin-top: 10px;
+      padding-top: 4px;
     }
 
     .report-signatory-grid {
       display: flex;
       justify-content: space-between;
-      gap: 30px;
-      margin-bottom: 14px;
+      gap: 20px;
+      margin-bottom: 6px;
     }
 
     .report-signatory-block {
-      flex: 1;
-      max-width: 280px;
+      flex: 0 0 45%;
+      max-width: 260px;
     }
 
     .report-signatory-label {
-      font-size: 8.5pt;
+      font-size: 8pt;
       color: #475569;
-      margin: 0 0 4px;
+      margin: 0 0 2px;
     }
 
     .report-signature-space {
-      height: 38px;
+      height: 26px;
       border-bottom: 1px solid #0f172a;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
 
     .report-signatory-name {
-      font-size: 9.5pt;
+      font-size: 9pt;
       font-weight: 700;
       color: #0f172a;
       margin: 0;
@@ -238,29 +256,19 @@ export function getReportPrintStyles(paperSize = "A4", orientation = "portrait")
     }
 
     .report-signatory-title {
-      font-size: 8.5pt;
+      font-size: 8pt;
       color: #334155;
       margin: 1px 0 0;
       line-height: 1.2;
     }
 
+    /* office/department line removed intentionally — do not display */
     .report-signatory-office {
-      font-size: 8pt;
-      color: #64748b;
-      margin: 1px 0 0;
-      line-height: 1.2;
+      display: none !important;
     }
 
     .report-document-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-top: 1px solid #e2e8f0;
-      padding-top: 6px;
-      font-size: 7.5pt;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+      display: none !important;
     }
 
     /* ── Page Break Controls ── */
@@ -281,7 +289,7 @@ export function getReportPrintStyles(paperSize = "A4", orientation = "portrait")
 
       @page {
         size: ${sizeDefinition} ${orientation};
-        margin: 12mm 15mm;
+        margin: 10mm 12mm;
       }
 
       html, body {

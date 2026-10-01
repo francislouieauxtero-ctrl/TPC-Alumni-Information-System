@@ -22,7 +22,7 @@ export default function ExecutiveSummaryTable({ overview }) {
   return (
     <section className="report-section report-keep-together">
       <h2 className="report-section-title">1. Executive Summary</h2>
-      
+
       {/* Registration & Cohort Metrics */}
       <table className="report-table report-kpi-table">
         <thead>
@@ -67,9 +67,7 @@ export default function ExecutiveSummaryTable({ overview }) {
         </tbody>
       </table>
       <div className="report-note-text">
-        * Employment Rate = (Employed + Self-Employed) / (Employed + Self-Employed + Unemployed) × 100.
-        <br />
-        * Job–Course Alignment Rate = Aligned / (Aligned + Not Aligned) × 100.
+        * Employment Rate = (Employed + Self-Employed) / (Employed + Self-Employed + Unemployed) × 100 | Alignment Rate = Aligned / (Aligned + Not Aligned) × 100.
       </div>
     </section>
   );

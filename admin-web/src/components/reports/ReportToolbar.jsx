@@ -58,22 +58,20 @@ export default function ReportToolbar({
             <button
               type="button"
               onClick={() => onReportTypeChange("summary")}
-              className={`px-2.5 py-1 rounded-md font-semibold transition cursor-pointer ${
-                reportType === "summary"
+              className={`px-2.5 py-1 rounded-md font-semibold transition cursor-pointer ${reportType === "summary"
                   ? "bg-white text-[#02451C] shadow-xs"
                   : "text-slate-600 hover:text-slate-900"
-              }`}
+                }`}
             >
               Summary Report
             </button>
             <button
               type="button"
               onClick={() => onReportTypeChange("detailed")}
-              className={`px-2.5 py-1 rounded-md font-semibold transition cursor-pointer ${
-                reportType === "detailed"
+              className={`px-2.5 py-1 rounded-md font-semibold transition cursor-pointer ${reportType === "detailed"
                   ? "bg-white text-[#02451C] shadow-xs"
                   : "text-slate-600 hover:text-slate-900"
-              }`}
+                }`}
             >
               Detailed Roster
             </button>
@@ -133,37 +131,37 @@ export default function ReportToolbar({
             <button
               type="button"
               onClick={() => onOrientationChange("portrait")}
-              className={`px-2 py-1 rounded-md font-medium transition cursor-pointer ${
-                orientation === "portrait"
+              className={`px-2 py-1 rounded-md font-medium transition cursor-pointer ${orientation === "portrait"
                   ? "bg-white text-slate-900 font-semibold shadow-xs"
                   : "text-slate-600 hover:text-slate-900"
-              }`}
+                }`}
             >
               Portrait
             </button>
             <button
               type="button"
               onClick={() => onOrientationChange("landscape")}
-              className={`px-2 py-1 rounded-md font-medium transition cursor-pointer ${
-                orientation === "landscape"
+              className={`px-2 py-1 rounded-md font-medium transition cursor-pointer ${orientation === "landscape"
                   ? "bg-white text-slate-900 font-semibold shadow-xs"
                   : "text-slate-600 hover:text-slate-900"
-              }`}
+                }`}
             >
               Landscape
             </button>
           </div>
         </div>
 
-        {/* Right: Print Action Button */}
-        <button
-          type="button"
-          onClick={onPrint}
-          className="inline-flex items-center gap-2 bg-[#02451C] hover:bg-[#035a25] text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-sm hover:shadow transition cursor-pointer"
-        >
-          <Printer size={15} />
-          <span>Print / Save as PDF</span>
-        </button>
+        {/* Right: Preview & Print Action Button */}
+        <div className="flex items-center gap-3 no-print">
+          <button
+            type="button"
+            onClick={onPrint}
+            className="inline-flex items-center gap-2 bg-[#02451C] hover:bg-[#035a25] text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-sm hover:shadow transition cursor-pointer"
+          >
+            <Printer size={15} />
+            <span>Preview &amp; Print</span>
+          </button>
+        </div>
       </div>
     </div>
   );

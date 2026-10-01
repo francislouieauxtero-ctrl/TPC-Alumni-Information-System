@@ -2,46 +2,66 @@ import React from "react";
 
 /**
  * Report Signatory and Institutional Endorsement Footer
- * Compact, formal signature blocks customized by user role.
+ * 
+ * President report:  single column — Alumni President
+ * Department Head:   two columns — Department Head (left) + Alumni President (right)
+ *
+ * IMPORTANT: Does NOT show department name, program name, or office label
+ * under the Department Head signatory block.
  */
 export default function ReportSignatory({
   role = "super_admin",
   preparedByName,
-  departmentName,
+  departmentName,  // kept for backward compatibility but NOT displayed
   generatedAt,
+  alumniPresidentName,
 }) {
   const isDeptHead = role === "admin";
-  const name = preparedByName || (isDeptHead ? "Department Head" : "College President");
-  const title = isDeptHead ? "Department Head" : "College President";
-  const office = isDeptHead
-    ? (departmentName || "Academic Department")
-    : "Office of the College President";
 
+  // Authenticated user's display name
+  const userName = preparedByName || (isDeptHead ? "Department Head" : "Alumni President");
+
+  // Alumni President's name (different from the authenticated dept head user)
+  const presidentName =
+    alumniPresidentName ||
+    (isDeptHead ? "" : userName); // For president role, userName IS the president
+
+  if (isDeptHead) {
+    // ── Department Head: two-column signatory ────────────────────────────────
+    return (
+      <div className="report-footer-section report-keep-together">
+        <div className="report-signatory-grid" style={{ display: "flex", justifyContent: "space-between", gap: "20px" }}>
+          {/* Left: Department Head */}
+          <div className="report-signatory-block">
+            <p className="report-signatory-label">Prepared by:</p>
+            <div className="report-signature-space" />
+            <p className="report-signatory-name">{userName}</p>
+            <p className="report-signatory-title">Department Head</p>
+            {/* NOTE: Do NOT show department name / program under signatory */}
+          </div>
+
+          {/* Right: Alumni President */}
+          <div className="report-signatory-block">
+            <p className="report-signatory-label">Certified by:</p>
+            <div className="report-signature-space" />
+            <p className="report-signatory-name">{presidentName || "Alumni President"}</p>
+            <p className="report-signatory-title">Alumni President</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── President: single-column signatory ──────────────────────────────────────
   return (
     <div className="report-footer-section report-keep-together">
       <div className="report-signatory-grid">
         <div className="report-signatory-block">
           <p className="report-signatory-label">Prepared and Certified by:</p>
           <div className="report-signature-space" />
-          <p className="report-signatory-name">{name}</p>
-          <p className="report-signatory-title">{title}</p>
-          <p className="report-signatory-office">{office}</p>
+          <p className="report-signatory-name">{userName}</p>
+          <p className="report-signatory-title">Alumni President</p>
         </div>
-
-        {isDeptHead && (
-          <div className="report-signatory-block">
-            <p className="report-signatory-label">Noted by:</p>
-            <div className="report-signature-space" />
-            <p className="report-signatory-name">Office of the College President</p>
-            <p className="report-signatory-title">Talibon Polytechnic College</p>
-            <p className="report-signatory-office">Executive Administration</p>
-          </div>
-        )}
-      </div>
-
-      <div className="report-document-footer">
-        <span>Official Academic Report — Talibon Polytechnic College</span>
-        <span>Generated: {generatedAt}</span>
       </div>
     </div>
   );

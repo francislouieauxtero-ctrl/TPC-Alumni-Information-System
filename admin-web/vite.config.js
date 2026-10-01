@@ -82,6 +82,7 @@ export default defineConfig({
         ],
       },
       workbox: {
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3 MiB
         navigateFallback: null,
         navigateFallbackDenylist: [/^\/api\//, /^\/storage\//],
         runtimeCaching: [

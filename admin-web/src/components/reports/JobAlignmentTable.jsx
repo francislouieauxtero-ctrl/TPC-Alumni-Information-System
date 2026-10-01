@@ -58,9 +58,7 @@ export default function JobAlignmentTable({
         </tbody>
       </table>
       <div className="report-note-text">
-        * Alignment Rate ({alignmentRatePct}%) is evaluated exclusively among the {declaredCount.toLocaleString()} employed alumni who formally declared alignment: Aligned / (Aligned + Not Aligned) × 100.
-        <br />
-        * Pending Alignment Response represents employed alumni who have yet to complete the alignment confirmation survey.
+        * Alignment Rate ({alignmentRatePct}%) is evaluated among {declaredCount.toLocaleString()} declared alumni: Aligned / (Aligned + Not Aligned) × 100.
       </div>
     </section>
   );
