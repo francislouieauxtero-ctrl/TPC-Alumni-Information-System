@@ -68,11 +68,16 @@ services:
     build:
       context: ./admin-web
       dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ""
     container_name: capstone_admin
-    profiles: ["production"]
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "80:80"
+    environment:
+      BACKEND_URL: "http://nginx"
+    depends_on:
+      - nginx
     networks:
       - capstone_network
 
