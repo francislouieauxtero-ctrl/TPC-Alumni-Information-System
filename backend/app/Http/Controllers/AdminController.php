@@ -38,7 +38,14 @@ class AdminController extends Controller
             $requestedBatch = $request->filled('batch') ? trim((string) $request->batch) : null;
 
             if ($actor->isAdmin()) {
-                $requestedDept = $actor->department_id;
+                if (empty($actor->department_id)) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'No department assigned to this department head.',
+                        'data' => (object) [],
+                    ], 403);
+                }
+                $requestedDept = (int) $actor->department_id;
             }
 
             $studentsQuery = $this->users->students()->visibleTo($actor)
@@ -49,7 +56,7 @@ class AdminController extends Controller
 
             $departmentHeads = $actor->isSuperAdmin()
                 ? User::admins()
-                : User::admins()->where('department_id', $actor->department_id);
+                : null;
 
             $alumniQuery = AlumniProfile::query()->whereHas('user', function ($q) {
                 $q->where('is_verified', true)->where('role', User::ROLE_USER);
@@ -62,7 +69,7 @@ class AdminController extends Controller
                 ->when($requestedBatch, fn ($query) => $query->where('graduates.batch_year', $requestedBatch));
 
             $cacheKey = 'dash_stats_' . $actor->id . '_' . ($requestedDept ?? 'all') . '_' . ($requestedBatch ?? 'all');
-            $stats = Cache::remember($cacheKey, 300, function () use ($studentsQuery, $alumniQuery, $graduatesQuery, $departmentHeads, $requestedDept) {
+            $stats = Cache::remember($cacheKey, 300, function () use ($studentsQuery, $alumniQuery, $graduatesQuery, $departmentHeads, $requestedDept, $actor) {
                 $userStats = (clone $studentsQuery)
                     ->selectRaw(
                         'COUNT(*) as total_students, ' .
@@ -102,39 +109,48 @@ class AdminController extends Controller
                     ->pluck('cnt', 'batch_year')
                     ->toArray();
 
-                $departmentCounts = (clone $studentsQuery)
-                    ->leftJoin('alumni_profiles', 'alumni_profiles.user_id', '=', 'users.id')
-                    ->leftJoin('departments as user_departments', 'user_departments.id', '=', 'users.department_id')
-                    ->leftJoin('departments as alumni_department_names', 'alumni_department_names.id', '=', 'alumni_profiles.department_id')
-                    ->selectRaw('COALESCE(user_departments.name, alumni_department_names.name) as department_name, COUNT(*) as total')
-                    ->groupBy('department_name')
-                    ->pluck('total', 'department_name')
-                    ->toArray();
+                if (! $actor->isAdmin()) {
+                    $departmentCounts = (clone $studentsQuery)
+                        ->leftJoin('alumni_profiles', 'alumni_profiles.user_id', '=', 'users.id')
+                        ->leftJoin('departments as user_departments', 'user_departments.id', '=', 'users.department_id')
+                        ->leftJoin('departments as alumni_department_names', 'alumni_department_names.id', '=', 'alumni_profiles.department_id')
+                        ->selectRaw('COALESCE(user_departments.name, alumni_department_names.name) as department_name, COUNT(*) as total')
+                        ->groupBy('department_name')
+                        ->pluck('total', 'department_name')
+                        ->toArray();
 
-                $allDepartments = Department::query()
-                    ->when($requestedDept, fn ($query) => $query->whereKey($requestedDept))
-                    ->pluck('name')
-                    ->all();
+                    $allDepartments = Department::query()
+                        ->when($requestedDept, fn ($query) => $query->whereKey($requestedDept))
+                        ->pluck('name')
+                        ->all();
 
-                $byDepartment = [];
-                foreach ($allDepartments as $departmentName) {
-                    $byDepartment[$departmentName] = (int) ($departmentCounts[$departmentName] ?? 0);
+                    $byDepartment = [];
+                    foreach ($allDepartments as $departmentName) {
+                        $byDepartment[$departmentName] = (int) ($departmentCounts[$departmentName] ?? 0);
+                    }
+
+                    if (empty($byDepartment) && ! empty($departmentCounts)) {
+                        $byDepartment = array_map('intval', $departmentCounts);
+                    }
+                } else {
+                    $deptName = $actor->department?->name ?? 'Assigned Department';
+                    $byDepartment = [$deptName => (int) ($userStats->total_students ?? 0)];
+                    $allDepartments = [$deptName];
                 }
 
-                if (empty($byDepartment) && ! empty($departmentCounts)) {
-                    $byDepartment = array_map('intval', $departmentCounts);
+                $departmentHeadStats = null;
+                if ($departmentHeads) {
+                    $departmentHeadStats = (clone $departmentHeads)
+                        ->selectRaw(
+                            'COUNT(*) as total_department_heads, ' .
+                            'SUM(CASE WHEN is_verified = 1 THEN 1 ELSE 0 END) as verified_department_heads, ' .
+                            'SUM(CASE WHEN is_verified = 0 THEN 1 ELSE 0 END) as unverified_department_heads, ' .
+                            'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as active_department_heads, ' .
+                            'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as inactive_department_heads',
+                            [User::STATUS_ACTIVE, User::STATUS_INACTIVE]
+                        )
+                        ->first();
                 }
-
-                $departmentHeadStats = (clone $departmentHeads)
-                    ->selectRaw(
-                        'COUNT(*) as total_department_heads, ' .
-                        'SUM(CASE WHEN is_verified = 1 THEN 1 ELSE 0 END) as verified_department_heads, ' .
-                        'SUM(CASE WHEN is_verified = 0 THEN 1 ELSE 0 END) as unverified_department_heads, ' .
-                        'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as active_department_heads, ' .
-                        'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as inactive_department_heads',
-                        [User::STATUS_ACTIVE, User::STATUS_INACTIVE]
-                    )
-                    ->first();
 
                 return [
                     'total_students' => (int) ($userStats->total_students ?? 0),

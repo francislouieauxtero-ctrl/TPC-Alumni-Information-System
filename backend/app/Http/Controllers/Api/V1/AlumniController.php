@@ -110,7 +110,7 @@ class AlumniController extends Controller
     {
         try {
             $user = auth()->user();
-            if ($user->isAdmin() && !$user->isSuperAdmin() && (int) $user->department_id !== (int) $departmentId) {
+            if ($user->isAdmin() && !$user->isSuperAdmin() && (empty($user->department_id) || (int) $user->department_id !== (int) $departmentId)) {
                 return $this->errorResponse('Unauthorized to view alignment details for this department', 403);
             }
 

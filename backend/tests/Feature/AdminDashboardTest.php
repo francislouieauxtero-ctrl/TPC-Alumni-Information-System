@@ -133,4 +133,53 @@ class AdminDashboardTest extends TestCase
         $this->assertArrayNotHasKey('No department assigned', $stats['by_department']);
         $this->assertSame(1, $stats['total_departments']);
     }
+
+    public function test_admin_with_null_department_id_is_forbidden_and_cannot_access_analytics(): void
+    {
+        $adminWithoutDept = User::factory()->create([
+            'role' => User::ROLE_ADMIN,
+            'department_id' => null,
+            'is_verified' => true,
+            'status' => User::STATUS_ACTIVE,
+        ]);
+
+        $response = $this->actingAs($adminWithoutDept, 'sanctum')
+            ->getJson('/api/admin/dashboard');
+
+        $response->assertStatus(403);
+        $response->assertJson([
+            'status' => false,
+            'message' => 'No department assigned to this department head.',
+        ]);
+    }
+
+    public function test_admin_cannot_access_another_departments_alignment_details(): void
+    {
+        $deptOne = Department::factory()->create(['name' => 'Department A']);
+        $deptTwo = Department::factory()->create(['name' => 'Department B']);
+
+        $admin = User::factory()->create([
+            'role' => User::ROLE_ADMIN,
+            'department_id' => $deptOne->id,
+            'is_verified' => true,
+            'status' => User::STATUS_ACTIVE,
+        ]);
+
+        // Attempting to access department two's alignment detail
+        $response = $this->actingAs($admin, 'sanctum')
+            ->getJson('/api/admin/alumni/alignment/detail/' . $deptTwo->id);
+
+        $response->assertStatus(403);
+        $response->assertJson([
+            'status' => false,
+            'message' => 'Unauthorized to view alignment details for this department',
+        ]);
+
+        // Accessing own department succeeds
+        $ownResponse = $this->actingAs($admin, 'sanctum')
+            ->getJson('/api/admin/alumni/alignment/detail/' . $deptOne->id);
+
+        $ownResponse->assertOk();
+    }
 }
+

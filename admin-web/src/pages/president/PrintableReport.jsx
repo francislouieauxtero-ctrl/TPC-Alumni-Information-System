@@ -34,8 +34,9 @@ export default function PrintableReport({
   const [freshStats, setFreshStats] = useState(null);
   const [freshAlignmentRows, setFreshAlignmentRows] = useState([]);
 
-  // Fetch fresh data from backend at time of opening/printing
+  // Use data passed from parent; only fetch if stats are not provided
   useEffect(() => {
+    if (stats) return;
     let mounted = true;
 
     const fetchData = async () => {
@@ -67,13 +68,13 @@ export default function PrintableReport({
     return () => {
       mounted = false;
     };
-  }, [filters]);
+  }, [filters, stats]);
 
-  const statsToUse = freshStats ?? stats;
+  const statsToUse = stats ?? freshStats;
   const alignmentToUse =
-    freshAlignmentRows && freshAlignmentRows.length > 0
-      ? freshAlignmentRows
-      : alignmentRows;
+    alignmentRows && alignmentRows.length > 0
+      ? alignmentRows
+      : freshAlignmentRows;
 
   const overview = computeReportOverview(statsToUse, alignmentToUse);
   const breakdown = buildReportBreakdown(statsToUse, alignmentToUse);

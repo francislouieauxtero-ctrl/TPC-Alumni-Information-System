@@ -32,9 +32,13 @@ class AlumniRepository
             });
 
         if ($actor->isAdmin()) {
-            $query->where('department_id', $actor->department_id);
+            if (empty($actor->department_id)) {
+                $query->whereRaw('1 = 0');
+            } else {
+                $query->where('department_id', (int) $actor->department_id);
+            }
         } elseif (!empty($filters['department_id'])) {
-            $query->where('department_id', $filters['department_id']);
+            $query->where('department_id', (int) $filters['department_id']);
         }
 
         if (!empty($filters['batch_year'])) {
@@ -123,6 +127,10 @@ class AlumniRepository
      */
     public function getAlignmentSummaryByDepartment(User $actor, array $filters = []): Collection
     {
+        if ($actor->isAdmin() && empty($actor->department_id)) {
+            return collect();
+        }
+
         $query = AlumniProfile::query()
             ->selectRaw("
                 department_id,
@@ -136,14 +144,12 @@ class AlumniRepository
                 , 1)                                                            AS alignment_rate
             ")
             ->employed()   // scope on AlumniProfile: excludes STATUS_UNEMPLOYED
-            ->whereHas('department')
+            ->when(!$actor->isAdmin() && empty($filters['department_id']), fn ($q) => $q->whereHas('department'))
             ->groupBy('department_id');
 
         if ($actor->isAdmin()) {
-            $query->where('department_id', $actor->department_id);
-        }
-
-        if (!empty($filters['department_id'])) {
+            $query->where('department_id', (int) $actor->department_id);
+        } elseif (!empty($filters['department_id'])) {
             $query->where('department_id', (int) $filters['department_id']);
         }
 
@@ -154,8 +160,8 @@ class AlumniRepository
         $notRegisteredByDepartment = Graduate::query()
             ->whereDoesntHave('alumniProfile')
             ->when($actor->isAdmin(), fn ($q) =>
-                $q->where('department_id', $actor->department_id))
-            ->when(!empty($filters['department_id']), fn ($q) =>
+                $q->where('department_id', (int) $actor->department_id))
+            ->when(!$actor->isAdmin() && !empty($filters['department_id']), fn ($q) =>
                 $q->where('department_id', (int) $filters['department_id']))
             ->when(!empty($filters['batch']), fn ($q) =>
                 $q->where('batch_year', trim((string) $filters['batch'])))
@@ -166,8 +172,8 @@ class AlumniRepository
         $alignmentByDepartment = $query->get()->keyBy('department_id');
         $departments = Department::query()
             ->when($actor->isAdmin(), fn ($q) =>
-                $q->whereKey($actor->department_id))
-            ->when(!empty($filters['department_id']), fn ($q) =>
+                $q->whereKey((int) $actor->department_id))
+            ->when(!$actor->isAdmin() && !empty($filters['department_id']), fn ($q) =>
                 $q->whereKey((int) $filters['department_id']))
             ->get(['id', 'name']);
 
