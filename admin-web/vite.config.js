@@ -43,9 +43,9 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "favicon.png", "favicon.svg", "apple-touch-icon.png", "tpc-logo.jpg"],
       manifest: {
-        name: "TPC Alumni Management System",
-        short_name: "TPC AMS",
-        description: "Talibon Polytechnic College Alumni Management System",
+        name: "TPC Alumni Portal",
+        short_name: "TPC Alumni",
+        description: "Talibon Polytechnic College Alumni Portal",
         theme_color: "#0f3a5c",
         background_color: "#ffffff",
         display: "standalone",
@@ -82,7 +82,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        navigateFallback: "/index.html",
+        navigateFallback: null,
         navigateFallbackDenylist: [/^\/api\//, /^\/storage\//],
         runtimeCaching: [
           {

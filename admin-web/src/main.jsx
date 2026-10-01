@@ -111,11 +111,13 @@ function Root() {
 
   const updateSW = import.meta.env.PROD
     ? registerSW({
+        immediate: true,
         onNeedRefresh() {
-          setShowUpdateToast(true);
+          // Auto-reload so new SW activates immediately on mobile
+          updateSW(true);
         },
         onOfflineReady() {
-          console.log("TPC AMS is ready to work offline.");
+          console.log("TPC Alumni Portal is ready to work offline.");
         },
         onRegisterError(error) {
           console.error("Service Worker registration failed:", error);
