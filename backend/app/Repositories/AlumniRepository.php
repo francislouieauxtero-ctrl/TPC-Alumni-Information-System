@@ -157,6 +157,36 @@ class AlumniRepository
             $query->where('batch_year', trim((string) $filters['batch']));
         }
 
+        $graduatesByDepartment = Graduate::query()
+            ->when($actor->isAdmin(), fn ($q) =>
+                $q->where('department_id', (int) $actor->department_id))
+            ->when(!$actor->isAdmin() && !empty($filters['department_id']), fn ($q) =>
+                $q->where('department_id', (int) $filters['department_id']))
+            ->when(!empty($filters['batch']), fn ($q) =>
+                $q->where('batch_year', trim((string) $filters['batch'])))
+            ->selectRaw('department_id, COUNT(*) as total')
+            ->groupBy('department_id')
+            ->pluck('total', 'department_id');
+
+        $employmentByDepartment = AlumniProfile::query()
+            ->selectRaw("
+                department_id,
+                COUNT(*) as registered,
+                SUM(employment_status = 'employed') as employed,
+                SUM(employment_status = 'self_employed') as self_employed,
+                SUM(employment_status = 'unemployed') as unemployed,
+                SUM(employment_status = 'not_specified' OR employment_status IS NULL) as not_specified
+            ")
+            ->when($actor->isAdmin(), fn ($q) =>
+                $q->where('department_id', (int) $actor->department_id))
+            ->when(!$actor->isAdmin() && !empty($filters['department_id']), fn ($q) =>
+                $q->where('department_id', (int) $filters['department_id']))
+            ->when(!empty($filters['batch']), fn ($q) =>
+                $q->where('batch_year', trim((string) $filters['batch'])))
+            ->groupBy('department_id')
+            ->get()
+            ->keyBy('department_id');
+
         $notRegisteredByDepartment = Graduate::query()
             ->whereDoesntHave('alumniProfile')
             ->when($actor->isAdmin(), fn ($q) =>
@@ -179,7 +209,9 @@ class AlumniRepository
 
         return $departments->map(function ($department) use (
             $alignmentByDepartment,
-            $notRegisteredByDepartment
+            $notRegisteredByDepartment,
+            $graduatesByDepartment,
+            $employmentByDepartment
         ) {
             $row = $alignmentByDepartment->get($department->id);
 
@@ -197,7 +229,35 @@ class AlumniRepository
                 $row->setRelation('department', $department);
             }
 
-            $row->not_registered = (int) ($notRegisteredByDepartment[$department->id] ?? 0);
+            $totalGrads = (int) ($graduatesByDepartment[$department->id] ?? 0);
+            $notReg = (int) ($notRegisteredByDepartment[$department->id] ?? 0);
+            $reg = max(0, $totalGrads - $notReg);
+
+            $empStats = $employmentByDepartment->get($department->id);
+            $employed = (int) ($empStats->employed ?? 0);
+            $selfEmployed = (int) ($empStats->self_employed ?? 0);
+            $unemployed = (int) ($empStats->unemployed ?? 0);
+            $notSpecified = (int) ($empStats->not_specified ?? 0);
+
+            $workingTotal = $employed + $selfEmployed;
+            $declaredTotal = $workingTotal + $unemployed;
+            $employmentRate = $declaredTotal > 0
+                ? round(($workingTotal / $declaredTotal) * 100, 1)
+                : 0.0;
+            $registrationCoverage = $totalGrads > 0
+                ? round(($reg / $totalGrads) * 100, 1)
+                : 0.0;
+
+            $row->total_graduates = $totalGrads;
+            $row->registered = $reg;
+            $row->not_registered = $notReg;
+            $row->registration_coverage = $registrationCoverage;
+            $row->employed = $employed;
+            $row->self_employed = $selfEmployed;
+            $row->unemployed = $unemployed;
+            $row->not_specified = $notSpecified;
+            $row->employment_rate = $employmentRate;
+
             return $row;
         });
     }
