@@ -92,8 +92,10 @@ const DashboardRedirect = () => {
   return <Navigate to={getDashboardPath(userRole)} replace />;
 };
 
-// Elegant, minimal, professional splash screen using the official TPC logo
-const SplashScreen = ({ isFadingOut }) => {
+// Authoritative splash screen controller using the official TPC logo and tagline
+const SplashScreen = ({ stage, isFadingOut }) => {
+  const isBrandStage = stage === "brand";
+
   return (
     <div
       className={`fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-white px-6 select-none transition-opacity duration-300 ease-out ${
@@ -111,23 +113,36 @@ const SplashScreen = ({ isFadingOut }) => {
           isFadingOut ? "scale-[1.01]" : "scale-100"
         }`}
       >
-        {/* Official TPC Seal */}
-        <div className="relative splash-logo-enter">
-          <img
-            src={tpcLogo}
-            alt="Talibon Polytechnic College Seal"
-            className="w-[clamp(84px,14vw,112px)] h-[clamp(84px,14vw,112px)] rounded-full border-[2.5px] border-[#c9a84c] object-cover shadow-[0_8px_24px_rgba(15,58,92,0.08)] ring-4 ring-[#0f3a5c]/5 aspect-square"
-          />
+        {/* Brand Reveal: Official TPC Seal + Existing Tagline */}
+        <div
+          className={`flex flex-col items-center transition-all duration-500 ease-out ${
+            isBrandStage
+              ? "opacity-100 max-h-[260px] translate-y-0 mb-6 sm:mb-7"
+              : "opacity-0 max-h-0 -translate-y-2 pointer-events-none overflow-hidden mb-0"
+          }`}
+        >
+          {/* Official TPC Seal */}
+          <div className={isBrandStage ? "relative splash-logo-enter" : "relative"}>
+            <img
+              src={tpcLogo}
+              alt="Talibon Polytechnic College Seal"
+              className="w-[clamp(84px,14vw,112px)] h-[clamp(84px,14vw,112px)] rounded-full border-[2.5px] border-[#c9a84c] object-cover shadow-[0_8px_24px_rgba(15,58,92,0.08)] ring-4 ring-[#0f3a5c]/5 aspect-square"
+            />
+          </div>
+
+          {/* Tagline */}
+          <h2
+            className={`mt-5 sm:mt-6 text-[clamp(16px,2.5vw,20px)] font-semibold text-[#0f3a5c] tracking-tight leading-[1.45] ${
+              isBrandStage ? "splash-tagline-enter" : ""
+            }`}
+          >
+            Reconnect, Reminisce,
+            <span className="block sm:inline sm:ml-1">Reunite.</span>
+          </h2>
         </div>
 
-        {/* Tagline */}
-        <h2 className="mt-5 sm:mt-6 text-[clamp(16px,2.5vw,20px)] font-semibold text-[#0f3a5c] tracking-tight leading-[1.45] splash-tagline-enter">
-          Reconnect, Reminisce,
-          <span className="block sm:inline sm:ml-1">Reunite.</span>
-        </h2>
-
-        {/* Subtle Institutional Loading Line */}
-        <div className="mt-6 sm:mt-7 w-[clamp(120px,18vw,160px)] h-[2.5px] bg-slate-100 rounded-full overflow-hidden relative splash-indicator-enter">
+        {/* Institutional Loading Line */}
+        <div className="w-[clamp(120px,18vw,160px)] h-[2.5px] bg-slate-100 rounded-full overflow-hidden relative">
           <div className="absolute inset-y-0 w-2/5 rounded-full bg-gradient-to-r from-[#0f3a5c] via-[#0f3a5c] to-[#c9a84c] splash-progress-line" />
         </div>
       </div>
@@ -135,10 +150,11 @@ const SplashScreen = ({ isFadingOut }) => {
   );
 };
 
-// Component to check user on app load with smooth splash transition
+// Authoritative splash and authentication controller
 const AuthProvider = ({ children }) => {
   const [authChecked, setAuthChecked] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
+  const [splashStage, setSplashStage] = useState("loading"); // "loading" | "brand"
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [user, setUser] = useState(null);
 
@@ -146,6 +162,14 @@ const AuthProvider = ({ children }) => {
     let isMounted = true;
     const startTime = performance.now();
     const MIN_SPLASH_DURATION = 3000; // Minimum 3 seconds display time
+    const BRAND_REVEAL_DELAY = 700; // Stage 1 (loading) -> Stage 2 (brand reveal)
+
+    // Stage 1 (loading) -> Stage 2 (brand reveal)
+    const brandTimer = setTimeout(() => {
+      if (isMounted) {
+        setSplashStage("brand");
+      }
+    }, BRAND_REVEAL_DELAY);
 
     const checkAuth = async () => {
       try {
@@ -168,12 +192,15 @@ const AuthProvider = ({ children }) => {
       } finally {
         if (!isMounted) return;
 
+        // CRUCIAL: Mount verified destination immediately underneath the splash overlay
+        // so routes & dashboard fetch their initial data in the background
+        setAuthChecked(true);
+
         const prefersReducedMotion =
           typeof window !== "undefined" &&
           window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
         if (prefersReducedMotion) {
-          setAuthChecked(true);
           setShowSplash(false);
           return;
         }
@@ -183,9 +210,7 @@ const AuthProvider = ({ children }) => {
 
         setTimeout(() => {
           if (!isMounted) return;
-          // Mount verified children underneath the overlay
-          setAuthChecked(true);
-          // Softly fade out splash screen
+          // Softly fade out splash screen after minimum duration
           setIsFadingOut(true);
 
           setTimeout(() => {
@@ -200,13 +225,16 @@ const AuthProvider = ({ children }) => {
 
     return () => {
       isMounted = false;
+      clearTimeout(brandTimer);
     };
   }, []);
 
   return (
     <>
       {authChecked && children}
-      {showSplash && <SplashScreen isFadingOut={isFadingOut} />}
+      {showSplash && (
+        <SplashScreen stage={splashStage} isFadingOut={isFadingOut} />
+      )}
     </>
   );
 };
