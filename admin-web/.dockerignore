@@ -3,4 +3,7 @@ dist
 dev-dist
 .git
 *.md
+.env
+.env.*
 .env*.local
+

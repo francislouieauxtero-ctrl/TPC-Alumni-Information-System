@@ -3,6 +3,7 @@ services:
     build:
       context: ./php
       dockerfile: Dockerfile
+    image: tpc-alumni-php:latest
     container_name: capstone_php
     working_dir: /var/www/backend
     command:
@@ -29,6 +30,7 @@ services:
     build:
       context: ./php
       dockerfile: Dockerfile
+    image: tpc-alumni-queue-worker:latest
     container_name: capstone_queue
     working_dir: /var/www/backend
     command:
@@ -70,10 +72,12 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_URL: ""
+    image: tpc-alumni-admin-web:latest
     container_name: capstone_admin
     restart: unless-stopped
     ports:
       - "80:80"
+      - "3000:80"
     environment:
       BACKEND_URL: "http://nginx"
     depends_on:
