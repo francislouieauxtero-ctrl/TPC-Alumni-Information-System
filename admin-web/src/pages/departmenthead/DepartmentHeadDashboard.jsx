@@ -73,20 +73,9 @@ export default function DepartmentHeadDashboard() {
     fetchDashboardData();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-white">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tpc-greenDeep mx-auto mb-4"></div>
-          <p className="text-gray-500">Loading dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">
           {error}
         </div>
@@ -114,18 +103,18 @@ export default function DepartmentHeadDashboard() {
         : 0;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto min-w-0">
       <header className="rounded-2xl bg-gradient-to-r from-[#006400] via-[#008000] to-[#00A000] p-4 sm:p-6 text-white shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
+          <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-green-100">
               Department dashboard
             </p>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl text-white">
+            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl text-white break-words">
               {departmentName}
             </h1>
           </div>
-          <div className="self-start sm:self-auto rounded-xl border border-white/20 bg-white/10 px-3.5 py-2 sm:px-4 sm:py-3 backdrop-blur-sm">
+          <div className="self-start sm:self-auto rounded-xl border border-white/20 bg-white/10 px-3.5 py-2 sm:px-4 sm:py-3 backdrop-blur-sm shrink-0">
             <p className="text-xs uppercase tracking-[0.22em] text-green-100">
               Employment rate
             </p>
@@ -242,7 +231,7 @@ function StatCard({ title, value, icon, color, detail }) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <p className="text-xs sm:text-sm font-medium text-gray-500 truncate">{title}</p>
-          <p className="mt-1.5 sm:mt-2 text-2xl sm:text-3xl font-bold text-gray-900">{value ?? 0}</p>
+          <p className="mt-1.5 sm:mt-2 text-2xl sm:text-3xl font-bold text-gray-900 break-words">{value ?? 0}</p>
         </div>
         <div
           className={`${color} flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl text-white shadow-sm`}

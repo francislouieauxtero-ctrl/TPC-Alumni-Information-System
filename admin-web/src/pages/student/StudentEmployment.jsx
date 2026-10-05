@@ -370,8 +370,9 @@ export default function StudentEmployment() {
       </header>
 
       {loading ? (
-        <div className="flex items-center justify-center h-48">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tpc-green"></div>
+        <div className="space-y-4">
+          <div className="h-32 bg-slate-100 rounded-2xl animate-pulse" />
+          <div className="h-32 bg-slate-100 rounded-2xl animate-pulse" />
         </div>
       ) : jobs.data.length ? (
         <div className="space-y-4 sm:space-y-6">

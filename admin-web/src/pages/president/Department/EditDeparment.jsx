@@ -81,8 +81,9 @@ export default function EditDepartment() {
 
       <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
         {fetchLoading ? (
-          <div className="flex justify-center py-6">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-tpc-greenDeep" />
+          <div className="py-4 space-y-3">
+            <div className="h-10 bg-slate-100 rounded-lg animate-pulse" />
+            <div className="h-10 bg-slate-100 rounded-lg animate-pulse w-32" />
           </div>
         ) : (
           <form onSubmit={handleUpdate} className="space-y-5">

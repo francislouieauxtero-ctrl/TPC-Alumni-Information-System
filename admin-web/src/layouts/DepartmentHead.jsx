@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import api from "../services/api";
 import UserAvatar from "../components/shared/UserAvatar";
+import TopLoadingBar from "../components/shared/TopLoadingBar";
 
 export default function DepartmentHeadLayout({ children }) {
   const navigate = useNavigate();
@@ -240,6 +241,7 @@ export default function DepartmentHeadLayout({ children }) {
 
       {/* Main Content */}
       <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+        <TopLoadingBar />
         {/* Top Bar */}
         <div className="bg-white border-b border-gray-200 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
           <button
@@ -249,8 +251,8 @@ export default function DepartmentHeadLayout({ children }) {
           >
             <Menu className="w-6 h-6" />
           </button>
-          <div className="flex items-center gap-3 sm:gap-4 ml-auto min-w-0">
-            <span className="text-gray-500 text-xs sm:text-sm font-medium truncate max-w-[150px] sm:max-w-none">
+          <div className="flex items-center gap-2.5 sm:gap-4 ml-auto min-w-0">
+            <span className="text-gray-500 text-xs sm:text-sm font-medium truncate max-w-[130px] xs:max-w-[180px] sm:max-w-none">
               Welcome, {departmentHeadName}!
             </span>
             <UserAvatar

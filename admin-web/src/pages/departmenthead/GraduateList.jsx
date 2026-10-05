@@ -54,14 +54,6 @@ export default function GraduateList() {
     setCurrentPage(1);
   };
 
-  if (loading && !graduates.meta) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tpc-green"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -81,7 +73,7 @@ export default function GraduateList() {
 
           <button
             onClick={() => navigate("create")}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-green-50 text-[#006400] px-4 py-2.5 text-sm font-semibold transition shadow-sm self-start sm:self-auto shrink-0"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-green-50 text-[#006400] px-4 py-2.5 text-sm font-semibold transition shadow-sm w-full sm:w-auto shrink-0"
           >
             + Add Graduate
           </button>
@@ -117,7 +109,13 @@ export default function GraduateList() {
         </div>
       </div>
 
-      {graduates.data && graduates.data.length > 0 ? (
+      {loading && (!graduates.data || graduates.data.length === 0) ? (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-3">
+          <div className="h-10 bg-slate-100 rounded-lg animate-pulse" />
+          <div className="h-10 bg-slate-100 rounded-lg animate-pulse" />
+          <div className="h-10 bg-slate-100 rounded-lg animate-pulse" />
+        </div>
+      ) : graduates.data && graduates.data.length > 0 ? (
         <div
           className={`bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-opacity ${loading ? "opacity-50" : "opacity-100"
             }`}

@@ -738,9 +738,10 @@ export default function StudentManagement() {
       </div>
 
       {loading ? (
-        <div className="text-center py-16">
-          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-tpc-greenDeep" />
-          <p className="text-gray-500">Loading alumni...</p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="h-44 bg-slate-100 rounded-2xl animate-pulse" />
+          ))}
         </div>
       ) : visibleAlumni.length === 0 ? (
         <div className="rounded-lg border border-gray-200 bg-gray-50 py-16 text-center">

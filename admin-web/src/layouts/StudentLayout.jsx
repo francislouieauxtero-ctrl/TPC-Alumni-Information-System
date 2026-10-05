@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import api from "../services/api";
 import UserAvatar from "../components/shared/UserAvatar";
+import TopLoadingBar from "../components/shared/TopLoadingBar";
 
 const NAV_ITEMS = [
   { to: "/student/dashboard", icon: Home, label: "Dashboard" },
@@ -203,6 +204,7 @@ export default function StudentLayout({ children }) {
 
       {/* ── Main content area ── */}
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
+        <TopLoadingBar />
         {/* Top bar */}
         <header className="flex items-center justify-between border-b border-gray-200 bg-white px-3 py-2.5 sm:px-6 sm:py-4">
           {/* Hamburger — mobile only */}

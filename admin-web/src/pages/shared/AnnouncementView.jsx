@@ -99,8 +99,10 @@ export default function AnnouncementView() {
 
   if (loading && !announcement) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-[#008000]" />
+      <div className="max-w-4xl mx-auto space-y-4 p-4">
+        <div className="h-48 bg-slate-100 rounded-2xl animate-pulse" />
+        <div className="h-6 w-3/4 bg-slate-100 rounded-lg animate-pulse" />
+        <div className="h-4 w-1/2 bg-slate-100 rounded-lg animate-pulse" />
       </div>
     );
   }

@@ -70,15 +70,15 @@ function FilterBar({
       <span className="w-px h-5 bg-slate-200 shrink-0" />
 
       {/* Locked Department Badge */}
-      <div className="inline-flex items-center gap-2 bg-[#e8f4ed] border border-[#86c99a] text-[#02451C] px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0">
+      <div className="inline-flex items-center gap-2 bg-[#e8f4ed] border border-[#86c99a] text-[#02451C] px-3 py-1.5 rounded-xl text-xs font-semibold min-w-0 max-w-full">
         <Building2 size={13} className="text-[#006400] shrink-0" />
-        <span className="truncate max-w-[240px] sm:max-w-xs" title={departmentName}>
+        <span className="truncate max-w-[170px] xs:max-w-[220px] sm:max-w-xs" title={departmentName}>
           {departmentName}
         </span>
       </div>
 
       {/* Batch Select */}
-      <div className="relative shrink-0">
+      <div className="relative min-w-0 max-w-full xs:w-auto">
         <select
           value={selectedBatch}
           onChange={(e) => onBatchChange(e.target.value)}
@@ -517,17 +517,6 @@ export default function DeptAnalytics({ onDrillDown }) {
 
   const batchScopeLabel = selectedBatch ? `Batch ${selectedBatch}` : "All Batches";
 
-  if (loading && !stats) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <Loader2 className="animate-spin h-10 w-10 text-[#02451C] mx-auto mb-3" />
-          <p className="text-sm font-medium text-slate-500">Loading department analytics...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
       <div
@@ -553,7 +542,7 @@ export default function DeptAnalytics({ onDrillDown }) {
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-green-50 text-[#006400] px-4 py-2.5 text-sm font-semibold transition shadow-sm self-start sm:self-auto shrink-0 cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-green-50 text-[#006400] px-4 py-2.5 text-sm font-semibold transition shadow-sm w-full sm:w-auto shrink-0 cursor-pointer"
               >
                 <Printer size={15} />
                 <span>Print / Save as PDF</span>

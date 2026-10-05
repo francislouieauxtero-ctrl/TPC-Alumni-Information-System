@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import api from "../services/api";
 import UserAvatar from "../components/shared/UserAvatar";
+import TopLoadingBar from "../components/shared/TopLoadingBar";
 
 export default function PresidentLayout({ children }) {
   const navigate = useNavigate();
@@ -274,17 +275,18 @@ export default function PresidentLayout({ children }) {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+        <TopLoadingBar />
         {/* Top Bar */}
-        <div className="bg-white border-b border-gray-200 px-3 py-2.5 sm:px-6 sm:py-4 flex items-center justify-between">
+        <div className="bg-white border-b border-gray-200 px-3 py-2.5 sm:px-6 sm:py-4 flex items-center justify-between gap-2">
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="min-[850px]:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            className="min-[850px]:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors shrink-0"
             aria-label="Open mobile menu"
           >
             <Menu className="w-6 h-6" />
           </button>
-          <div className="flex items-center gap-3 sm:gap-4 ml-auto min-w-0">
-            <span className="text-gray-600 text-xs sm:text-sm font-medium truncate max-w-[140px] sm:max-w-none">
+          <div className="flex items-center gap-2.5 sm:gap-4 ml-auto min-w-0">
+            <span className="text-gray-600 text-xs sm:text-sm font-medium truncate max-w-[130px] xs:max-w-[180px] sm:max-w-none">
               Welcome back, {userName}!
             </span>
             <UserAvatar
@@ -297,7 +299,7 @@ export default function PresidentLayout({ children }) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-auto bg-slate-50 p-3 sm:p-4 md:p-6 lg:p-8">{children}</div>
+        <div className="flex-1 overflow-auto bg-slate-50 p-3 sm:p-4 md:p-6 lg:p-8 min-w-0">{children}</div>
       </div>
     </div>
   );

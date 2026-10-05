@@ -122,8 +122,9 @@ export default function CreateDepartment() {
         </div>
 
         {listLoading ? (
-          <div className="flex justify-center py-10">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-tpc-greenDeep" />
+          <div className="p-4 space-y-2">
+            <div className="h-8 bg-slate-100 rounded-lg animate-pulse" />
+            <div className="h-8 bg-slate-100 rounded-lg animate-pulse" />
           </div>
         ) : departments.length === 0 ? (
           <p className="text-center text-gray-400 text-sm py-10">

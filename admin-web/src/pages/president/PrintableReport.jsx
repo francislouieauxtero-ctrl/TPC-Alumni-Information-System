@@ -352,12 +352,12 @@ export default function PrintableReport({
           >
             {/* Modal Header */}
             <div
-              className="flex items-center justify-between px-5 py-3 border-b border-slate-200 shrink-0"
+              className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-5 py-3 gap-2.5 sm:gap-3 border-b border-slate-200 shrink-0"
               style={{ borderRadius: "16px 16px 0 0", background: "#f8fafc" }}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                 <span
-                  className="inline-flex items-center justify-center rounded-lg"
+                  className="inline-flex items-center justify-center rounded-lg shrink-0"
                   style={{ background: "#02451C", width: 32, height: 32 }}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2">
@@ -368,14 +368,14 @@ export default function PrintableReport({
                     <polyline points="10 9 9 9 8 9"/>
                   </svg>
                 </span>
-                <div>
-                  <p className="text-xs font-bold text-slate-800 uppercase tracking-wide">TPC Alumni Report Preview</p>
-                  <p className="text-[11px] text-slate-500">
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-slate-800 uppercase tracking-wide truncate">TPC Alumni Report Preview</p>
+                  <p className="text-[11px] text-slate-500 truncate">
                     {isDeptHead ? "Department Alumni Report" : "President Alumni Report"} · {paperSize} {orientation.charAt(0).toUpperCase() + orientation.slice(1)}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto shrink-0">
                 {!previewLoading && !previewError && previewUrl && (
                   <>
                     <button

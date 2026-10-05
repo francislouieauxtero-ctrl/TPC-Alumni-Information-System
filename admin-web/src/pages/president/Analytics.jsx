@@ -96,13 +96,14 @@ function FilterBar({
       <span className="w-px h-5 bg-slate-200 shrink-0" />
 
       {/* Department select */}
-      <div className="relative shrink-0">
+      <div className="relative min-w-0 max-w-full xs:w-auto">
         <select
           value={filters.department}
           onChange={(e) => onChange({ ...filters, department: e.target.value })}
-          style={activeSelectStyle(filters.department)}
+          style={{ ...activeSelectStyle(filters.department), maxWidth: "100%" }}
           disabled={departmentLocked}
           aria-label="Filter by Department"
+          className="max-w-[260px] xs:max-w-none truncate"
         >
           {!departmentLocked ? (
             <option value="">All Departments</option>
@@ -125,12 +126,13 @@ function FilterBar({
       </div>
 
       {/* Batch select */}
-      <div className="relative shrink-0">
+      <div className="relative min-w-0 max-w-full xs:w-auto">
         <select
           value={filters.batch}
           onChange={(e) => onChange({ ...filters, batch: e.target.value })}
-          style={activeSelectStyle(filters.batch)}
+          style={{ ...activeSelectStyle(filters.batch), maxWidth: "100%" }}
           aria-label="Filter by Graduation Batch"
+          className="max-w-[200px] xs:max-w-none truncate"
         >
           <option value="">All Batches</option>
           {batches.map((year) => (
@@ -736,17 +738,6 @@ export default function Analytics({ onDrillDown }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-[#F8FAFC]">
-        <div className="text-center">
-          <Loader2 className="animate-spin h-10 w-10 text-[#0F3A5C] mx-auto mb-3" />
-          <p className="text-sm font-medium text-slate-500">Loading analytics...</p>
-        </div>
-      </div>
-    );
-  }
-
   // Department options for dropdown
   const departmentOptions =
     departments.length > 0
@@ -833,7 +824,7 @@ export default function Analytics({ onDrillDown }) {
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-green-50 text-[#006400] px-4 py-2.5 text-sm font-semibold transition shadow-sm self-start sm:self-auto shrink-0 cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-green-50 text-[#006400] px-4 py-2.5 text-sm font-semibold transition shadow-sm w-full sm:w-auto shrink-0 cursor-pointer"
               >
                 <Printer size={15} />
                 <span>Print / Save as PDF</span>

@@ -57,19 +57,6 @@ export default function StudentDashboard() {
     fetchAll();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-tpc-greenDeep mx-auto mb-4" />
-          <p className="text-sm text-gray-400 tracking-wide">
-            Loading dashboard…
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="p-4 sm:p-8">
@@ -90,9 +77,9 @@ export default function StudentDashboard() {
         <p className="text-green-100 text-xs uppercase tracking-[0.2em] font-semibold mb-1">
           Alumni Portal
         </p>
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-snug">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-snug break-words">
           Welcome back,{" "}
-          <span className="text-green-200">{student?.name?.split(" ")[0]}</span>
+          <span className="text-green-200">{student?.name?.split(" ")[0] || "Alumni"}</span>
           !
         </h1>
         <p className="mt-1 text-green-50/90 text-sm">

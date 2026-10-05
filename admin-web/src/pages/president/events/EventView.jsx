@@ -106,8 +106,10 @@ export default function EventView() {
 
   if (loading && !event) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#008000]"></div>
+      <div className="max-w-4xl mx-auto space-y-4 p-4">
+        <div className="h-48 bg-slate-100 rounded-2xl animate-pulse" />
+        <div className="h-6 w-3/4 bg-slate-100 rounded-lg animate-pulse" />
+        <div className="h-4 w-1/2 bg-slate-100 rounded-lg animate-pulse" />
       </div>
     );
   }

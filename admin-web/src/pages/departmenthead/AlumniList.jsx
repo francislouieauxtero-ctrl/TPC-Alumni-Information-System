@@ -664,8 +664,10 @@ export default function AlumniList() {
 
       {/* Table & Cards */}
       {loading ? (
-        <div className="flex items-center justify-center h-56">
-          <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-200 border-t-tpc-greenDeep" />
+        <div className="space-y-3">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="h-20 bg-slate-100 rounded-xl animate-pulse" />
+          ))}
         </div>
       ) : visibleAlumni.length > 0 ? (
         <>
