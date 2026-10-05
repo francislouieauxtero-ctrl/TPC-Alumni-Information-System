@@ -246,7 +246,7 @@ export default function StudentLayout({ children }) {
         <main className="flex-1 overflow-auto bg-slate-50">{children}</main>
 
         {/* ── Mobile bottom nav ── */}
-        <nav className="flex border-t border-gray-200 bg-white min-[850px]:hidden">
+        <nav className="flex border-t border-gray-200 bg-white min-[850px]:hidden shrink-0 pb-[env(safe-area-inset-bottom,0.25rem)]">
           {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
             <MobileNavItem key={to} to={to} icon={Icon} label={label} />
           ))}
@@ -310,10 +310,11 @@ function MobileNavItem({ to, icon: Icon, label }) {
   return (
     <button
       onClick={() => navigate(to)}
-      className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2 sm:py-2.5 text-[10px] sm:text-xs font-medium transition-colors min-w-0 ${isActive ? "text-[#006400] font-semibold" : "text-gray-400 hover:text-gray-600"
-        }`}
+      className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2 sm:py-2.5 text-[10px] sm:text-xs font-medium transition-colors min-w-0 ${
+        isActive ? "text-[#1877F2] font-semibold" : "text-[#9CA3AF] hover:text-gray-600"
+      }`}
     >
-      <Icon className={`w-5 h-5 ${isActive ? "stroke-[2.5]" : ""}`} />
+      <Icon className={`w-5 h-5 ${isActive ? "text-[#1877F2] stroke-[2.5]" : "text-[#9CA3AF]"}`} />
       <span className="truncate max-w-full px-0.5">{label}</span>
     </button>
   );
