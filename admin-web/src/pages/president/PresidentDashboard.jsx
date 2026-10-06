@@ -78,7 +78,7 @@ export default function PresidentDasboard() {
         </div>
       </header>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+      <section className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
         <StatCard
           title="Total Departments"
           value={stats?.total_departments || 0}
@@ -137,19 +137,19 @@ export default function PresidentDasboard() {
 
 function StatCard({ title, value, icon, color, detail }) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
-      <div className="flex items-start justify-between gap-3">
+    <div className="rounded-xl sm:rounded-2xl border border-gray-200 bg-white p-2.5 sm:p-4 md:p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+      <div className="flex items-start justify-between gap-2 sm:gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-xs sm:text-sm font-medium text-gray-500 truncate">{title}</p>
-          <p className="mt-1.5 sm:mt-2 text-2xl sm:text-3xl font-bold text-gray-900 break-words">{value ?? 0}</p>
+          <p className="text-[11px] sm:text-xs md:text-sm font-medium text-gray-500 truncate">{title}</p>
+          <p className="mt-1 sm:mt-1.5 md:mt-2 text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 break-words">{value ?? 0}</p>
         </div>
         <div
-          className={`${color} flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl text-white shadow-sm`}
+          className={`${color} flex h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 shrink-0 items-center justify-center rounded-lg sm:rounded-xl text-white shadow-sm [&>svg]:w-4 [&>svg]:h-4 sm:[&>svg]:w-5 sm:[&>svg]:h-5`}
         >
           {icon}
         </div>
       </div>
-      <p className="mt-2 sm:mt-3 text-xs text-gray-400 line-clamp-1">{detail}</p>
+      <p className="mt-1 sm:mt-2 md:mt-3 text-[10px] sm:text-xs text-gray-400 line-clamp-1">{detail}</p>
     </div>
   );
 }
