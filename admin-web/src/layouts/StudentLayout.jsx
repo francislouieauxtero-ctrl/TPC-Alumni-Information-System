@@ -89,10 +89,11 @@ export default function StudentLayout({ children }) {
 
   const handleLogout = async () => {
     try {
+      setMobileMenuOpen(false);
       setLogoutLoading(true);
       await api.post("/auth/logout");
       localStorage.clear();
-      setTimeout(() => navigate("/welcome", { replace: true }), 100);
+      navigate("/welcome", { replace: true });
     } catch {
       localStorage.clear();
       navigate("/welcome", { replace: true });
@@ -113,9 +114,11 @@ export default function StudentLayout({ children }) {
     <div className="flex h-screen h-dvh bg-slate-50 text-gray-900 font-sans w-full max-w-full overflow-hidden">
       {/* ── Sidebar ── */}
       <aside
-        className={`${sidebarOpen ? "min-[850px]:w-[260px]" : "min-[850px]:w-20"
-          } fixed inset-y-0 left-0 z-50 flex h-screen min-h-screen max-h-screen w-[260px] ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-          } flex-col bg-white border-r border-slate-200/80 px-3 py-2.5 transition-all duration-300 min-[850px]:static min-[850px]:translate-x-0 shadow-sm`}
+        className={`${
+          sidebarOpen ? "min-[850px]:w-[260px]" : "min-[850px]:w-20"
+        } fixed inset-y-0 left-0 z-50 flex h-full h-dvh max-h-dvh w-[260px] ${
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        } flex-col bg-white border-r border-slate-200/80 px-3 py-2.5 transition-all duration-300 min-[850px]:static min-[850px]:h-screen min-[850px]:min-h-screen min-[850px]:max-h-screen min-[850px]:translate-x-0 shadow-sm overflow-y-auto`}
       >
         {/* Header / Branding */}
         <div className="shrink-0 px-1 pb-2.5 border-b border-slate-200/80">
@@ -167,11 +170,8 @@ export default function StudentLayout({ children }) {
           ))}
         </nav>
 
-        {/* Mobile drawer spacer (when desktop nav is hidden) */}
-        <div className="flex-1 min-h-0 min-[850px]:hidden" />
-
         {/* Footer: Profile + Logout + Toggle */}
-        <div className="shrink-0 mt-auto border-t border-slate-200/80 pt-2 flex flex-col gap-1.5">
+        <div className="shrink-0 min-[850px]:mt-auto border-t border-slate-200/80 pt-2 flex flex-col gap-1.5">
           {/* User Profile */}
           <div
             className={`flex items-center gap-2.5 py-1 ${!sidebarOpen && "min-[850px]:justify-center"}`}
