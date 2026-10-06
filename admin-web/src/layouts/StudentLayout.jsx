@@ -66,6 +66,20 @@ export default function StudentLayout({ children }) {
     };
   }, []);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 850) {
+        setMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
+    };
+  }, []);
+
   const handleLogout = async () => {
     try {
       setLogoutLoading(true);
@@ -89,7 +103,7 @@ export default function StudentLayout({ children }) {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50 text-gray-900 font-sans">
+    <div className="flex h-screen h-dvh bg-slate-50 text-gray-900 font-sans w-full max-w-full overflow-hidden">
       {/* ── Sidebar ── */}
       <aside
         className={`${sidebarOpen ? "min-[850px]:w-[260px]" : "min-[850px]:w-20"
@@ -99,7 +113,7 @@ export default function StudentLayout({ children }) {
         {/* Header / Branding */}
         <div className="shrink-0 px-1 pb-2.5 border-b border-slate-200/80">
           <div
-            className={`flex items-center gap-2.5 ${!sidebarOpen && "justify-center"}`}
+            className={`flex items-center gap-2.5 ${!sidebarOpen && "min-[850px]:justify-center"}`}
           >
             {/* Circular logo */}
             <img
@@ -107,22 +121,25 @@ export default function StudentLayout({ children }) {
               alt="Talibon Polytechnic College seal"
               className="h-10 w-10 rounded-full border-2 border-tpc-gold object-cover shadow-xs shrink-0 ring-2 ring-slate-100"
             />
-            {sidebarOpen && (
-              <div className="min-w-0 flex-1 flex flex-col justify-center text-left">
-                <h1 className="text-[#006400] text-xs font-bold tracking-tight whitespace-nowrap">
-                  Talibon Polytechnic College
-                </h1>
-                <p className="text-slate-400 text-[10px] font-semibold tracking-wider uppercase mt-0.5 whitespace-nowrap">
-                  ALUMNI OFFICIAL WEBSITE
-                </p>
-              </div>
-            )}
+            <div
+              className={`min-w-0 flex-1 flex flex-col justify-center text-left ${
+                sidebarOpen ? "" : "min-[850px]:hidden"
+              }`}
+            >
+              <h1 className="text-[#006400] text-xs font-bold tracking-tight whitespace-nowrap">
+                Talibon Polytechnic College
+              </h1>
+              <p className="text-slate-400 text-[10px] font-semibold tracking-wider uppercase mt-0.5 whitespace-nowrap">
+                ALUMNI OFFICIAL WEBSITE
+              </p>
+            </div>
             {/* Mobile close button */}
             {mobileMenuOpen && (
               <button
                 onClick={() => setMobileMenuOpen(false)}
                 className="min-[850px]:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0 ml-auto"
                 aria-label="Close menu"
+                type="button"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -130,8 +147,8 @@ export default function StudentLayout({ children }) {
           </div>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 min-h-0 flex flex-col gap-1 py-1.5 overflow-y-auto">
+        {/* Navigation - Desktop only (hidden in mobile drawer to prevent duplicate navigation) */}
+        <nav className="hidden min-[850px]:flex flex-1 min-h-0 flex-col gap-1 py-1.5 overflow-y-auto">
           {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
             <NavLink
               key={to}
@@ -139,16 +156,18 @@ export default function StudentLayout({ children }) {
               icon={<Icon className="w-5 h-5 shrink-0" />}
               label={label}
               sidebarOpen={sidebarOpen}
-              onNavigate={() => setMobileMenuOpen(false)}
             />
           ))}
         </nav>
+
+        {/* Mobile drawer spacer (when desktop nav is hidden) */}
+        <div className="flex-1 min-h-0 min-[850px]:hidden" />
 
         {/* Footer: Profile + Logout + Toggle */}
         <div className="shrink-0 mt-auto border-t border-slate-200/80 pt-2 flex flex-col gap-1.5">
           {/* User Profile */}
           <div
-            className={`flex items-center gap-2.5 py-1 ${!sidebarOpen && "justify-center"}`}
+            className={`flex items-center gap-2.5 py-1 ${!sidebarOpen && "min-[850px]:justify-center"}`}
           >
             <UserAvatar
               name={studentName}
@@ -156,16 +175,18 @@ export default function StudentLayout({ children }) {
               size="sm"
               className="shrink-0"
             />
-            {sidebarOpen && (
-              <div className="flex-1 min-w-0 flex flex-col justify-center text-left">
-                <p className="text-slate-900 text-sm font-semibold truncate">
-                  {studentName}
-                </p>
-                <p className="text-slate-500 text-xs font-medium truncate">
-                  Alumni
-                </p>
-              </div>
-            )}
+            <div
+              className={`flex-1 min-w-0 flex flex-col justify-center text-left ${
+                sidebarOpen ? "" : "min-[850px]:hidden"
+              }`}
+            >
+              <p className="text-slate-900 text-sm font-semibold truncate">
+                {studentName}
+              </p>
+              <p className="text-slate-500 text-xs font-medium truncate">
+                Alumni
+              </p>
+            </div>
           </div>
 
           {/* Logout Button */}
@@ -173,20 +194,23 @@ export default function StudentLayout({ children }) {
             onClick={handleLogout}
             disabled={logoutLoading}
             title={!sidebarOpen ? "Logout" : undefined}
-            className={`w-full flex items-center justify-center gap-2 rounded-lg bg-[#F5F5F5] hover:bg-[#EAEAEA] border border-slate-200/80 text-slate-900 text-xs font-medium disabled:opacity-50 transition-colors shadow-xs ${sidebarOpen ? "px-3 py-2" : "p-2"
-              }`}
+            type="button"
+            className={`w-full flex items-center justify-center gap-2 rounded-lg bg-[#F5F5F5] hover:bg-[#EAEAEA] border border-slate-200/80 text-slate-900 text-xs font-medium disabled:opacity-50 transition-colors shadow-xs ${
+              sidebarOpen ? "px-3 py-2" : "px-3 py-2 min-[850px]:p-2"
+            }`}
           >
             <LogOut className="w-4 h-4 text-slate-900 shrink-0" />
-            {sidebarOpen && (
-              <span>{logoutLoading ? "Logging out..." : "Logout"}</span>
-            )}
+            <span className={sidebarOpen ? "" : "min-[850px]:hidden"}>
+              {logoutLoading ? "Logging out..." : "Logout"}
+            </span>
           </button>
 
-          {/* Toggle Sidebar Control (Three-line Hamburger Icon) */}
+          {/* Toggle Sidebar Control (Desktop only) */}
           <button
             onClick={handleSidebarToggle}
             title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
-            className="w-full flex items-center justify-center h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            type="button"
+            className="hidden min-[850px]:flex w-full items-center justify-center h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
             aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
           >
             <Menu className="w-4 h-4" />
@@ -203,15 +227,16 @@ export default function StudentLayout({ children }) {
       )}
 
       {/* ── Main content area ── */}
-      <div className="flex flex-1 flex-col overflow-hidden min-w-0">
+      <div className="flex flex-1 flex-col overflow-hidden min-w-0 min-h-0">
         <TopLoadingBar />
         {/* Top bar */}
-        <header className="flex items-center justify-between border-b border-gray-200 bg-white px-3 py-2.5 sm:px-6 sm:py-4">
+        <header className="relative z-20 flex items-center justify-between border-b border-gray-200 bg-white px-3 py-2.5 sm:px-6 sm:py-4">
           {/* Hamburger — mobile only */}
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors min-[850px]:hidden shrink-0"
+            className="rounded-lg p-2 text-slate-600 hover:text-[#1877F2] hover:bg-blue-50/60 transition-colors min-[850px]:hidden shrink-0"
             aria-label="Open menu"
+            type="button"
           >
             <Menu className="w-6 h-6" />
           </button>
@@ -242,11 +267,14 @@ export default function StudentLayout({ children }) {
           </div>
         </header>
 
-        {/* Page content */}
-        <main className="flex-1 overflow-auto bg-slate-50">{children}</main>
+        {/* Page content with bottom clearance for fixed mobile navigation */}
+        <main className="flex-1 min-h-0 overflow-y-auto bg-slate-50 pb-20 min-[850px]:pb-0">{children}</main>
 
         {/* ── Mobile bottom nav ── */}
-        <nav className="flex border-t border-gray-200 bg-white min-[850px]:hidden shrink-0 pb-[env(safe-area-inset-bottom,0.25rem)]">
+        <nav
+          aria-label="Mobile navigation"
+          className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-around border-t border-gray-200 bg-white min-[850px]:hidden shadow-[0_-2px_8px_rgba(0,0,0,0.04)] pb-[env(safe-area-inset-bottom,0.25rem)]"
+        >
           {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
             <MobileNavItem key={to} to={to} icon={Icon} label={label} />
           ))}
@@ -270,32 +298,38 @@ function NavLink({ to, icon, label, sidebarOpen, onNavigate }) {
         onNavigate?.();
       }}
       title={!sidebarOpen ? label : undefined}
-      className={`group w-full flex items-center ${sidebarOpen ? "gap-2.5 px-3 py-2" : "justify-center px-2 py-2"
-        } rounded-lg text-sm transition-colors duration-150 ${isActive
-          ? "bg-[#006400] text-white font-semibold shadow-xs hover:bg-[#006400]"
-          : "bg-white text-slate-800 hover:bg-[#00A000] hover:text-white font-medium"
-        }`}
+      type="button"
+      className={`group w-full flex items-center ${
+        sidebarOpen ? "gap-2.5 px-3 py-2" : "gap-2.5 px-3 py-2 min-[850px]:justify-center min-[850px]:px-2 min-[850px]:py-2"
+      } rounded-lg text-sm transition-colors duration-150 ${
+        isActive
+          ? "bg-[#1877F2] text-white font-semibold shadow-xs hover:bg-[#1877F2]"
+          : "bg-white text-[#9CA3AF] hover:bg-blue-50/60 hover:text-[#1877F2] font-medium"
+      }`}
     >
       <span
-        className={`shrink-0 transition-colors duration-150 ${isActive ? "text-white" : "text-slate-600 group-hover:text-white"
-          }`}
+        className={`shrink-0 transition-colors duration-150 ${
+          isActive ? "text-white" : "text-[#9CA3AF] group-hover:text-[#1877F2]"
+        }`}
       >
         {icon}
       </span>
-      {sidebarOpen && (
-        <>
-          <span
-            className={`truncate flex-1 text-left transition-colors duration-150 ${isActive ? "text-white" : "text-slate-800 group-hover:text-white"
-              }`}
-          >
-            {label}
-          </span>
-          <ChevronRight
-            className={`w-4 h-4 shrink-0 transition-colors duration-150 ${isActive ? "text-white" : "text-slate-400 group-hover:text-white"
-              }`}
-          />
-        </>
-      )}
+      <span
+        className={`truncate flex-1 text-left transition-colors duration-150 ${
+          sidebarOpen ? "" : "min-[850px]:hidden"
+        } ${
+          isActive ? "text-white" : "text-[#9CA3AF] group-hover:text-[#1877F2]"
+        }`}
+      >
+        {label}
+      </span>
+      <ChevronRight
+        className={`w-4 h-4 shrink-0 transition-colors duration-150 ${
+          sidebarOpen ? "" : "min-[850px]:hidden"
+        } ${
+          isActive ? "text-white" : "text-[#9CA3AF] group-hover:text-[#1877F2]"
+        }`}
+      />
     </button>
   );
 }
@@ -310,12 +344,17 @@ function MobileNavItem({ to, icon: Icon, label }) {
   return (
     <button
       onClick={() => navigate(to)}
+      type="button"
       className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2 sm:py-2.5 text-[10px] sm:text-xs font-medium transition-colors min-w-0 ${
         isActive ? "text-[#1877F2] font-semibold" : "text-[#9CA3AF] hover:text-gray-600"
       }`}
     >
-      <Icon className={`w-5 h-5 ${isActive ? "text-[#1877F2] stroke-[2.5]" : "text-[#9CA3AF]"}`} />
-      <span className="truncate max-w-full px-0.5">{label}</span>
+      <Icon
+        className={`w-5 h-5 shrink-0 ${
+          isActive ? "text-[#1877F2] stroke-[2.5]" : "text-[#9CA3AF]"
+        }`}
+      />
+      <span className="truncate max-w-full px-0.5 tracking-tight">{label}</span>
     </button>
   );
 }
