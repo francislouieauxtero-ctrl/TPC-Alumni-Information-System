@@ -10,7 +10,6 @@ import {
   Hash,
   CheckCircle2,
   XCircle,
-  Info,
   Megaphone,
   CalendarDays,
   ArrowRight,
@@ -177,39 +176,12 @@ export default function StudentDashboard() {
         </div>
 
         {/* TPC Updates: Events & Announcements */}
-        <div className="mb-4 sm:mb-6">
+        <div>
           <DashboardUpdatesSection
             events={events}
             announcements={announcements}
             role="student"
           />
-        </div>
-
-        {/* Help card */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Info className="w-4 h-4 text-tpc-greenDeep shrink-0" />
-            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-[0.18em]">
-              What's next?
-            </h2>
-          </div>
-          <ul className="space-y-3">
-            {[
-              "Your registration is reviewed by your department head.",
-              "Approved accounts can access the alumni portal immediately.",
-              "Contact your department head if you need faster verification.",
-            ].map((tip, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-3 text-sm text-gray-500"
-              >
-                <span className="mt-0.5 w-5 h-5 rounded-full bg-tpc-greenDeep/10 text-tpc-greenDeep flex items-center justify-center text-xs font-bold shrink-0">
-                  {i + 1}
-                </span>
-                {tip}
-              </li>
-            ))}
-          </ul>
         </div>
       </div>
     </div>
