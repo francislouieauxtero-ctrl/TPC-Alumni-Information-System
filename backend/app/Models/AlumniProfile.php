@@ -60,6 +60,11 @@ class AlumniProfile extends Model
         return $this->belongsTo(Graduate::class);
     }
 
+    public function jobHistories(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(JobHistory::class, 'user_id', 'user_id');
+    }
+
     // ─── Scopes ───────────────────────────────────────────────────────────────
 
     /**

@@ -16,7 +16,11 @@ class StudentController extends Controller
     public function dashboard(Request $request): JsonResponse
     {
         try {
-            $user = $request->user()->load('department', 'alumniProfile');
+            $user = $request->user()->load([
+                'department',
+                'alumniProfile.jobHistories' => fn ($q) => $q->latest('start_date')->latest('created_at'),
+                'jobHistories' => fn ($q) => $q->latest('start_date')->latest('created_at'),
+            ]);
 
             return response()->json([
                 'status' => true,

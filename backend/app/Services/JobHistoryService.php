@@ -138,10 +138,19 @@ class JobHistoryService
                 'company'           => $currentJob?->company,
             ]);
         } elseif ($type === AlumniProfile::STATUS_SELF_EMPLOYED) {
+            $currentJob = JobHistory::where('user_id', $user->id)
+                ->where('is_current', true)
+                ->latest('start_date')
+                ->first()
+                ?? JobHistory::where('user_id', $user->id)
+                    ->where('employment_type', AlumniProfile::STATUS_SELF_EMPLOYED)
+                    ->latest('created_at')
+                    ->first();
+
             $alumni->update([
                 'employment_status' => AlumniProfile::STATUS_SELF_EMPLOYED,
-                'current_job'       => null,
-                'company'           => null,
+                'current_job'       => $currentJob?->position,
+                'company'           => $currentJob?->company,
             ]);
         } elseif ($type === AlumniProfile::STATUS_UNEMPLOYED) {
             $alumni->update([

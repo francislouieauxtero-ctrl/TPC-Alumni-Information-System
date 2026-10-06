@@ -23,21 +23,27 @@ class AlumniProfileResource extends JsonResource
 
         $currentJob = $this->current_job;
         $company = $this->company;
-        $jobHistories = $this->relationLoaded('user') && $this->user && $this->user->relationLoaded('jobHistories')
-            ? $this->user->jobHistories
-            : collect();
+        $jobHistories = collect();
+        if ($this->relationLoaded('jobHistories')) {
+            $jobHistories = $this->jobHistories;
+        } elseif ($this->relationLoaded('user') && $this->user && $this->user->relationLoaded('jobHistories')) {
+            $jobHistories = $this->user->jobHistories;
+        }
 
-        if (empty($currentJob) || empty($company)) {
-            $currentEntry = $jobHistories->first(fn ($job) => (bool) $job->is_current) ?? $jobHistories->first();
+        $currentEntry = $jobHistories->first(fn ($job) => (bool) $job->is_current) ?? $jobHistories->first();
+
+        if (empty($currentJob) || empty($company) || $currentJob === 'Not Specified') {
             if (!empty($currentEntry)) {
-                $currentJob = $currentJob ?: $currentEntry->position;
+                $currentJob = ($currentJob && $currentJob !== 'Not Specified') ? $currentJob : $currentEntry->position;
                 $company = $company ?: $currentEntry->company;
             }
         }
 
-        $hasJobHistory = $this->relationLoaded('user') && $this->user
-            ? ($this->user->job_histories_exists ?? $jobHistories->isNotEmpty())
-            : false;
+        $industry = $currentEntry?->industry;
+
+        $hasJobHistory = $this->relationLoaded('jobHistories')
+            ? $jobHistories->isNotEmpty()
+            : ($this->relationLoaded('user') && $this->user ? ($this->user->job_histories_exists ?? $jobHistories->isNotEmpty()) : false);
 
         $graduate = $this->relationLoaded('graduate') ? $this->graduate : null;
         $user = $this->relationLoaded('user') ? $this->user : null;
@@ -57,6 +63,8 @@ class AlumniProfileResource extends JsonResource
             'profile_photo_url'   => $photo ?: null,
             'current_job'         => $currentJob ?: ($this->employment_status === \App\Models\AlumniProfile::STATUS_NOT_SPECIFIED ? 'Not Specified' : null),
             'company'             => $company,
+            'position'            => $currentJob,
+            'industry'            => $industry ?: null,
             'batch_year'          => $this->batch_year,
             'employment_status'   => $this->employment_status ?: \App\Models\AlumniProfile::STATUS_NOT_SPECIFIED,
             'has_job_history'     => $hasJobHistory,

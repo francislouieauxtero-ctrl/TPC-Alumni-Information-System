@@ -15,6 +15,8 @@ import {
   ArrowRight,
   MapPin,
   Clock,
+  Briefcase,
+  Layers,
 } from "lucide-react";
 import DashboardUpdatesSection from "../../components/dashboard/DashboardUpdatesSection";
 import AlumniOnboarding from "./AlumniOnboarding";
@@ -69,6 +71,27 @@ export default function StudentDashboard() {
     fetchAll();
   }, []);
 
+  useEffect(() => {
+    const handleSync = async () => {
+      try {
+        const dashRes = await api.get("/student/dashboard");
+        const success = dashRes.data.status ?? dashRes.data.success;
+        if (success) {
+          setStudent(dashRes.data.data);
+        }
+      } catch (e) {
+        console.error("Failed to sync employment updates", e);
+      }
+    };
+
+    window.addEventListener("employment-updated", handleSync);
+    window.addEventListener("user-profile-updated", handleSync);
+    return () => {
+      window.removeEventListener("employment-updated", handleSync);
+      window.removeEventListener("user-profile-updated", handleSync);
+    };
+  }, []);
+
   if (error) {
     return (
       <div className="p-4 sm:p-8">
@@ -113,36 +136,6 @@ export default function StudentDashboard() {
 
       {/* ── Main content ── */}
       <div className="mx-auto -mt-8 max-w-5xl px-3 pb-10 sm:px-8">
-        {/* Status + ID row */}
-        {/* <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5">
-            <p className="text-xs text-gray-400 uppercase tracking-[0.18em] mb-3">
-              Account
-            </p>
-            <div className="flex items-center gap-2">
-              {isActive ? (
-                <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
-              ) : (
-                <XCircle className="w-4 h-4 text-red-400 shrink-0" />
-              )}
-              <span
-                className={`text-sm font-semibold ${isActive ? "text-green-600" : "text-red-500"}`}
-              >
-                {isActive ? "Active" : "Inactive"}
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5">
-            <p className="text-xs text-gray-400 uppercase tracking-[0.18em] mb-3">
-              Student ID
-            </p>
-            <p className="text-sm font-semibold text-gray-900 truncate">
-              {student?.schoolId || student?.school_id || "—"}
-            </p>
-          </div>
-        </div> */}
-
         {/* Profile card */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6 mb-4 sm:mb-6">
           <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-[0.18em] mb-5">
@@ -175,6 +168,9 @@ export default function StudentDashboard() {
           </div>
         </div>
 
+        {/* Employment Status card */}
+        <EmploymentStatusCard student={student} />
+
         {/* TPC Updates: Events & Announcements */}
         <div>
           <DashboardUpdatesSection
@@ -204,6 +200,209 @@ function ProfileField({ icon, label, value }) {
           {value}
         </p>
       </div>
+    </div>
+  );
+}
+
+function EmploymentStatusCard({ student }) {
+  const alumniProfile = student?.alumniProfile;
+  const rawStatus = (alumniProfile?.employment_status || "").toLowerCase().trim();
+  const isEmployed = rawStatus === "employed";
+  const isSelfEmployed = rawStatus === "self_employed" || rawStatus === "self-employed";
+  const isUnemployed = rawStatus === "unemployed";
+  const isNotSpecified = !isEmployed && !isSelfEmployed && !isUnemployed;
+
+  const currentJobHistory =
+    student?.jobHistories?.find((j) => j.is_current) ||
+    student?.jobHistories?.[0];
+
+  const company = (
+    alumniProfile?.company ||
+    alumniProfile?.current_work ||
+    currentJobHistory?.company ||
+    ""
+  ).trim();
+
+  const rawPosition = (
+    alumniProfile?.position ||
+    alumniProfile?.current_job ||
+    currentJobHistory?.position ||
+    ""
+  ).trim();
+  const position = rawPosition.toLowerCase() === "not specified" ? "" : rawPosition;
+
+  const industry = (
+    alumniProfile?.industry ||
+    currentJobHistory?.industry ||
+    ""
+  ).trim();
+
+  let statusBadge = null;
+  if (isEmployed) {
+    statusBadge = (
+      <span className="rounded-full bg-emerald-50 border border-emerald-200/60 px-3 py-1 text-xs font-bold uppercase tracking-wider text-emerald-700">
+        EMPLOYED
+      </span>
+    );
+  } else if (isSelfEmployed) {
+    statusBadge = (
+      <span className="rounded-full bg-emerald-50 border border-emerald-200/60 px-3 py-1 text-xs font-bold uppercase tracking-wider text-emerald-700">
+        SELF-EMPLOYED
+      </span>
+    );
+  } else if (isUnemployed) {
+    statusBadge = (
+      <span className="rounded-full bg-amber-50 border border-amber-200/60 px-3 py-1 text-xs font-bold uppercase tracking-wider text-amber-700">
+        UNEMPLOYED
+      </span>
+    );
+  } else {
+    statusBadge = (
+      <span className="rounded-full bg-gray-100 border border-gray-200 px-3 py-1 text-xs font-bold uppercase tracking-wider text-gray-600">
+        NOT SPECIFIED
+      </span>
+    );
+  }
+
+  const hasEmployedDetails = Boolean(company || position || industry);
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6 mb-4 sm:mb-6">
+      <div className="flex items-center justify-between gap-3 mb-5">
+        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-[0.18em]">
+          Employment Status
+        </h2>
+        {statusBadge}
+      </div>
+
+      {isEmployed && (
+        <>
+          {hasEmployedDetails ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {company ? (
+                <ProfileField
+                  icon={<Building className="w-4 h-4" />}
+                  label="Current Work / Company"
+                  value={company}
+                />
+              ) : null}
+              {position ? (
+                <ProfileField
+                  icon={<Briefcase className="w-4 h-4" />}
+                  label="Position"
+                  value={position}
+                />
+              ) : null}
+              {industry ? (
+                <ProfileField
+                  icon={<Layers className="w-4 h-4" />}
+                  label="Industry"
+                  value={industry}
+                />
+              ) : null}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500">
+                No current employment information available.
+              </p>
+              <div>
+                <Link
+                  to="/student/employment"
+                  className="inline-flex items-center gap-2 rounded-xl bg-tpc-greenDeep px-4 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition hover:bg-tpc-green focus:outline-none focus:ring-2 focus:ring-tpc-greenDeep/20 active:scale-[0.98]"
+                >
+                  Update Employment Information
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {isSelfEmployed && (
+        <>
+          {hasEmployedDetails ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {company ? (
+                <ProfileField
+                  icon={<Building className="w-4 h-4" />}
+                  label="Business / Current Work"
+                  value={company}
+                />
+              ) : null}
+              {position ? (
+                <ProfileField
+                  icon={<Briefcase className="w-4 h-4" />}
+                  label="Role / Position"
+                  value={position}
+                />
+              ) : null}
+              {industry ? (
+                <ProfileField
+                  icon={<Layers className="w-4 h-4" />}
+                  label="Industry"
+                  value={industry}
+                />
+              ) : null}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500">
+                No current employment information available.
+              </p>
+              <div>
+                <Link
+                  to="/student/employment"
+                  className="inline-flex items-center gap-2 rounded-xl bg-tpc-greenDeep px-4 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition hover:bg-tpc-green focus:outline-none focus:ring-2 focus:ring-tpc-greenDeep/20 active:scale-[0.98]"
+                >
+                  Update Employment Information
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {isUnemployed && (
+        <div className="space-y-4">
+          <div>
+            <p className="text-sm font-semibold text-gray-900">
+              Currently unemployed
+            </p>
+            <p className="text-sm text-gray-500 mt-0.5">
+              No current employment information available.
+            </p>
+          </div>
+          <div>
+            <Link
+              to="/student/employment"
+              className="inline-flex items-center gap-2 rounded-xl bg-tpc-greenDeep px-4 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition hover:bg-tpc-green focus:outline-none focus:ring-2 focus:ring-tpc-greenDeep/20 active:scale-[0.98]"
+            >
+              Update Employment Information
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {isNotSpecified && (
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">
+            Employment status not yet specified.
+          </p>
+          <div>
+            <Link
+              to="/student/employment"
+              className="inline-flex items-center gap-2 rounded-xl bg-tpc-greenDeep px-4 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition hover:bg-tpc-green focus:outline-none focus:ring-2 focus:ring-tpc-greenDeep/20 active:scale-[0.98]"
+            >
+              Update Employment Information
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

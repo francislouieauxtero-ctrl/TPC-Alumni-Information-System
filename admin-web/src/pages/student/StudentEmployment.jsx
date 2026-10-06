@@ -315,6 +315,8 @@ export default function StudentEmployment() {
 
       closeModal();
       fetchJobs();
+      window.dispatchEvent(new Event("employment-updated"));
+      window.dispatchEvent(new Event("user-profile-updated"));
     } catch (err) {
       if (err?.errors) {
         const backendErrors = {};
@@ -337,6 +339,8 @@ export default function StudentEmployment() {
       await employmentService.delete(job.id);
       toast.success("Job entry deleted.");
       fetchJobs();
+      window.dispatchEvent(new Event("employment-updated"));
+      window.dispatchEvent(new Event("user-profile-updated"));
     } catch (err) {
       toast.error(err.message || "Failed to delete job entry.");
     }

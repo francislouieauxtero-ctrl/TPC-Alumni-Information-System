@@ -36,6 +36,7 @@ class UserResource extends JsonResource
             'avatar'              => $avatar ?: null,
             'onboarding_completed' => (bool) ($this->alumniProfile?->onboarding_completed ?? false),
             'alumniProfile'       => $this->whenLoaded('alumniProfile', fn () => new AlumniProfileResource($this->alumniProfile)),
+            'jobHistories'        => JobHistoryResource::collection($this->whenLoaded('jobHistories')),
             'createdAt'           => $this->created_at,
             'updatedAt'           => $this->updated_at,
         ];
