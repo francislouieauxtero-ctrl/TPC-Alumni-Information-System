@@ -28,14 +28,8 @@ export default function Login() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     const userRole = localStorage.getItem("userRole");
-    const onboardingCompleted = localStorage.getItem("onboardingCompleted");
 
     if (!token) {
-      return;
-    }
-
-    if (userRole === "user" && onboardingCompleted === "false") {
-      navigate("/student/onboarding", { replace: true });
       return;
     }
 
@@ -54,17 +48,6 @@ export default function Login() {
 
   const completeLogin = (token, user) => {
     storeAuthSession(token, user);
-    if (user?.role === "user") {
-      const isOnboardingCompleted =
-        user?.onboarding_completed ??
-        user?.alumniProfile?.onboarding_completed ??
-        user?.alumni_profile?.onboarding_completed ??
-        false;
-      if (!isOnboardingCompleted) {
-        navigate("/student/onboarding", { replace: true });
-        return;
-      }
-    }
     navigate(getDashboardPath(user?.role), { replace: true });
   };
 

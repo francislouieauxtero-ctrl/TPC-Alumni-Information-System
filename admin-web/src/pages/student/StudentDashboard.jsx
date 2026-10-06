@@ -18,6 +18,7 @@ import {
   Clock,
 } from "lucide-react";
 import DashboardUpdatesSection from "../../components/dashboard/DashboardUpdatesSection";
+import AlumniOnboarding from "./AlumniOnboarding";
 
 export default function StudentDashboard() {
   const [student, setStudent] = useState(null);
@@ -25,6 +26,9 @@ export default function StudentDashboard() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showWelcome, setShowWelcome] = useState(() => {
+    return localStorage.getItem("onboardingCompleted") === "false";
+  });
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -42,7 +46,16 @@ export default function StudentDashboard() {
         ]);
 
         const success = dashRes.data.status ?? dashRes.data.success;
-        if (success) setStudent(dashRes.data.data);
+        if (success) {
+          const studentData = dashRes.data.data;
+          setStudent(studentData);
+          if (studentData?.onboarding_completed === true) {
+            localStorage.setItem("onboardingCompleted", "true");
+            setShowWelcome(false);
+          } else if (studentData?.onboarding_completed === false) {
+            setShowWelcome(true);
+          }
+        }
 
         setAnnouncements((annRes.data ?? annRes).slice(0, 3));
         setEvents((evtRes.data ?? evtRes).slice(0, 3));
@@ -71,7 +84,19 @@ export default function StudentDashboard() {
   const isActive = student?.status === "active";
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-gray-50">
+    <div className="relative min-h-screen overflow-x-hidden bg-gray-50">
+      {/* ── Welcome Onboarding Modal Overlay (Floating on top of Dashboard) ── */}
+      {showWelcome && (
+        <AlumniOnboarding
+          onComplete={() => {
+            setShowWelcome(false);
+            setStudent((prev) =>
+              prev ? { ...prev, onboarding_completed: true } : prev
+            );
+          }}
+        />
+      )}
+
       {/* ── Header banner ── */}
       <div className="bg-gradient-to-r from-[#006400] via-[#008000] to-[#00A000] px-4 sm:px-8 pt-8 pb-16 text-white shadow-sm">
         <p className="text-green-100 text-xs uppercase tracking-[0.2em] font-semibold mb-1">

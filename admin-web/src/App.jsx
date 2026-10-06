@@ -50,7 +50,6 @@ import AnnouncementView from "./pages/shared/AnnouncementView";
 import PresidentLayout from "./layouts/President";
 import DepartmentHeadLayout from "./layouts/DepartmentHead";
 import StudentLayout from "./layouts/StudentLayout";
-import AlumniOnboarding from "./pages/student/AlumniOnboarding";
 import api from "./services/api";
 import { getDashboardPath } from "./utils/roleRedirect";
 import {
@@ -85,14 +84,9 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 const DashboardRedirect = () => {
   const token = localStorage.getItem("token");
   const userRole = localStorage.getItem("userRole");
-  const onboardingCompleted = localStorage.getItem("onboardingCompleted");
 
   if (!token) {
     return <Navigate to="/home" replace />;
-  }
-
-  if (userRole === "user" && onboardingCompleted === "false") {
-    return <Navigate to="/student/onboarding" replace />;
   }
 
   return <Navigate to={getDashboardPath(userRole)} replace />;
@@ -649,11 +643,7 @@ export default function App() {
             {/* Student Routes */}
             <Route
               path="/student/onboarding"
-              element={
-                <ProtectedRoute requiredRole="user">
-                  <AlumniOnboarding />
-                </ProtectedRoute>
-              }
+              element={<Navigate to="/student/dashboard" replace />}
             />
             <Route
               path="/student/dashboard"

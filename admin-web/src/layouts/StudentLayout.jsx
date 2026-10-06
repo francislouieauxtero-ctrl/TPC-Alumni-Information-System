@@ -46,13 +46,6 @@ export default function StudentLayout({ children }) {
   }, [location.pathname]);
 
   useEffect(() => {
-    const onboardingCompleted = localStorage.getItem("onboardingCompleted");
-    if (onboardingCompleted === "false") {
-      navigate("/student/onboarding", { replace: true });
-    }
-  }, [navigate]);
-
-  useEffect(() => {
     const syncUser = () => {
       const storedName = localStorage.getItem("userName");
       const storedEmail = localStorage.getItem("userEmail");

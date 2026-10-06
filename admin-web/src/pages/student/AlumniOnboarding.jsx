@@ -1,72 +1,16 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import {
+  ArrowRight,
   UserCheck,
   Briefcase,
   ShieldCheck,
   BellRing,
-  ArrowRight,
-  Loader2,
-  AlertCircle,
 } from "lucide-react";
 import api from "../../services/api";
 import logo from "../../assets/tpcL.jpg";
-import { getDashboardPath } from "../../utils/roleRedirect";
 
-export default function AlumniOnboarding() {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const userRole = localStorage.getItem("userRole");
-    const onboardingCompleted = localStorage.getItem("onboardingCompleted");
-
-    if (!token) {
-      navigate("/login", { replace: true });
-      return;
-    }
-
-    // Role restriction: ALUMNI USERS ONLY
-    if (userRole !== "user") {
-      navigate(getDashboardPath(userRole), { replace: true });
-      return;
-    }
-
-    // If onboarding is already completed, go directly to dashboard
-    if (onboardingCompleted === "true") {
-      navigate("/student/dashboard", { replace: true });
-    }
-  }, [navigate]);
-
-  const handleNext = async () => {
-    setError("");
-    setLoading(true);
-
-    try {
-      const response = await api.post("/student/onboarding/complete");
-
-      if (response.data?.status || response.data?.success) {
-        localStorage.setItem("onboardingCompleted", "true");
-        window.dispatchEvent(new Event("user-profile-updated"));
-        navigate("/student/dashboard", { replace: true });
-      } else {
-        setError(
-          response.data?.message ||
-            "Unable to complete onboarding. Please try again."
-        );
-      }
-    } catch (err) {
-      console.error("Onboarding completion error:", err);
-      const serverMessage =
-        err.response?.data?.message ||
-        "Unable to complete onboarding. Please check your connection and try again.";
-      setError(serverMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
+export default function AlumniOnboarding({ onComplete }) {
+  const [step, setStep] = useState(1);
 
   const nextSteps = [
     {
@@ -99,151 +43,169 @@ export default function AlumniOnboarding() {
     },
   ];
 
+  const handleComplete = () => {
+    // 1. Close modal IMMEDIATELY and show the already-rendered Dashboard
+    localStorage.setItem("onboardingCompleted", "true");
+    window.dispatchEvent(new Event("user-profile-updated"));
+    if (typeof onComplete === "function") {
+      onComplete();
+    }
+
+    // 2. Persist completion in the background without blocking the UI
+    api.post("/student/onboarding/complete").catch((err) => {
+      console.error("Background onboarding completion error:", err);
+    });
+  };
+
   return (
-    <div className="min-h-screen min-h-dvh w-full bg-gradient-to-br from-slate-50 via-[#f0f7ff] to-slate-100 flex items-center justify-center p-4 sm:p-6 lg:p-8 overflow-y-auto">
-      {/* Background ambient accents */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-        <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-100/60 rounded-full blur-3xl" />
-        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-amber-50/70 rounded-full blur-3xl" />
-      </div>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 md:p-6 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={step === 1 ? "welcome-title" : "whats-next-title"}
+    >
+      <div className="relative w-full max-w-lg md:max-w-2xl max-h-[92dvh] sm:max-h-[90vh] bg-white rounded-2xl sm:rounded-3xl shadow-2xl shadow-slate-900/30 border border-slate-100 overflow-hidden flex flex-col my-auto animate-fadeUp">
+        {/* Scrollable container for card body */}
+        <div className="overflow-y-auto p-5 sm:p-7 md:p-9 flex-1">
+          {step === 1 ? (
+            /* ── PAGE 1: WELCOME ── */
+            <div className="flex flex-col items-center text-center">
+              {/* Actual official TPC logo */}
+              <div className="relative mb-3.5 sm:mb-4">
+                <img
+                  src={logo}
+                  alt="Talibon Polytechnic College Seal"
+                  className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full border-[2.5px] border-tpc-gold object-cover shadow-sm ring-4 ring-slate-100 shrink-0 aspect-square mx-auto"
+                />
+              </div>
 
-      {/* Main card */}
-      <main className="w-full max-w-2xl bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-[#0f3a5c]/8 border border-slate-100 p-6 sm:p-9 md:p-11 transition-all">
-        {/* Top / Branding Area */}
-        <header className="flex flex-col items-center text-center">
-          {/* Actual official TPC logo */}
-          <div className="relative">
-            <img
-              src={logo}
-              alt="Talibon Polytechnic College Seal"
-              className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-[2.5px] border-tpc-gold object-cover shadow-sm ring-4 ring-slate-100 shrink-0 aspect-square"
-            />
-          </div>
+              <h2 className="text-xs sm:text-sm font-bold tracking-[0.22em] text-tpc-navy uppercase">
+                TPC ALUMNI
+              </h2>
+              <p className="mt-0.5 text-xs sm:text-sm font-medium text-slate-500 italic">
+                &ldquo;Reconnect, Reminisce, Reunite.&rdquo;
+              </p>
 
-          <h2 className="mt-3.5 text-xs sm:text-sm font-bold tracking-[0.22em] text-tpc-navy uppercase">
-            TPC ALUMNI
-          </h2>
-          <p className="mt-0.5 text-xs sm:text-sm font-medium text-slate-500 italic">
-            &ldquo;Reconnect, Reminisce, Reunite.&rdquo;
-          </p>
-
-          {/* Welcome Message */}
-          <h1 className="mt-5 text-xl sm:text-2xl md:text-3xl font-extrabold text-tpc-navy tracking-tight">
-            WELCOME TO TPC ALUMNI!
-          </h1>
-          <p className="mt-1 text-sm sm:text-base font-semibold text-[#1877F2]">
-            We&apos;re glad to have you back.
-          </p>
-          <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed max-w-lg">
-            Your alumni journey continues here. Keep your information updated,
-            stay connected with your fellow alumni, and remain informed about
-            opportunities and activities from Talibon Polytechnic College.
-          </p>
-        </header>
-
-        {/* What's Next Section */}
-        <section
-          aria-labelledby="whats-next-heading"
-          className="mt-7 sm:mt-8 pt-6 sm:pt-7 border-t border-slate-100"
-        >
-          <h3
-            id="whats-next-heading"
-            className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-400 mb-4 text-left"
-          >
-            WHAT&apos;S NEXT?
-          </h3>
-
-          <div className="space-y-3 sm:space-y-3.5">
-            {nextSteps.map((step) => {
-              const Icon = step.icon;
-              return (
-                <div
-                  key={step.title}
-                  className="flex items-start gap-3 sm:gap-4 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-slate-50/70 border border-slate-100/90 hover:bg-slate-50 transition-colors text-left"
+              <div className="mt-5 sm:mt-6 w-full pt-5 sm:pt-6 border-t border-slate-100">
+                <h1
+                  id="welcome-title"
+                  className="text-xl sm:text-2xl md:text-3xl font-extrabold text-tpc-navy tracking-tight"
                 >
-                  {/* Number Badge with Icon */}
-                  <div
-                    className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 border ${step.accent}`}
-                  >
-                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </div>
-
-                  {/* Text Content */}
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-xs sm:text-sm font-bold text-slate-800 tracking-tight flex items-center gap-1.5">
-                      <span className="text-slate-400 font-semibold">
-                        {step.num}
-                      </span>
-                      <span>{step.title}</span>
-                    </h4>
-                    <p className="mt-0.5 text-[11px] sm:text-xs text-slate-600 leading-relaxed">
-                      {step.desc}
+                  WELCOME TO TPC ALUMNI!
+                </h1>
+                <p className="mt-1.5 sm:mt-2 text-sm sm:text-base md:text-lg font-semibold text-[#1877F2]">
+                  We&apos;re glad to have you back.
+                </p>
+                <p className="mt-3 sm:mt-4 text-xs sm:text-sm md:text-base text-slate-600 leading-relaxed max-w-lg mx-auto">
+                  Your alumni journey continues here. Keep your information updated,
+                  stay connected with your fellow alumni, and remain informed about
+                  opportunities and activities from Talibon Polytechnic College.
+                </p>
+              </div>
+            </div>
+          ) : (
+            /* ── PAGE 2: WHAT'S NEXT? ── */
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between pb-3.5 sm:pb-4 border-b border-slate-100">
+                <div className="flex items-center gap-2.5 sm:gap-3">
+                  <img
+                    src={logo}
+                    alt="TPC Seal"
+                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-tpc-gold object-cover shrink-0 aspect-square"
+                  />
+                  <div>
+                    <h2
+                      id="whats-next-title"
+                      className="text-base sm:text-lg md:text-xl font-extrabold text-tpc-navy tracking-tight uppercase"
+                    >
+                      WHAT&apos;S NEXT?
+                    </h2>
+                    <p className="text-[11px] sm:text-xs text-slate-500 font-medium">
+                      Essential steps to get started
                     </p>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </section>
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="text-xs sm:text-sm text-slate-500 hover:text-tpc-navy font-semibold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                >
+                  ← Back
+                </button>
+              </div>
 
-        {/* Error message if API fails */}
-        {error && (
+              <div className="mt-4 sm:mt-5 space-y-2.5 sm:space-y-3 md:space-y-3.5">
+                {nextSteps.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <div
+                      key={item.title}
+                      className="flex items-start gap-3 sm:gap-4 p-3 sm:p-3.5 md:p-4 rounded-xl sm:rounded-2xl bg-slate-50/80 border border-slate-100 hover:bg-slate-50 transition-colors text-left"
+                    >
+                      <div
+                        className={`w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center shrink-0 border ${item.accent}`}
+                      >
+                        <Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xs sm:text-sm md:text-sm font-bold text-slate-800 tracking-tight flex items-center gap-1.5">
+                          <span className="text-slate-400 font-semibold">
+                            {item.num}
+                          </span>
+                          <span>{item.title}</span>
+                        </h3>
+                        <p className="mt-0.5 text-[11px] sm:text-xs md:text-xs text-slate-600 leading-relaxed">
+                          {item.desc}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Fixed card footer with navigation */}
+        <div className="p-4 sm:p-5 md:p-6 md:px-8 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between gap-4 shrink-0">
+          {/* Step indicator */}
           <div
-            role="alert"
-            className="mt-5 p-3.5 rounded-xl border border-red-200 bg-red-50/90 text-xs sm:text-sm text-red-700 flex items-center gap-2.5 animate-fadeUp"
-          >
-            <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
-            <span className="flex-1 font-medium">{error}</span>
-          </div>
-        )}
-
-        {/* Bottom Area: Progress Indicator + Primary Next Button */}
-        <footer className="mt-8 sm:mt-9 pt-5 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-          {/* Progress Indicator: ● ○ ○ ○ */}
-          <div
-            className="flex items-center gap-2.5"
-            aria-label="Progress: step 1 of 4"
-            role="status"
+            className="flex items-center gap-1.5"
+            aria-label={`Step ${step} of 2`}
           >
             <span
-              className="w-3 h-3 rounded-full bg-tpc-navy shadow-sm ring-2 ring-tpc-navy/20"
-              title="Step 1 active"
+              className={`h-2 rounded-full transition-all ${
+                step === 1 ? "w-6 bg-tpc-navy" : "w-2 bg-slate-300"
+              }`}
             />
             <span
-              className="w-2.5 h-2.5 rounded-full border-2 border-slate-300 bg-white"
-              title="Step 2"
-            />
-            <span
-              className="w-2.5 h-2.5 rounded-full border-2 border-slate-300 bg-white"
-              title="Step 3"
-            />
-            <span
-              className="w-2.5 h-2.5 rounded-full border-2 border-slate-300 bg-white"
-              title="Step 4"
+              className={`h-2 rounded-full transition-all ${
+                step === 2 ? "w-6 bg-tpc-navy" : "w-2 bg-slate-300"
+              }`}
             />
           </div>
 
-          {/* Primary Action Button */}
-          <button
-            onClick={handleNext}
-            disabled={loading}
-            type="button"
-            className="w-full sm:w-auto min-w-[150px] px-7 py-3 rounded-full bg-tpc-navy hover:bg-tpc-navyDeep active:scale-[0.98] text-white font-semibold text-sm sm:text-base shadow-md shadow-tpc-navy/20 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus:ring-2 focus:ring-tpc-navy/40 focus:ring-offset-2"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin shrink-0" />
-                <span>Saving...</span>
-              </>
-            ) : (
-              <>
-                <span>NEXT</span>
-                <ArrowRight className="w-4 h-4 shrink-0" />
-              </>
-            )}
-          </button>
-        </footer>
-      </main>
+          {step === 1 ? (
+            <button
+              type="button"
+              onClick={() => setStep(2)}
+              className="w-full sm:w-auto min-w-[130px] sm:min-w-[150px] px-6 sm:px-8 py-2.5 sm:py-3 rounded-full bg-tpc-navy hover:bg-tpc-navyDeep active:scale-[0.98] text-white font-semibold text-sm sm:text-base shadow-md shadow-tpc-navy/20 transition-all flex items-center justify-center gap-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-tpc-navy/40"
+            >
+              <span>NEXT</span>
+              <ArrowRight className="w-4 h-4 shrink-0" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleComplete}
+              className="w-full sm:w-auto min-w-[130px] sm:min-w-[150px] px-6 sm:px-8 py-2.5 sm:py-3 rounded-full bg-tpc-navy hover:bg-tpc-navyDeep active:scale-[0.98] text-white font-semibold text-sm sm:text-base shadow-md shadow-tpc-navy/20 transition-all flex items-center justify-center gap-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-tpc-navy/40"
+            >
+              <span>OKAY</span>
+              <ArrowRight className="w-4 h-4 shrink-0" />
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
