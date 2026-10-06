@@ -81,6 +81,7 @@ Route::prefix('admin')->name('admin.')->middleware('role:super_admin,admin')->gr
             Route::get('dashboard', 'dashboard');
             Route::get('profile', 'profile');
             Route::put('profile', 'updateProfile');
+            Route::post('onboarding/complete', 'completeOnboarding');
         });
     });
 

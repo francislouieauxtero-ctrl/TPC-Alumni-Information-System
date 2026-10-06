@@ -68,6 +68,7 @@ class AlumniProfileResource extends JsonResource
             'is_work_aligned'         => $this->is_work_aligned,
             'work_aligned_reason'     => $this->work_aligned_reason,
             'has_answered_alignment'  => $this->hasAnsweredAlignment(),
+            'onboarding_completed'    => (bool) $this->onboarding_completed,
 
             'created_at'          => $this->created_at,
             'updated_at'          => $this->updated_at,

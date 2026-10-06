@@ -112,4 +112,37 @@ class StudentController extends Controller
             ], 500);
         }
     }
+
+    public function completeOnboarding(Request $request): JsonResponse
+    {
+        try {
+            $user = $request->user();
+            $profile = $user->alumniProfile()->firstOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'department_id'     => $user->department_id,
+                    'employment_status' => AlumniProfile::STATUS_NOT_SPECIFIED,
+                    'current_job'       => 'Not Specified',
+                ]
+            );
+
+            $profile->update(['onboarding_completed' => true]);
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Onboarding marked as completed',
+                'data'    => [
+                    'onboarding_completed' => true,
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json([
+                'status'  => false,
+                'message' => 'Failed to save onboarding completion',
+                'data'    => (object) [],
+            ], 500);
+        }
+    }
 }

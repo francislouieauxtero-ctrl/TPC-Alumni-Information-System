@@ -33,10 +33,11 @@ class UserResource extends JsonResource
             'department'    => $this->whenLoaded('department', fn () => new DepartmentResource($this->department)),
             'isVerified'    => (bool) $this->is_verified,
             'status'        => $this->status,
-            'avatar'        => $avatar ?: null,
-            'alumniProfile' => $this->whenLoaded('alumniProfile', fn () => new AlumniProfileResource($this->alumniProfile)),
-            'createdAt'     => $this->created_at,
-            'updatedAt'     => $this->updated_at,
+            'avatar'              => $avatar ?: null,
+            'onboarding_completed' => (bool) ($this->alumniProfile?->onboarding_completed ?? false),
+            'alumniProfile'       => $this->whenLoaded('alumniProfile', fn () => new AlumniProfileResource($this->alumniProfile)),
+            'createdAt'           => $this->created_at,
+            'updatedAt'           => $this->updated_at,
         ];
     }
 }

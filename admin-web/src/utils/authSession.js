@@ -19,6 +19,11 @@ export const storeAuthSession = (token, user) => {
   const departmentId = user?.departmentId ?? user?.department?.id ?? "";
   const schoolId = user?.schoolId ?? user?.school_id ?? "";
   const departmentName = user?.department?.name ?? "";
+  const onboardingCompleted =
+    user?.onboarding_completed ??
+    user?.alumniProfile?.onboarding_completed ??
+    user?.alumni_profile?.onboarding_completed ??
+    false;
 
   localStorage.setItem("token", token ?? "");
   localStorage.setItem("userId", user?.id != null ? String(user.id) : "");
@@ -26,6 +31,10 @@ export const storeAuthSession = (token, user) => {
   localStorage.setItem("userName", user?.name ?? "");
   localStorage.setItem("userEmail", user?.email ?? "");
   localStorage.setItem("userAvatar", user?.avatar ?? "");
+  localStorage.setItem(
+    "onboardingCompleted",
+    String(Boolean(onboardingCompleted))
+  );
   localStorage.setItem(
     "departmentId",
     departmentId !== "" ? String(departmentId) : "",

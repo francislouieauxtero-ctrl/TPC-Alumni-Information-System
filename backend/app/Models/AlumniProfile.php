@@ -31,13 +31,15 @@ class AlumniProfile extends Model
         'employment_status',
         'is_work_aligned',       // bool|null — self-reported alignment answer
         'work_aligned_reason',   // string|null — optional elaboration
+        'onboarding_completed',  // bool — true once alumni finishes initial welcome screen
     ];
 
     protected function casts(): array
     {
         return [
-            'employment_status' => 'string',
-            'is_work_aligned'   => 'boolean', // null stays null; 1/0 cast to true/false
+            'employment_status'    => 'string',
+            'is_work_aligned'      => 'boolean', // null stays null; 1/0 cast to true/false
+            'onboarding_completed' => 'boolean',
         ];
     }
 
