@@ -117,17 +117,13 @@ export default defineConfig({
     headers: {
       "Cache-Control": "no-store, no-cache, must-revalidate",
     },
-    watch: {
-      usePolling: true,
-      interval: 300,
-    },
     proxy: {
       "/api": {
-        target: process.env.VITE_BACKEND_PROXY_URL || "http://localhost:8070",
+        target: process.env.VITE_BACKEND_PROXY_URL || "http://127.0.0.1:8000",
         changeOrigin: true,
       },
       "/storage": {
-        target: process.env.VITE_BACKEND_PROXY_URL || "http://localhost:8070",
+        target: process.env.VITE_BACKEND_PROXY_URL || "http://127.0.0.1:8000",
         changeOrigin: true,
       },
     },

@@ -1,8 +1,12 @@
 -- ==============================================================
 -- TPC Alumni Information and Career Management System
 -- Clean Database Schema (Zero Test Data)
--- Compatible with MySQL 8.0 & TiDB Cloud Serverless
+-- Target Database: tpc_alumni
+-- Compatible with MySQL 8.0 & MariaDB 10.4+ (XAMPP / Laragon)
 -- ==============================================================
+
+CREATE DATABASE IF NOT EXISTS `tpc_alumni` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `tpc_alumni`;
 
 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT;
 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS;
@@ -42,13 +46,13 @@ CREATE TABLE `users` (
   `email_verified_at` timestamp NULL DEFAULT NULL,
   `password` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
   `google_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `avatar` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `role` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'user',
   `is_verified` tinyint(1) NOT NULL DEFAULT '0',
   `status` enum('active','inactive') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `users_email_unique` (`email`),
@@ -78,6 +82,7 @@ CREATE TABLE `graduates` (
   KEY `graduates_department_id_index` (`department_id`),
   KEY `graduates_student_number_index` (`student_number`),
   KEY `graduates_batch_year_index` (`batch_year`),
+  KEY `graduates_department_batch_index` (`department_id`,`batch_year`),
   CONSTRAINT `graduates_department_id_foreign` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -96,6 +101,7 @@ CREATE TABLE `alumni_profiles` (
   `current_job` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `company` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `employment_status` enum('employed','unemployed','self_employed') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'unemployed',
+  `onboarding_completed` tinyint(1) NOT NULL DEFAULT '0',
   `is_work_aligned` tinyint(1) DEFAULT NULL,
   `work_aligned_reason` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `batch_year` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -108,6 +114,9 @@ CREATE TABLE `alumni_profiles` (
   KEY `alumni_profiles_graduate_id_index` (`graduate_id`),
   KEY `alumni_profiles_employment_status_index` (`employment_status`),
   KEY `alumni_profiles_is_work_aligned_index` (`is_work_aligned`),
+  KEY `alumni_profiles_batch_year_index` (`batch_year`),
+  KEY `alumni_profiles_department_batch_index` (`department_id`,`batch_year`),
+  KEY `alumni_profiles_department_status_index` (`department_id`,`employment_status`),
   CONSTRAINT `alumni_profiles_department_id_foreign` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE CASCADE,
   CONSTRAINT `alumni_profiles_graduate_id_foreign` FOREIGN KEY (`graduate_id`) REFERENCES `graduates` (`id`) ON DELETE SET NULL,
   CONSTRAINT `alumni_profiles_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
@@ -191,7 +200,25 @@ CREATE TABLE `job_histories` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------------
--- 8. Table structure for `account_activity_logs`
+-- 8. Table structure for `reactions`
+-- --------------------------------------------------------------
+DROP TABLE IF EXISTS `reactions`;
+CREATE TABLE `reactions` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
+  `reactable_type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `reactable_id` bigint unsigned NOT NULL,
+  `type` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_user_reaction` (`user_id`,`reactable_type`,`reactable_id`),
+  KEY `reaction_lookup_index` (`reactable_type`,`reactable_id`,`type`),
+  CONSTRAINT `reactions_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------------
+-- 9. Table structure for `account_activity_logs`
 -- --------------------------------------------------------------
 DROP TABLE IF EXISTS `account_activity_logs`;
 CREATE TABLE `account_activity_logs` (
@@ -213,7 +240,7 @@ CREATE TABLE `account_activity_logs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------------
--- 9. Table structure for `rejection_logs`
+-- 10. Table structure for `rejection_logs`
 -- --------------------------------------------------------------
 DROP TABLE IF EXISTS `rejection_logs`;
 CREATE TABLE `rejection_logs` (
@@ -231,7 +258,7 @@ CREATE TABLE `rejection_logs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------------
--- 10. Table structure for `personal_access_tokens`
+-- 11. Table structure for `personal_access_tokens`
 -- --------------------------------------------------------------
 DROP TABLE IF EXISTS `personal_access_tokens`;
 CREATE TABLE `personal_access_tokens` (
@@ -252,7 +279,7 @@ CREATE TABLE `personal_access_tokens` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------------
--- 11. Table structure for `password_reset_tokens`
+-- 12. Table structure for `password_reset_tokens`
 -- --------------------------------------------------------------
 DROP TABLE IF EXISTS `password_reset_tokens`;
 CREATE TABLE `password_reset_tokens` (
@@ -263,7 +290,23 @@ CREATE TABLE `password_reset_tokens` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------------
--- 12. Table structure for `cache` & `cache_locks`
+-- 13. Table structure for `sessions`
+-- --------------------------------------------------------------
+DROP TABLE IF EXISTS `sessions`;
+CREATE TABLE `sessions` (
+  `id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` bigint unsigned DEFAULT NULL,
+  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` text COLLATE utf8mb4_unicode_ci,
+  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `last_activity` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `sessions_user_id_index` (`user_id`),
+  KEY `sessions_last_activity_index` (`last_activity`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------------
+-- 14. Table structure for `cache` and `cache_locks`
 -- --------------------------------------------------------------
 DROP TABLE IF EXISTS `cache`;
 CREATE TABLE `cache` (
@@ -284,7 +327,7 @@ CREATE TABLE `cache_locks` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------------
--- 13. Table structure for `jobs`, `job_batches`, `failed_jobs`
+-- 15. Table structure for `jobs`, `job_batches`, `failed_jobs`
 -- --------------------------------------------------------------
 DROP TABLE IF EXISTS `jobs`;
 CREATE TABLE `jobs` (
@@ -328,23 +371,7 @@ CREATE TABLE `failed_jobs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------------
--- 14. Table structure for `sessions`
--- --------------------------------------------------------------
-DROP TABLE IF EXISTS `sessions`;
-CREATE TABLE `sessions` (
-  `id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `user_id` bigint unsigned DEFAULT NULL,
-  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `user_agent` text COLLATE utf8mb4_unicode_ci,
-  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `last_activity` int NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `sessions_user_id_index` (`user_id`),
-  KEY `sessions_last_activity_index` (`last_activity`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------------
--- 15. Table structure for `migrations`
+-- 16. Table structure for `migrations`
 -- --------------------------------------------------------------
 DROP TABLE IF EXISTS `migrations`;
 CREATE TABLE `migrations` (
