@@ -11,6 +11,14 @@ echo.
 cd /d "%~dp0"
 
 REM ---------------------------------------------------------
+REM PHP Executable Configuration
+REM Defaults to "php" from PATH. Can be overridden by setting
+REM the PHP_BIN environment variable before running this script
+REM (e.g. set PHP_BIN=C:\custom\php\php.exe).
+REM ---------------------------------------------------------
+if not defined PHP_BIN set "PHP_BIN=php"
+
+REM ---------------------------------------------------------
 REM Step 1: Validate Project Folder
 REM ---------------------------------------------------------
 if not exist "%~dp0backend\artisan" (
@@ -32,12 +40,16 @@ REM Step 2: Check Prerequisites (PHP & Node.js)
 REM ---------------------------------------------------------
 echo [1/4] Checking prerequisites...
 
-where php >nul 2>&1
+where "%PHP_BIN%" >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [ERROR] PHP is not found in your PATH.
-    echo Please install PHP 8.2+ or add your PHP folder to your System PATH.
-    pause
-    exit /b 1
+    "%PHP_BIN%" -v >nul 2>&1
+    if !errorlevel! neq 0 (
+        echo [ERROR] PHP executable "!PHP_BIN!" is not found.
+        echo Please install PHP 8.2+ or add your PHP directory to PATH,
+        echo or set PHP_BIN to your PHP path before running this script.
+        pause
+        exit /b 1
+    )
 )
 
 where node >nul 2>&1
@@ -55,7 +67,7 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-echo [OK] PHP and Node.js are available.
+echo [OK] PHP (!PHP_BIN!) and Node.js are available.
 
 REM ---------------------------------------------------------
 REM Step 3: Check MySQL Connection (XAMPP / Local)
@@ -79,7 +91,7 @@ REM ---------------------------------------------------------
 echo [3/4] Checking storage symlink...
 if not exist "%~dp0backend\public\storage" (
     cd "%~dp0backend"
-    php artisan storage:link >nul 2>&1
+    "%PHP_BIN%" artisan storage:link >nul 2>&1
     cd "%~dp0"
     echo [OK] Storage symlink created.
 ) else (
@@ -93,7 +105,7 @@ echo [4/4] Launching application services...
 echo.
 
 REM Start Laravel Backend on port 8000
-start "TPC Alumni - Laravel Backend (Port 8000)" cmd /k "title TPC Alumni - Backend && cd /d "%~dp0backend" && php artisan serve --host=127.0.0.1 --port=8000"
+start "TPC Alumni - Laravel Backend (Port 8000)" cmd /k "title TPC Alumni - Backend && cd /d "%~dp0backend" && "%PHP_BIN%" artisan serve --host=127.0.0.1 --port=8000"
 
 REM Start Vite Frontend on port 3000
 start "TPC Alumni - React Frontend (Port 3000)" cmd /k "title TPC Alumni - Frontend && cd /d "%~dp0admin-web" && npm run dev"
@@ -121,4 +133,3 @@ echo   the system. Close them when you want to stop the servers.
 echo ========================================================
 echo.
 pause
-
